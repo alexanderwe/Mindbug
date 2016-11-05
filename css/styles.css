@@ -1,0 +1,92 @@
+
+/*------------------------------------*\
+    Base styles
+\*------------------------------------*/
+
+/*Toolbar*/
+
+.toolbar{
+    -webkit-app-region: drag;
+    z-index: 1
+}
+
+/*Navbar*/
+.nav-group-item:hover{
+    cursor: pointer;
+}
+
+.tag-list{
+    overflow-y: auto;
+}
+
+/*ALert dialog*/
+dialog{
+    padding: 0;
+    padding: 0;
+    border: 1px solid #bebebe;
+    border-radius: 6px;
+    box-shadow: 0 0 30px rgba(0,0,0,.1);
+    overflow: hidden;
+    z-index: -1;
+}
+
+dialog[open]{
+    -webkit-animation: show-dialog .5s ease normal;
+}
+
+@-webkit-keyframes show-dialog {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0%);
+    }
+}
+
+.alert{
+    top: 55px;
+    padding: 10px 20px;
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    background: #F6F6F6;
+    transition: all 0.25s ease-out;
+}
+
+
+
+/*------------------------------------*\
+    Tasklist
+\*------------------------------------*/
+
+.list-group-item .active{
+    background-color: #eee;
+}
+
+
+/*------------------------------------*\
+    Base Styles
+\*------------------------------------*/
+.icon:hover{
+    cursor: pointer;
+}
+
+
+/*------------------------------------*\
+    createTaskDialog
+\*------------------------------------*/
+.createTaskDialog{
+    padding: 10px;
+    width: 400px;
+}
+
+textarea{
+    width: 100%;
+    resize: vertical;
+}
+
+input{
+    width: 100%;
+}
