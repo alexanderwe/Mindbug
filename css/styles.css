@@ -34,6 +34,11 @@ dialog[open]{
     -webkit-animation: show-dialog .5s ease normal;
 }
 
+.dialog-close{
+    -webkit-animation: close-dialog .5s ease normal;
+}
+
+
 @-webkit-keyframes show-dialog {
     from {
         opacity: 0;
@@ -42,6 +47,17 @@ dialog[open]{
     to {
         opacity: 1;
         transform: translateY(0%);
+    }
+}
+
+@-webkit-keyframes close-dialog {
+    from {
+        opacity: 1;
+        transform: translateY(0%);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-1000%);
     }
 }
 

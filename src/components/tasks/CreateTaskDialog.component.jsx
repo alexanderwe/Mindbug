@@ -39,8 +39,8 @@ export default class CreateTaskDialog extends Component {
             if(err){
                 console.log(err);
             }else{
-                this.props.parent.refs.taskList.refreshTasks();
-                this.props.parent.refs.navbar.refreshTags();
+                this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
+                this.props.parent.refs.navbar.refreshTags(); //app-->Navbar
             }
         });
 

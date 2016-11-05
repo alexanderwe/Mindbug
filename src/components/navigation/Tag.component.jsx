@@ -7,15 +7,15 @@ export default class Tag extends Component {
         super(props);
     }
 
-    componentWillMount(){
-
+    filterTasks(){
+        this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
     }
 
 
     render(){
         return(
-            <span className="nav-group-item" href="#">
-                <span className="icon icon-record" ></span>
+            <span className="nav-group-item" href="#" onClick={()=>this.filterTasks()}>
+                <span className="icon icon-record"  ></span>
                 {this.props.name}
             </span>
         )

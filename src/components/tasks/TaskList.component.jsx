@@ -14,18 +14,34 @@ export default class TaskList extends Component{
         this.refreshTasks();
     }
 
-    refreshTasks(){
-        this.props.db.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
-            if(docs.length==0){
-                this.setState({
-                    tasks: null
-                });
-            } else{
-                this.setState({
-                    tasks: docs
-                });
-            }
-        })
+    refreshTasks(tag){
+
+        if(tag){
+            console.log("search with tag " + tag);
+            this.props.db.find({ tags: { $in: [tag] }}).sort({ createdAt: 1 }).exec((err,docs)=>{
+                if(docs.length==0){
+                    this.setState({
+                        tasks: null
+                    });
+                } else{
+                    this.setState({
+                        tasks: docs
+                    });
+                }
+            })
+        } else{
+            this.props.db.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
+                if(docs.length==0){
+                    this.setState({
+                        tasks: null
+                    });
+                } else{
+                    this.setState({
+                        tasks: docs
+                    });
+                }
+            })
+        }
     }
 
     render(){

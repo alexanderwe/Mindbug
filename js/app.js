@@ -30606,7 +30606,7 @@ var Navbar = function (_Component) {
                             'Tags'
                         ),
                         this.state.tags.map(function (tag) {
-                            return _react2.default.createElement(_TagComponent2.default, { name: tag, key: name });
+                            return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
                         })
                     )
                 );
@@ -30690,14 +30690,20 @@ var Tag = function (_Component) {
     }
 
     _createClass(Tag, [{
-        key: "componentWillMount",
-        value: function componentWillMount() {}
+        key: "filterTasks",
+        value: function filterTasks() {
+            this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //Tasklis.refreshTasks();
+        }
     }, {
         key: "render",
         value: function render() {
+            var _this2 = this;
+
             return _react2.default.createElement(
                 "span",
-                { className: "nav-group-item", href: "#" },
+                { className: "nav-group-item", href: "#", onClick: function onClick() {
+                        return _this2.filterTasks();
+                    } },
                 _react2.default.createElement("span", { className: "icon icon-record" }),
                 this.props.name
             );
@@ -30745,6 +30751,21 @@ var ToolbarHeader = function (_Component) {
             this.props.parent.refs.createTaskDialog.showDialog();
         }
     }, {
+        key: "goHome",
+        value: function goHome() {
+            this.props.parent.setState({
+                activeItem: "tasks"
+            });
+
+            this.props.parent.refs.navbar.setState({
+                activeItem: "tasks"
+            });
+
+            if (this.props.parent.refs.taskList) {
+                this.props.parent.refs.taskList.refreshTasks();
+            }
+        }
+    }, {
         key: "render",
         value: function render() {
             var _this2 = this;
@@ -30769,6 +30790,13 @@ var ToolbarHeader = function (_Component) {
                                     return _this2.openDialog();
                                 } },
                             _react2.default.createElement("span", { className: "icon icon-plus" })
+                        ),
+                        _react2.default.createElement(
+                            "button",
+                            { className: "btn btn-default", onClick: function onClick() {
+                                    return _this2.goHome();
+                                } },
+                            _react2.default.createElement("span", { className: "icon icon-home" })
                         )
                     ),
                     _react2.default.createElement(
@@ -30901,8 +30929,8 @@ var CreateTaskDialog = function (_Component) {
                 if (err) {
                     console.log(err);
                 } else {
-                    _this2.props.parent.refs.taskList.refreshTasks();
-                    _this2.props.parent.refs.navbar.refreshTags();
+                    _this2.props.parent.refs.taskList.refreshTasks(); //app-->Tasklist
+                    _this2.props.parent.refs.navbar.refreshTags(); //app-->Navbar
                 }
             });
 
@@ -31068,7 +31096,6 @@ var Task = function (_Component) {
                     _react2.default.createElement(
                         "p",
                         null,
-                        "Notes:",
                         this.props.task.notes
                     ),
                     _react2.default.createElement(
@@ -31141,20 +31168,35 @@ var TaskList = function (_Component) {
         }
     }, {
         key: 'refreshTasks',
-        value: function refreshTasks() {
+        value: function refreshTasks(tag) {
             var _this2 = this;
 
-            this.props.db.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    _this2.setState({
-                        tasks: null
-                    });
-                } else {
-                    _this2.setState({
-                        tasks: docs
-                    });
-                }
-            });
+            if (tag) {
+                console.log("search with tag " + tag);
+                this.props.db.find({ tags: { $in: [tag] } }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    if (docs.length == 0) {
+                        _this2.setState({
+                            tasks: null
+                        });
+                    } else {
+                        _this2.setState({
+                            tasks: docs
+                        });
+                    }
+                });
+            } else {
+                this.props.db.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    if (docs.length == 0) {
+                        _this2.setState({
+                            tasks: null
+                        });
+                    } else {
+                        _this2.setState({
+                            tasks: docs
+                        });
+                    }
+                });
+            }
         }
     }, {
         key: 'render',

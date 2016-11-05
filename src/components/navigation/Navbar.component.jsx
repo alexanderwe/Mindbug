@@ -19,7 +19,7 @@ export default class Navbar extends Component {
         });
 
         //Set active item in the main component
-        this.props.parent.setState({
+        this.props.parent.setState({ //app
             activeItem: pageName
         });
     }
@@ -49,17 +49,13 @@ export default class Navbar extends Component {
                 tags: tagsArray
             });
         });
-
-
     }
 
     componentWillMount(){
         this.refreshTags();
     }
 
-
     render(){
-
         if(this.state.tags){
             return(
                 <nav className="nav-group">
@@ -75,7 +71,7 @@ export default class Navbar extends Component {
                     <nav className="nav-group tag-list">
                         <h5 className="nav-group-title">Tags</h5>
                         {this.state.tags.map((tag)=>{
-                            return <Tag name={tag} key={name}/>
+                            return <Tag name={tag} key={tag} parent={this}/>
                         })}
                     </nav>
                 </nav>

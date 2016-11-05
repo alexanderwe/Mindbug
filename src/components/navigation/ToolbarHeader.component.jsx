@@ -10,6 +10,20 @@ export default class ToolbarHeader extends Component{
         this.props.parent.refs.createTaskDialog.showDialog();
     }
 
+    goHome(){
+        this.props.parent.setState({ //app
+            activeItem: "tasks",
+        });
+
+        this.props.parent.refs.navbar.setState({ //app-->navbar
+            activeItem: "tasks",
+        });
+
+        if(this.props.parent.refs.taskList){
+            this.props.parent.refs.taskList.refreshTasks(); //app-->tasklist
+        }
+    }
+
     render(){
         return(
             <header className="toolbar toolbar-header">
@@ -18,6 +32,9 @@ export default class ToolbarHeader extends Component{
                     <div className="btn-group">
                         <button className="btn btn-default" onClick={()=>this.openDialog()}>
                             <span className="icon icon-plus"></span>
+                        </button>
+                        <button className="btn btn-default" onClick={()=>this.goHome()}>
+                            <span className="icon icon-home"></span>
                         </button>
                     </div>
                     <button className="btn btn-default btn-dropdown pull-right">
