@@ -4,8 +4,8 @@
   "description": "Simple GTD app for everyone made with Electron and React.",
   "main": "main.js",
   "scripts": {
-    "compile": "browserify -t [ babelify --presets [ react es2015 ] ] src/app.jsx -o js/app.js",
-    "start": "browserify -t [ babelify --presets [ react es2015 ] ] src/app.jsx -o js/app.js && electron main.js"
+    "compile": "browserify -t [ babelify --presets [ react es2015 ] ] src/app.jsx -o js/app.js && ",
+    "start": "browserify -t [ babelify --presets [ react es2015 ] ] src/app.jsx -o js/app.js && stylus css/styles.styl -o css/styles.css && electron main.js"
   },
   "repository": "https://github.com/gr4h4n/Mindbug",
   "keywords": [
@@ -25,8 +25,11 @@
   },
   "dependencies": {
     "dotenv": "^2.0.0",
+    "moment": "^2.15.2",
     "nedb": "^1.8.0",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react-datepicker": "^0.33.0",
+    "react-dom": "^15.3.2",
+    "stylus": "^0.54.5"
   }
 }

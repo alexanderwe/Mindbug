@@ -36,7 +36,7 @@ class Main extends Component {
     render(){
         return (
             <div className="window">
-                <ToolbarHeader parent={this} db={db}/>
+                <ToolbarHeader ref="toolbarHeader" parent={this} db={db}/>
                 <CreateTaskDialog ref="createTaskDialog" parent={this} db={db}/>
                 <div className="window-content">
                     <div className="pane-group">

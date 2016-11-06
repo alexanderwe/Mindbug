@@ -66,3 +66,8 @@ export default class TaskList extends Component{
         }
     }
 }
+
+TaskList.propTypes = {
+    parent: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
+};

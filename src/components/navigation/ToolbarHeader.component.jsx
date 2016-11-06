@@ -44,6 +44,9 @@ export default class ToolbarHeader extends Component{
             </header>
         )
     }
-
-
 }
+
+ToolbarHeader.propTypes = {
+    parent: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
+};

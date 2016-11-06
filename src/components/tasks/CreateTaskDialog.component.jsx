@@ -1,10 +1,15 @@
 import React, {Component} from 'react';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
 
 
 export default class CreateTaskDialog extends Component {
 
     constructor(props){
         super();
+        this.state={
+            startDate: moment()
+        }
     }
 
     clearForm(){
@@ -15,7 +20,7 @@ export default class CreateTaskDialog extends Component {
     }
 
     showDialog(){
-        this.refs.createTaskDialog.showModal();
+        this.refs.createTaskDialog.show();
     }
 
     closeDialog(){
@@ -23,14 +28,20 @@ export default class CreateTaskDialog extends Component {
         this.clearForm();
     }
 
+    handleDateChange(date){
+        console.log(date);
+        this.setState({
+            startDate: date
+        });
+    }
 
     addTask(){
-        //Create doc
+
         var doc = {
             taskName: this.refs.taskNameInput.value,
             notes: this.refs.taskNotesTextarea.value,
             tags: this.refs.tagsInput.value.split(" "),
-            dueDate: new Date(),
+            dueDate: this.state.startDate.format('L'),
             repeat: this.refs.repeatCheckbox.checked,
         };
 
@@ -52,6 +63,11 @@ export default class CreateTaskDialog extends Component {
     }
 
     render(){
+        const datePickerStyles={
+            width: "100%"
+        };
+
+
         return(
             <dialog id="createTaskDialog" className="alert createTaskDialog" ref="createTaskDialog">
                 <div>
@@ -65,7 +81,11 @@ export default class CreateTaskDialog extends Component {
                             <textarea className="form-control" rows="3" ref="taskNotesTextarea"></textarea>
                         </div>
                         <div className="form-group">
-                            <label>tags</label>
+                            <label>Due to</label>
+                            <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} style={datePickerStyles} />
+                        </div>
+                        <div className="form-group">
+                            <label>Tags</label>
                             <input type="text" className="form-control" placeholder="tags" ref="tagsInput"/>
                         </div>
                         <div className="checkbox">
@@ -86,3 +106,9 @@ export default class CreateTaskDialog extends Component {
         )
     }
 }
+
+
+CreateTaskDialog.propTypes = {
+    parent: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
+};
