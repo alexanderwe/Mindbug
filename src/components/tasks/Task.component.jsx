@@ -9,7 +9,7 @@ export default class Task extends Component {
     }
 
     removeTask(){
-        this.props.db.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
+        this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
             this.refreshTags(); //Refresh taglist after task is deleted
         });
@@ -37,3 +37,10 @@ export default class Task extends Component {
         )
     }
 }
+
+Task.propTypes = {
+    task: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
+    parent: React.PropTypes.object.isRequired,
+    edit: React.PropTypes.bool,
+};

@@ -13,7 +13,14 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1000, height: 1000, minHeight: 300, minWidth: 300,titleBarStyle: 'hidden'})
+  mainWindow = new BrowserWindow({
+    width: 1000,
+    height: 1000,
+    minHeight: 300,
+    minWidth: 300,
+    titleBarStyle: 'hidden',
+    transparent: true
+});
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -23,7 +30,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

@@ -46,7 +46,7 @@ export default class CreateTaskDialog extends Component {
         };
 
         //Insert doc
-        this.props.db.insert(doc,(err, newDoc) => {   // Callback is optional
+        this.props.tasksDb.insert(doc,(err, newDoc) => {   // Callback is optional
             if(err){
                 console.log(err);
             }else{
@@ -110,5 +110,5 @@ export default class CreateTaskDialog extends Component {
 
 CreateTaskDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    db: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
 };

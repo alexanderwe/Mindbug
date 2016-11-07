@@ -26,7 +26,7 @@ export default class Navbar extends Component {
 
     refreshTags(){
         var tagsArray = [];
-        this.props.db.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
+        this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if(docs.length==0){
             } else{
                 docs.map((task)=>{
@@ -102,5 +102,5 @@ export default class Navbar extends Component {
 
 Navbar.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    db: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
 };

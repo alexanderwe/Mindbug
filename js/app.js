@@ -34772,7 +34772,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var db = new _nedb2.default({
+var tasksDb = new _nedb2.default({
     filename: __dirname + '/tasks.json',
     autoload: true,
     timestampData: true
@@ -34805,8 +34805,8 @@ var Main = function (_Component) {
             return _react2.default.createElement(
                 'div',
                 { className: 'window' },
-                _react2.default.createElement(_ToolbarHeaderComponent2.default, { ref: 'toolbarHeader', parent: this, db: db }),
-                _react2.default.createElement(_CreateTaskDialogComponent2.default, { ref: 'createTaskDialog', parent: this, db: db }),
+                _react2.default.createElement(_ToolbarHeaderComponent2.default, { ref: 'toolbarHeader', parent: this, tasksDb: tasksDb }),
+                _react2.default.createElement(_CreateTaskDialogComponent2.default, { ref: 'createTaskDialog', parent: this, tasksDb: tasksDb }),
                 _react2.default.createElement(
                     'div',
                     { className: 'window-content' },
@@ -34816,12 +34816,12 @@ var Main = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'pane-sm sidebar' },
-                            _react2.default.createElement(_NavbarComponent2.default, { ref: 'navbar', parent: this, db: db })
+                            _react2.default.createElement(_NavbarComponent2.default, { ref: 'navbar', parent: this, tasksDb: tasksDb })
                         ),
                         _react2.default.createElement(
                             'div',
                             { className: 'pane', id: 'mainPane' },
-                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, db: db }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, db: db }) : null
+                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, tasksDb: tasksDb }) : null
                         )
                     )
                 )
@@ -34895,7 +34895,7 @@ var Navbar = function (_Component) {
             var _this2 = this;
 
             var tagsArray = [];
-            this.props.db.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
+            this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
                 if (docs.length == 0) {} else {
                     docs.map(function (task) {
                         task.tags.map(function (tag) {
@@ -35040,7 +35040,7 @@ exports.default = Navbar;
 
 Navbar.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    db: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
 },{"./Tag.component.jsx":199,"react":192}],199:[function(require,module,exports){
@@ -35201,7 +35201,7 @@ exports.default = ToolbarHeader;
 
 ToolbarHeader.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    db: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
 },{"react":192}],201:[function(require,module,exports){
@@ -35340,7 +35340,7 @@ var CreateTaskDialog = function (_Component) {
             };
 
             //Insert doc
-            this.props.db.insert(doc, function (err, newDoc) {
+            this.props.tasksDb.insert(doc, function (err, newDoc) {
                 // Callback is optional
                 if (err) {
                     console.log(err);
@@ -35460,7 +35460,7 @@ exports.default = CreateTaskDialog;
 
 CreateTaskDialog.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    db: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
 },{"moment":33,"react":192,"react-datepicker":46}],203:[function(require,module,exports){
@@ -35502,7 +35502,7 @@ var Task = function (_Component) {
         value: function removeTask() {
             var _this2 = this;
 
-            this.props.db.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
+            this.props.tasksDb.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
                 _this2.refreshTasks(); //Refresh tasklist after task is deleted
                 _this2.refreshTags(); //Refresh taglist after task is deleted
             });
@@ -35562,6 +35562,14 @@ var Task = function (_Component) {
 
 exports.default = Task;
 
+
+Task.propTypes = {
+    task: _react2.default.PropTypes.object.isRequired,
+    tasksDb: _react2.default.PropTypes.object.isRequired,
+    parent: _react2.default.PropTypes.object.isRequired,
+    edit: _react2.default.PropTypes.bool
+};
+
 },{"moment":33,"react":192}],204:[function(require,module,exports){
 'use strict';
 
@@ -35613,7 +35621,7 @@ var TaskList = function (_Component) {
 
             if (tag) {
                 console.log("search with tag " + tag);
-                this.props.db.find({ tags: { $in: [tag] } }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                this.props.tasksDb.find({ tags: { $in: [tag] } }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this2.setState({
                             tasks: null
@@ -35625,7 +35633,7 @@ var TaskList = function (_Component) {
                     }
                 });
             } else {
-                this.props.db.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
+                this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this2.setState({
                             tasks: null
@@ -35648,7 +35656,7 @@ var TaskList = function (_Component) {
                     'ul',
                     { className: 'list-group' },
                     this.state.tasks.map(function (task) {
-                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, db: _this3.props.db, parent: _this3, edit: false });
+                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, tasksDb: _this3.props.tasksDb, parent: _this3, edit: false });
                     })
                 );
             } else {
@@ -35681,7 +35689,7 @@ exports.default = TaskList;
 
 TaskList.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    db: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
 },{"./Task.component.jsx":203,"react":192}]},{},[197]);

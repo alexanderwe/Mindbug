@@ -48,5 +48,5 @@ export default class ToolbarHeader extends Component{
 
 ToolbarHeader.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    db: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
 };

@@ -18,7 +18,7 @@ export default class TaskList extends Component{
 
         if(tag){
             console.log("search with tag " + tag);
-            this.props.db.find({ tags: { $in: [tag] }}).sort({ createdAt: 1 }).exec((err,docs)=>{
+            this.props.tasksDb.find({ tags: { $in: [tag] }}).sort({ createdAt: 1 }).exec((err,docs)=>{
                 if(docs.length==0){
                     this.setState({
                         tasks: null
@@ -30,7 +30,7 @@ export default class TaskList extends Component{
                 }
             })
         } else{
-            this.props.db.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
+            this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
                 if(docs.length==0){
                     this.setState({
                         tasks: null
@@ -49,7 +49,7 @@ export default class TaskList extends Component{
             return (
                 <ul className="list-group">
                     {this.state.tasks.map((task)=>{
-                        return <Task task={task} key={task._id} db={this.props.db} parent={this} edit={false}/>
+                        return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} parent={this} edit={false}/>
                     })}
                 </ul>
             );
@@ -69,5 +69,5 @@ export default class TaskList extends Component{
 
 TaskList.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    db: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
 };
