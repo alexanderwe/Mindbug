@@ -58,43 +58,73 @@ export default class Navbar extends Component {
     render(){
         if(this.state.tags){
             return(
-                <nav className="nav-group">
-                    <h5 className="nav-group-title">Menu</h5>
-                    <a className={this.state.activeItem == "tasks" ? "nav-group-item active" : "nav-group-item" } onClick={()=>this.goTo("tasks")}>
-                        <span className={"icon icon-list"}></span>
+                <aside className="menu draggable">
+                    <p className="menu-label">
+                        General
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#"><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
+                        <li><a href="#"><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                    </ul>
+                    <p className="menu-label">
                         Tasks
-                    </a>
-                    <span className={this.state.activeItem == "projects" ? "nav-group-item active" : "nav-group-item" } onClick={()=>this.goTo("projects")} >
-                        <span className="icon icon-briefcase"></span>
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                    </ul>
+                    <p className="menu-label">
                         Projects
-                    </span>
-                    <nav className="nav-group tag-list">
-                        <h5 className="nav-group-title">Tags</h5>
-                        {this.state.tags.map((tag)=>{
-                            return <Tag name={tag} key={tag} parent={this}/>
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('projects')}><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                    </ul>
+                    <p className="menu-label">
+                        Tags
+                    </p>
+                    <ul className="menu-list tag-list">
+                         {this.state.tags.map((tag)=>{
+                            return <li><Tag name={tag} key={tag} parent={this}/></li>
                         })}
-                    </nav>
-                </nav>
+                    </ul>
+                </aside>
             )
         } else {
             return (
-                <nav className="nav-group">
-                    <h5 className="nav-group-title">Menu</h5>
-                    <a className={this.state.activeItem == "tasks" ? "nav-group-item active" : "nav-group-item" } onClick={()=>this.goTo("tasks")}>
-                        <span className={"icon icon-list"}></span>
+                <aside className="menu draggable">
+                    <p className="menu-label">
+                        General
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#"><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
+                        <li><a href="#"><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                    </ul>
+                    <p className="menu-label">
                         Tasks
-                    </a>
-                    <span className={this.state.activeItem == "projects" ? "nav-group-item active" : "nav-group-item" } onClick={()=>this.goTo("projects")} >
-                        <span className="icon icon-briefcase"></span>
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                    </ul>
+                    <p className="menu-label">
                         Projects
-                    </span>
-                    <nav className="nav-group">
-                        <h5 className="nav-group-title">Tags</h5>
-                        <span className="nav-group-item" href="#">
-                            No Tag
-                        </span>
-                    </nav>
-                </nav>
+                    </p>
+                    <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('projects')}><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                    </ul>
+                    <p className="menu-label">
+                        Tags
+                    </p>
+                    <ul className="menu-list tag-list">
+                        <li>No Tags</li>
+                    </ul>
+                </aside>
             )
         }
     }

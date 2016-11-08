@@ -15,5 +15,5 @@ export default class Projects extends Component{
 
 Projects.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    db: React.PropTypes.object.isRequired,
+    tasksDb: React.PropTypes.object.isRequired,
 };

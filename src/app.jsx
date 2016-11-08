@@ -37,14 +37,14 @@ class Main extends Component {
     render(){
         return (
             <div className="window">
-                <ToolbarHeader ref="toolbarHeader" parent={this} tasksDb={tasksDb}/>
+                {/*<ToolbarHeader ref="toolbarHeader" parent={this} tasksDb={tasksDb}/>*/}
                 <CreateTaskDialog ref="createTaskDialog" parent={this} tasksDb={tasksDb}/>
                 <div className="window-content">
                     <div className="pane-group">
                         <div className="pane-sm sidebar">
                             <Navbar ref="navbar" parent={this} tasksDb={tasksDb}/>
                         </div>
-                        <div className="pane" id="mainPane">
+                        <div className="pane main-content" id="mainPane">
                             {this.state.activeItem === 'tasks' ? (
                                 <TaskList ref="taskList" parent={this} tasksDb={tasksDb} />
                             ) : this.state.activeItem === 'projects' ? (

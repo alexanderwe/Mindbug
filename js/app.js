@@ -34805,7 +34805,6 @@ var Main = function (_Component) {
             return _react2.default.createElement(
                 'div',
                 { className: 'window' },
-                _react2.default.createElement(_ToolbarHeaderComponent2.default, { ref: 'toolbarHeader', parent: this, tasksDb: tasksDb }),
                 _react2.default.createElement(_CreateTaskDialogComponent2.default, { ref: 'createTaskDialog', parent: this, tasksDb: tasksDb }),
                 _react2.default.createElement(
                     'div',
@@ -34820,7 +34819,7 @@ var Main = function (_Component) {
                         ),
                         _react2.default.createElement(
                             'div',
-                            { className: 'pane', id: 'mainPane' },
+                            { className: 'pane main-content', id: 'mainPane' },
                             this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, tasksDb: tasksDb }) : null
                         )
                     )
@@ -34952,79 +34951,263 @@ var Navbar = function (_Component) {
 
             if (this.state.tags) {
                 return _react2.default.createElement(
-                    'nav',
-                    { className: 'nav-group' },
+                    'aside',
+                    { className: 'menu draggable' },
                     _react2.default.createElement(
-                        'h5',
-                        { className: 'nav-group-title' },
-                        'Menu'
+                        'p',
+                        { className: 'menu-label' },
+                        'General'
                     ),
                     _react2.default.createElement(
-                        'a',
-                        { className: this.state.activeItem == "tasks" ? "nav-group-item active" : "nav-group-item", onClick: function onClick() {
-                                return _this3.goTo("tasks");
-                            } },
-                        _react2.default.createElement('span', { className: "icon icon-list" }),
+                        'ul',
+                        { className: 'menu-list' },
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
+                                'Overview'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
+                                'Today'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
                         'Tasks'
                     ),
                     _react2.default.createElement(
-                        'span',
-                        { className: this.state.activeItem == "projects" ? "nav-group-item active" : "nav-group-item", onClick: function onClick() {
-                                return _this3.goTo("projects");
-                            } },
-                        _react2.default.createElement('span', { className: 'icon icon-briefcase' }),
+                        'ul',
+                        { className: 'menu-list' },
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
+                                'All'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
+                                'Starred'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
+                                'Deleted'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
                         'Projects'
                     ),
                     _react2.default.createElement(
-                        'nav',
-                        { className: 'nav-group tag-list' },
+                        'ul',
+                        { className: 'menu-list' },
                         _react2.default.createElement(
-                            'h5',
-                            { className: 'nav-group-title' },
-                            'Tags'
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
+                                'All'
+                            )
                         ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
+                                'Starred'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
+                                'Deleted'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
+                        'Tags'
+                    ),
+                    _react2.default.createElement(
+                        'ul',
+                        { className: 'menu-list tag-list' },
                         this.state.tags.map(function (tag) {
-                            return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
+                            return _react2.default.createElement(
+                                'li',
+                                null,
+                                _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 })
+                            );
                         })
                     )
                 );
             } else {
                 return _react2.default.createElement(
-                    'nav',
-                    { className: 'nav-group' },
+                    'aside',
+                    { className: 'menu draggable' },
                     _react2.default.createElement(
-                        'h5',
-                        { className: 'nav-group-title' },
-                        'Menu'
+                        'p',
+                        { className: 'menu-label' },
+                        'General'
                     ),
                     _react2.default.createElement(
-                        'a',
-                        { className: this.state.activeItem == "tasks" ? "nav-group-item active" : "nav-group-item", onClick: function onClick() {
-                                return _this3.goTo("tasks");
-                            } },
-                        _react2.default.createElement('span', { className: "icon icon-list" }),
+                        'ul',
+                        { className: 'menu-list' },
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
+                                'Overview'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
+                                'Today'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
                         'Tasks'
                     ),
                     _react2.default.createElement(
-                        'span',
-                        { className: this.state.activeItem == "projects" ? "nav-group-item active" : "nav-group-item", onClick: function onClick() {
-                                return _this3.goTo("projects");
-                            } },
-                        _react2.default.createElement('span', { className: 'icon icon-briefcase' }),
+                        'ul',
+                        { className: 'menu-list' },
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
+                                'All'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
+                                'Starred'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
+                                'Deleted'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
                         'Projects'
                     ),
                     _react2.default.createElement(
-                        'nav',
-                        { className: 'nav-group' },
+                        'ul',
+                        { className: 'menu-list' },
                         _react2.default.createElement(
-                            'h5',
-                            { className: 'nav-group-title' },
-                            'Tags'
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
+                                'All'
+                            )
                         ),
                         _react2.default.createElement(
-                            'span',
-                            { className: 'nav-group-item', href: '#' },
-                            'No Tag'
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
+                                'Starred'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#' },
+                                _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
+                                'Deleted'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
+                        'Tags'
+                    ),
+                    _react2.default.createElement(
+                        'ul',
+                        { className: 'menu-list tag-list' },
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            'No Tags'
                         )
                     )
                 );
@@ -35076,7 +35259,14 @@ var Tag = function (_Component) {
     _createClass(Tag, [{
         key: "filterTasks",
         value: function filterTasks() {
-            this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
+            console.log("hey");
+
+            if (!this.props.parent.props.parent.state.activeItem != "tasks") {
+                //navbar-->app
+                this.props.parent.goTo("tasks"); //TODO implement automatic tag search
+            } else {
+                this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
+            }
         }
     }, {
         key: "render",
@@ -35085,10 +35275,9 @@ var Tag = function (_Component) {
 
             return _react2.default.createElement(
                 "span",
-                { className: "nav-group-item", href: "#", onClick: function onClick() {
+                { className: "tag is-dark", onClick: function onClick() {
                         return _this2.filterTasks();
                     } },
-                _react2.default.createElement("span", { className: "icon icon-record" }),
                 this.props.name
             );
         }
@@ -35156,7 +35345,7 @@ var ToolbarHeader = function (_Component) {
 
             return _react2.default.createElement(
                 "header",
-                { className: "toolbar toolbar-header" },
+                { className: "toolbar toolbar-header draggable" },
                 _react2.default.createElement(
                     "h1",
                     { className: "title" },
@@ -35253,7 +35442,7 @@ exports.default = Projects;
 
 Projects.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    db: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
 },{"react":192}],202:[function(require,module,exports){
@@ -35336,7 +35525,10 @@ var CreateTaskDialog = function (_Component) {
                 notes: this.refs.taskNotesTextarea.value,
                 tags: this.refs.tagsInput.value.split(" "),
                 dueDate: this.state.startDate.format('L'),
-                repeat: this.refs.repeatCheckbox.checked
+                repeat: this.refs.repeatCheckbox.checked,
+                finished: false,
+                deleted: false
+
             };
 
             //Insert doc
@@ -35523,35 +35715,93 @@ var Task = function (_Component) {
             var _this3 = this;
 
             return _react2.default.createElement(
-                'li',
-                { className: 'list-group-item' },
+                'div',
+                { className: 'box' },
                 _react2.default.createElement(
-                    'div',
-                    { className: 'media-body' },
+                    'article',
+                    { className: 'media' },
                     _react2.default.createElement(
-                        'strong',
-                        null,
-                        this.props.task.taskName
+                        'div',
+                        { className: 'media-left' },
+                        _react2.default.createElement(
+                            'figure',
+                            { className: 'image is-64x64' },
+                            _react2.default.createElement('img', { src: 'http://placehold.it/128x128', alt: 'Image' })
+                        )
                     ),
                     _react2.default.createElement(
-                        'p',
-                        null,
-                        this.props.task.notes
+                        'div',
+                        { className: 'media-content' },
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'content' },
+                            _react2.default.createElement(
+                                'p',
+                                null,
+                                _react2.default.createElement(
+                                    'strong',
+                                    null,
+                                    'John Smith'
+                                ),
+                                ' ',
+                                _react2.default.createElement(
+                                    'small',
+                                    null,
+                                    '@johnsmith'
+                                ),
+                                ' ',
+                                _react2.default.createElement(
+                                    'small',
+                                    null,
+                                    '31m'
+                                ),
+                                _react2.default.createElement('br', null),
+                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'nav',
+                            { className: 'level' },
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'level-left' },
+                                _react2.default.createElement(
+                                    'a',
+                                    { className: 'level-item' },
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-reply' })
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'a',
+                                    { className: 'level-item' },
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-retweet' })
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'a',
+                                    { className: 'level-item' },
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-star' })
+                                    )
+                                )
+                            )
+                        )
                     ),
                     _react2.default.createElement(
-                        'p',
-                        null,
-                        this.props.task.tags
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        null,
-                        'Due date ',
-                        this.props.task.dueDate.toString()
-                    ),
-                    _react2.default.createElement('span', { className: 'icon icon-trash', onClick: function onClick() {
-                            return _this3.removeTask();
-                        } })
+                        'div',
+                        { className: 'media-right' },
+                        _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                                return _this3.removeTask();
+                            } })
+                    )
                 )
             );
         }

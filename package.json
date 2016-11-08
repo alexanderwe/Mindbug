@@ -24,6 +24,7 @@
     "browserify": "^13.0.1"
   },
   "dependencies": {
+    "bulma": "^0.2.3",
     "dotenv": "^2.0.0",
     "moment": "^2.15.2",
     "nedb": "^1.8.0",

@@ -8,16 +8,19 @@ export default class Tag extends Component {
     }
 
     filterTasks(){
-        this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
+        console.log("hey");
+
+        if(!this.props.parent.props.parent.state.activeItem != "tasks"){ //navbar-->app
+            this.props.parent.goTo("tasks"); //TODO implement automatic tag search
+        } else{
+            this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
+        }
     }
 
 
     render(){
         return(
-            <span className="nav-group-item" href="#" onClick={()=>this.filterTasks()}>
-                <span className="icon icon-record"  ></span>
-                {this.props.name}
-            </span>
+            <span className="tag is-dark" onClick={()=>this.filterTasks()}>{this.props.name}</span>
         )
     }
 }

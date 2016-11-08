@@ -1,88 +1,83 @@
 @import '../node_modules/react-datepicker/dist/react-datepicker.css';
-@import './photon.min.css';
-/*------------------------------------*    Base styles
+@import '../node_modules/bulma/css/bulma.css';
+@import '../node_modules/font-awesome/css/font-awesome.css';
+/*------------------------------------*    Base styles and utilities
 \*------------------------------------*/
 html,
 body {
   background: rgba(0,0,0,0);
 }
-/*Toolbar*/
-.toolbar {
+.draggable {
   -webkit-app-region: drag;
-  z-index: 1;
 }
-/*Navbar*/
-.nav-group-item:hover {
-  cursor: pointer;
+/*From Photon.css*/
+.window {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
 }
-.tag-list {
+.window-content {
+  position: relative;
   overflow-y: auto;
+  display: flex;
+  flex: 1;
 }
-/*ALert dialog*/
-dialog {
-  padding: 0;
-  padding: 0;
-  border: 1px solid #bebebe;
-  border-radius: 6px;
-  box-shadow: 0 0 30px rgba(0,0,0,0.1);
-  overflow: hidden;
-  z-index: 10;
+.pane-group {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
 }
-dialog[open] {
-  -webkit-animation: show-dialog 0.5s ease normal;
+.pane {
+  position: relative;
+  overflow-y: auto;
+  flex: 1;
 }
-@-webkit-keyframes show-dialog {
-  from {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0%);
-  }
+.main-content {
+  background-color: #fff;
 }
-.alert {
-  top: 55px;
-  padding: 10px 20px;
-  border-top: none;
-  border-radius: 0 0 3px 3px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-  background: #f6f6f6;
-  transition: all 0.25s ease-out;
+.fa {
+  margin-right: 5px;
+  vertical-align: baseline;
 }
-/*------------------------------------*    Tasklist
-\*------------------------------------*/
-.list-group-item .active {
-  background-color: #eee;
-}
-/*------------------------------------*    Base Styles
-\*------------------------------------*/
-.icon:hover {
+.tag {
   cursor: pointer;
 }
-/*------------------------------------*    createTaskDialog
+.delete:hover {
+  background-color: #ff3860;
+}
+/*------------------------------------*    Navbar
 \*------------------------------------*/
-.createTaskDialog {
+.sidebar {
+  background-color: rgba(0,0,0,0.8);
+  width: 150px;
+  overflow-y: scroll;
+}
+.menu {
   padding: 10px;
-  width: 400px;
+  padding-top: 30px;
 }
-textarea {
-  width: 100%;
-  resize: vertical;
+.menu-label {
+  color: #fff;
 }
-input {
-  width: 100%;
+.menu-list a {
+  color: #fff;
 }
-.react-datepicker__input-container {
-  width: 100%;
+.menu-list a:hover {
+  color: #bbb lue !important;
+  background-color: transparent !important;
 }
-.react-datepicker__input-container input {
-  width: 100%;
-  min-height: 25px;
-  padding: 5px 10px;
-  line-height: 1.6;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: 0;
+.tag-list .tag {
+  margin-top: 10px;
+}
+/*------------------------------------*    Navbar
+\*------------------------------------*/
+.list-group {
+  padding: 10px;
 }

@@ -43,6 +43,9 @@ export default class CreateTaskDialog extends Component {
             tags: this.refs.tagsInput.value.split(" "),
             dueDate: this.state.startDate.format('L'),
             repeat: this.refs.repeatCheckbox.checked,
+            finished: false,
+            deleted: false,
+
         };
 
         //Insert doc

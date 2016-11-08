@@ -26,7 +26,7 @@ export default class ToolbarHeader extends Component{
 
     render(){
         return(
-            <header className="toolbar toolbar-header">
+            <header className="toolbar toolbar-header draggable">
                 <h1 className="title">Mindbug</h1>
                 <div className="toolbar-actions">
                     <div className="btn-group">

@@ -25,15 +25,40 @@ export default class Task extends Component {
 
     render(){
         return (
-            <li className="list-group-item">
-                <div className="media-body">
-                    <strong>{this.props.task.taskName}</strong>
-                    <p>{this.props.task.notes}</p>
-                    <p>{this.props.task.tags}</p>
-                    <p>Due date {this.props.task.dueDate.toString()}</p>
-                    <span className="icon icon-trash" onClick={()=>this.removeTask()}></span>
-                </div>
-            </li>
+            <div className="box">
+                <article className="media">
+                    <div className="media-left">
+                        <figure className="image is-64x64">
+                            <img src="http://placehold.it/128x128" alt="Image" />
+                        </figure>
+                    </div>
+                    <div className="media-content">
+                        <div className="content">
+                            <p>
+                                <strong>John Smith</strong> <small>@johnsmith</small> <small>31m</small>
+                                <br />
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.
+                            </p>
+                        </div>
+                        <nav className="level">
+                            <div className="level-left">
+                                <a className="level-item">
+                                    <span className="icon is-small"><i className="fa fa-reply"></i></span>
+                                </a>
+                                <a className="level-item">
+                                    <span className="icon is-small"><i className="fa fa-retweet"></i></span>
+                                </a>
+                                <a className="level-item">
+                                    <span className="icon is-small"><i className="fa fa-star"></i></span>
+                                </a>
+                            </div>
+                        </nav>
+                    </div>
+                    <div className="media-right">
+                        <button className="delete" onClick={()=>this.removeTask()}></button>
+                    </div>
+                </article>
+            </div>
         )
     }
 }
