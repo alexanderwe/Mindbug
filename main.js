@@ -17,9 +17,10 @@ function createWindow () {
     width: 1000,
     height: 1000,
     minHeight: 300,
-    minWidth: 300,
+    minWidth: 520,
     titleBarStyle: 'hidden',
-    transparent: true
+    transparent: true,
+    title: "Mindbug",
 });
 
   // and load the index.html of the app.

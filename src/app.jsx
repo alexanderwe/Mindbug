@@ -12,12 +12,16 @@ import Projects from './components/projects/Projects.component.jsx';
 
 
 var tasksDb = new Datastore({
-    filename: __dirname + '/tasks.json',
+    filename: __dirname + './tasks.json',
     autoload: true,
     timestampData: true,
 });
 
-
+var projectsDb = new Datastore({
+    filename: __dirname + './projects.json',
+    autoload: true,
+    timestampData: true,
+});
 
 class Main extends Component {
 
@@ -25,19 +29,20 @@ class Main extends Component {
         super();
         this.state={
             activeItem: "tasks",
+            dbFilter: "",
+
         }
     }
 
-    closeOptions(){
-        this.setState({
-            optionPane: false,
-        });
+    componentDidUpdate(){
+        console.log("app componen updated");
+        this.refs.taskList.refreshTasks();
     }
 
     render(){
         return (
             <div className="window">
-                {/*<ToolbarHeader ref="toolbarHeader" parent={this} tasksDb={tasksDb}/>*/}
+
                 <CreateTaskDialog ref="createTaskDialog" parent={this} tasksDb={tasksDb}/>
                 <div className="window-content">
                     <div className="pane-group">
@@ -45,8 +50,9 @@ class Main extends Component {
                             <Navbar ref="navbar" parent={this} tasksDb={tasksDb}/>
                         </div>
                         <div className="pane main-content" id="mainPane">
+                            {/*<ToolbarHeader ref="toolbarHeader" parent={this} tasksDb={tasksDb}/>*/}
                             {this.state.activeItem === 'tasks' ? (
-                                <TaskList ref="taskList" parent={this} tasksDb={tasksDb} />
+                                <TaskList ref="taskList" parent={this} tasksDb={tasksDb} dbFilter={this.state.dbFilter} />
                             ) : this.state.activeItem === 'projects' ? (
                                 <Projects  parent={this} tasksDb={tasksDb}/>
                             ) : null}

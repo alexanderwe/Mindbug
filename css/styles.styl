@@ -59,6 +59,8 @@ html, body
     &:hover
         background-color:#ff3860;
 
+.noSelect
+    -webkit-user-select: none
 /*------------------------------------*\
     Navbar
 \*------------------------------------*/
@@ -67,6 +69,7 @@ html, body
 .sidebar
     background-color: rgba(0,0,0,.8);
     width: 150px;
+    min-width: 150px;
     overflow-y: scroll;
 
 .menu
@@ -88,7 +91,20 @@ html, body
         margin-top: 10px
 
 /*------------------------------------*\
-    Navbar
+    Tasklist
 \*------------------------------------*/
 .list-group
     padding: 10px
+
+/*------------------------------------*\
+    Modal
+\*------------------------------------*/
+
+.modal-content
+    padding: 10px
+    background-color: #fff;
+    border-radius: 5px;
+
+.modal-close
+    &:hover
+        background-color:#ff3860;

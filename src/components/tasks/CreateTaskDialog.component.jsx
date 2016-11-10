@@ -8,23 +8,28 @@ export default class CreateTaskDialog extends Component {
     constructor(props){
         super();
         this.state={
-            startDate: moment()
+            startDate: moment(),
+            isActive: false
         }
     }
 
     clearForm(){
         this.refs.taskNameInput.value = "";
         this.refs.taskNotesTextarea.value="";
-        this.refs.tagsInput.value = "";
-        this.refs.repeatCheckbox.checked = false;
+        this.refs.taskTagsInput.value = "";
+        this.refs.taskRepeatCheckbox.checked = false;
     }
 
-    showDialog(){
-        this.refs.createTaskDialog.show();
+    showModal(){
+        this.setState({
+            isActive: true
+        });
     }
 
-    closeDialog(){
-        this.refs.createTaskDialog.close();
+    closeModal(){
+        this.setState({
+            isActive: false
+        });
         this.clearForm();
     }
 
@@ -40,12 +45,12 @@ export default class CreateTaskDialog extends Component {
         var doc = {
             taskName: this.refs.taskNameInput.value,
             notes: this.refs.taskNotesTextarea.value,
-            tags: this.refs.tagsInput.value.split(" "),
-            dueDate: this.state.startDate.format('L'),
-            repeat: this.refs.repeatCheckbox.checked,
-            finished: false,
+            tags: this.refs.taskTagsInput.value.split(" "),
+            dueDate: new Date(),
+            repeat: this.refs.taskRepeatCheckbox.checked,
+            done: false,
+            starred: false,
             deleted: false,
-
         };
 
         //Insert doc
@@ -62,7 +67,7 @@ export default class CreateTaskDialog extends Component {
         this.clearForm();
 
         //Close dialog
-        this.refs.createTaskDialog.close()
+        this.closeModal();
     }
 
     render(){
@@ -72,40 +77,38 @@ export default class CreateTaskDialog extends Component {
 
 
         return(
-            <dialog id="createTaskDialog" className="alert createTaskDialog" ref="createTaskDialog">
-                <div>
-                    <form>
-                        <div className="form-group">
-                            <label>Task</label>
-                            <input type="text" className="form-control" placeholder="Task" ref="taskNameInput"/>
-                        </div>
-                        <div className="form-group">
-                            <label>Notes</label>
-                            <textarea className="form-control" rows="3" ref="taskNotesTextarea"></textarea>
-                        </div>
-                        <div className="form-group">
-                            <label>Due to</label>
-                            <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} style={datePickerStyles} />
-                        </div>
-                        <div className="form-group">
-                            <label>Tags</label>
-                            <input type="text" className="form-control" placeholder="tags" ref="tagsInput"/>
-                        </div>
-                        <div className="checkbox">
-                            <label>
-                                <input type="checkbox" ref="repeatCheckbox"/> Repeat this task ?
-                            </label>
-                        </div>
-                    </form>
-                </div>
+            <div className={this.state.isActive ? "modal is-active":"modal"}>
+                <div className="modal-background"></div>
+                <div className="modal-content">
+                    <label className="label">Task</label>
+                    <p className="control">
+                        <input className="input" type="text" placeholder="Task" ref="taskNameInput" />
+                    </p>
 
-                <footer>
-                    <div className="toolbar-actions">
-                        <button id="cancel" className="btn btn-default" onClick={()=>this.closeDialog()}>Cancel</button>
-                        <button id="save" className="btn btn-primary pull-right" onClick={()=>this.addTask()}>Save</button>
-                    </div>
-                </footer>
-            </dialog>
+                    <label className="label">Notes</label>
+                    <p className="control">
+                        <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
+                    </p>
+                    <label className="label">Due to</label>
+                    <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} style={datePickerStyles} />
+
+                    <label className="label">Task</label>
+                    <p className="control">
+                        <input className="input" type="text" placeholder="Tags" ref="taskTagsInput"/>
+                    </p>
+                    <p className="control">
+                        <label className="checkbox">
+                            <input type="checkbox" ref="taskRepeatCheckbox"/>
+                            Repeat this task
+                        </label>
+                    </p>
+                    <p className="control">
+                        <button className="button is-primary" onClick={()=>this.addTask()}>Submit</button>
+                        <button className="button is-link" onClick={()=>this.closeModal()}>Cancel</button>
+                    </p>
+                </div>
+                <button className="modal-close" onClick={()=>this.closeModal()}></button>
+            </div>
         )
     }
 }

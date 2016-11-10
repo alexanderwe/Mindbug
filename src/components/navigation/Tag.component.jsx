@@ -20,7 +20,7 @@ export default class Tag extends Component {
 
     render(){
         return(
-            <span className="tag is-dark" onClick={()=>this.filterTasks()}>{this.props.name}</span>
+            <span className="tag is-primary" onClick={()=>this.filterTasks()}>{this.props.name}</span>
         )
     }
 }

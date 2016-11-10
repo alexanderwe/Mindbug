@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import moment from 'moment';
 
+import Tag from '../navigation/Tag.component.jsx';
 
 export default class Task extends Component {
 
@@ -8,10 +9,20 @@ export default class Task extends Component {
         super();
     }
 
-    removeTask(){
+    deleteTask(){
         this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
             this.refreshTags(); //Refresh taglist after task is deleted
+        });
+    }
+
+    finishTask(){
+
+        console.log("finish task");
+
+
+        this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { done: true } },(err, numReplaced) => {
+            this.refreshTasks(); //Refresh tasklist after task is deleted
         });
     }
 
@@ -35,9 +46,14 @@ export default class Task extends Component {
                     <div className="media-content">
                         <div className="content">
                             <p>
-                                <strong>John Smith</strong> <small>@johnsmith</small> <small>31m</small>
+                                <strong>{this.props.task.taskName}</strong> <small>@johnsmith</small> <small>31m</small>
+                                {this.props.task.done.toString()}
                                 <br />
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.
+                                {this.props.task.notes}
+                                <br />
+                                {this.props.task.tags.map((tag)=>{
+                                    return <Tag name={tag} key={tag} parent={this}/>
+                                })}
                             </p>
                         </div>
                         <nav className="level">
@@ -55,7 +71,21 @@ export default class Task extends Component {
                         </nav>
                     </div>
                     <div className="media-right">
-                        <button className="delete" onClick={()=>this.removeTask()}></button>
+                        {this.props.task.done ? null: (
+                            <a className="button is-success" onClick={()=>this.finishTask()}>
+                            <span>Finish</span>
+                            <span className="icon">
+                                <i className="fa fa-check"></i>
+                            </span>
+                        </a>
+                        ) }
+
+                        <a className="button is-danger" onClick={()=>this.deleteTask()}>
+                            <span>Delete</span>
+                            <span className="icon">
+                                <i className="fa fa-times"></i>
+                            </span>
+                        </a>
                     </div>
                 </article>
             </div>

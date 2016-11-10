@@ -12,7 +12,7 @@ export default class Navbar extends Component {
         }
     }
 
-    goTo(pageName){
+    goTo(pageName, dbFilter=""){
         //Set active item in the navbar
         this.setState({
             activeItem: pageName
@@ -20,9 +20,11 @@ export default class Navbar extends Component {
 
         //Set active item in the main component
         this.props.parent.setState({ //app
-            activeItem: pageName
+            activeItem: pageName,
+            dbFilter: dbFilter
         });
     }
+
 
     refreshTags(){
         var tagsArray = [];
@@ -58,8 +60,8 @@ export default class Navbar extends Component {
     render(){
         if(this.state.tags){
             return(
-                <aside className="menu draggable">
-                    <p className="menu-label">
+                <aside className="menu draggable noSelect">
+                    <p className="menu-label ">
                         General
                     </p>
                     <ul className="menu-list">
@@ -71,8 +73,9 @@ export default class Navbar extends Component {
                     </p>
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','done')}><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')}><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','delete')}><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
                     </ul>
                     <p className="menu-label">
                         Projects
@@ -87,7 +90,7 @@ export default class Navbar extends Component {
                     </p>
                     <ul className="menu-list tag-list">
                          {this.state.tags.map((tag)=>{
-                            return <li><Tag name={tag} key={tag} parent={this}/></li>
+                            return <li key={tag}><Tag name={tag} parent={this}/></li>
                         })}
                     </ul>
                 </aside>
@@ -107,9 +110,10 @@ export default class Navbar extends Component {
                     </p>
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
-                    </ul>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','done')}><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')}><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','delete')}><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                        </ul>
                     <p className="menu-label">
                         Projects
                     </p>

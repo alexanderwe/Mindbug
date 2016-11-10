@@ -26,21 +26,27 @@ export default class ToolbarHeader extends Component{
 
     render(){
         return(
-            <header className="toolbar toolbar-header draggable">
-                <h1 className="title">Mindbug</h1>
-                <div className="toolbar-actions">
-                    <div className="btn-group">
-                        <button className="btn btn-default" onClick={()=>this.openDialog()}>
-                            <span className="icon icon-plus"></span>
-                        </button>
-                        <button className="btn btn-default" onClick={()=>this.goHome()}>
-                            <span className="icon icon-home"></span>
-                        </button>
-                    </div>
-                    <button className="btn btn-default btn-dropdown pull-right">
-                        <span className="icon icon-megaphone"></span>
-                    </button>
-                </div>
+            <header className="toolbar draggable">
+                <p className="control has-addons">
+                    <a className="button">
+                        <span className="icon is-small">
+                            <i className="fa fa-align-left"></i>
+                        </span>
+                        <span>Left</span>
+                    </a>
+                    <a className="button">
+                        <span className="icon is-small">
+                            <i className="fa fa-align-center"></i>
+                        </span>
+                        <span>Center</span>
+                    </a>
+                    <a className="button">
+                        <span className="icon is-small">
+                            <i className="fa fa-align-right"></i>
+                        </span>
+                        <span>Right</span>
+                    </a>
+                </p>
             </header>
         )
     }

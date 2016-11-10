@@ -34773,7 +34773,13 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var tasksDb = new _nedb2.default({
-    filename: __dirname + '/tasks.json',
+    filename: __dirname + './tasks.json',
+    autoload: true,
+    timestampData: true
+});
+
+var projectsDb = new _nedb2.default({
+    filename: __dirname + './projects.json',
     autoload: true,
     timestampData: true
 });
@@ -34787,17 +34793,18 @@ var Main = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this));
 
         _this.state = {
-            activeItem: "tasks"
+            activeItem: "tasks",
+            dbFilter: ""
+
         };
         return _this;
     }
 
     _createClass(Main, [{
-        key: 'closeOptions',
-        value: function closeOptions() {
-            this.setState({
-                optionPane: false
-            });
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            console.log("app componen updated");
+            this.refs.taskList.refreshTasks();
         }
     }, {
         key: 'render',
@@ -34820,7 +34827,7 @@ var Main = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'pane main-content', id: 'mainPane' },
-                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, tasksDb: tasksDb }) : null
+                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb, dbFilter: this.state.dbFilter }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, tasksDb: tasksDb }) : null
                         )
                     )
                 )
@@ -34878,6 +34885,8 @@ var Navbar = function (_Component) {
     _createClass(Navbar, [{
         key: 'goTo',
         value: function goTo(pageName) {
+            var dbFilter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+
             //Set active item in the navbar
             this.setState({
                 activeItem: pageName
@@ -34885,7 +34894,8 @@ var Navbar = function (_Component) {
 
             //Set active item in the main component
             this.props.parent.setState({ //app
-                activeItem: pageName
+                activeItem: pageName,
+                dbFilter: dbFilter
             });
         }
     }, {
@@ -34952,10 +34962,10 @@ var Navbar = function (_Component) {
             if (this.state.tags) {
                 return _react2.default.createElement(
                     'aside',
-                    { className: 'menu draggable' },
+                    { className: 'menu draggable noSelect' },
                     _react2.default.createElement(
                         'p',
-                        { className: 'menu-label' },
+                        { className: 'menu-label ' },
                         'General'
                     ),
                     _react2.default.createElement(
@@ -35007,7 +35017,21 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'done');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
+                                'Done'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'starred');
+                                    } },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35017,7 +35041,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'delete');
+                                    } },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
@@ -35075,8 +35101,8 @@ var Navbar = function (_Component) {
                         this.state.tags.map(function (tag) {
                             return _react2.default.createElement(
                                 'li',
-                                null,
-                                _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 })
+                                { key: tag },
+                                _react2.default.createElement(_TagComponent2.default, { name: tag, parent: _this3 })
                             );
                         })
                     )
@@ -35139,7 +35165,21 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'done');
+                                    } },
+                                _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
+                                'Done'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            _react2.default.createElement(
+                                'a',
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'starred');
+                                    } },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35149,7 +35189,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('tasks', 'delete');
+                                    } },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
@@ -35275,7 +35317,7 @@ var Tag = function (_Component) {
 
             return _react2.default.createElement(
                 "span",
-                { className: "tag is-dark", onClick: function onClick() {
+                { className: "tag is-primary", onClick: function onClick() {
                         return _this2.filterTasks();
                     } },
                 this.props.name
@@ -35341,41 +35383,53 @@ var ToolbarHeader = function (_Component) {
     }, {
         key: "render",
         value: function render() {
-            var _this2 = this;
-
             return _react2.default.createElement(
                 "header",
-                { className: "toolbar toolbar-header draggable" },
+                { className: "toolbar draggable" },
                 _react2.default.createElement(
-                    "h1",
-                    { className: "title" },
-                    "Mindbug"
-                ),
-                _react2.default.createElement(
-                    "div",
-                    { className: "toolbar-actions" },
+                    "p",
+                    { className: "control has-addons" },
                     _react2.default.createElement(
-                        "div",
-                        { className: "btn-group" },
+                        "a",
+                        { className: "button" },
                         _react2.default.createElement(
-                            "button",
-                            { className: "btn btn-default", onClick: function onClick() {
-                                    return _this2.openDialog();
-                                } },
-                            _react2.default.createElement("span", { className: "icon icon-plus" })
+                            "span",
+                            { className: "icon is-small" },
+                            _react2.default.createElement("i", { className: "fa fa-align-left" })
                         ),
                         _react2.default.createElement(
-                            "button",
-                            { className: "btn btn-default", onClick: function onClick() {
-                                    return _this2.goHome();
-                                } },
-                            _react2.default.createElement("span", { className: "icon icon-home" })
+                            "span",
+                            null,
+                            "Left"
                         )
                     ),
                     _react2.default.createElement(
-                        "button",
-                        { className: "btn btn-default btn-dropdown pull-right" },
-                        _react2.default.createElement("span", { className: "icon icon-megaphone" })
+                        "a",
+                        { className: "button" },
+                        _react2.default.createElement(
+                            "span",
+                            { className: "icon is-small" },
+                            _react2.default.createElement("i", { className: "fa fa-align-center" })
+                        ),
+                        _react2.default.createElement(
+                            "span",
+                            null,
+                            "Center"
+                        )
+                    ),
+                    _react2.default.createElement(
+                        "a",
+                        { className: "button" },
+                        _react2.default.createElement(
+                            "span",
+                            { className: "icon is-small" },
+                            _react2.default.createElement("i", { className: "fa fa-align-right" })
+                        ),
+                        _react2.default.createElement(
+                            "span",
+                            null,
+                            "Right"
+                        )
                     )
                 )
             );
@@ -35483,7 +35537,8 @@ var CreateTaskDialog = function (_Component) {
         var _this = _possibleConstructorReturn(this, (CreateTaskDialog.__proto__ || Object.getPrototypeOf(CreateTaskDialog)).call(this));
 
         _this.state = {
-            startDate: (0, _moment2.default)()
+            startDate: (0, _moment2.default)(),
+            isActive: false
         };
         return _this;
     }
@@ -35493,18 +35548,22 @@ var CreateTaskDialog = function (_Component) {
         value: function clearForm() {
             this.refs.taskNameInput.value = "";
             this.refs.taskNotesTextarea.value = "";
-            this.refs.tagsInput.value = "";
-            this.refs.repeatCheckbox.checked = false;
+            this.refs.taskTagsInput.value = "";
+            this.refs.taskRepeatCheckbox.checked = false;
         }
     }, {
-        key: 'showDialog',
-        value: function showDialog() {
-            this.refs.createTaskDialog.show();
+        key: 'showModal',
+        value: function showModal() {
+            this.setState({
+                isActive: true
+            });
         }
     }, {
-        key: 'closeDialog',
-        value: function closeDialog() {
-            this.refs.createTaskDialog.close();
+        key: 'closeModal',
+        value: function closeModal() {
+            this.setState({
+                isActive: false
+            });
             this.clearForm();
         }
     }, {
@@ -35523,12 +35582,12 @@ var CreateTaskDialog = function (_Component) {
             var doc = {
                 taskName: this.refs.taskNameInput.value,
                 notes: this.refs.taskNotesTextarea.value,
-                tags: this.refs.tagsInput.value.split(" "),
-                dueDate: this.state.startDate.format('L'),
-                repeat: this.refs.repeatCheckbox.checked,
-                finished: false,
+                tags: this.refs.taskTagsInput.value.split(" "),
+                dueDate: new Date(),
+                repeat: this.refs.taskRepeatCheckbox.checked,
+                done: false,
+                starred: false,
                 deleted: false
-
             };
 
             //Insert doc
@@ -35546,7 +35605,7 @@ var CreateTaskDialog = function (_Component) {
             this.clearForm();
 
             //Close dialog
-            this.refs.createTaskDialog.close();
+            this.closeModal();
         }
     }, {
         key: 'render',
@@ -35558,88 +35617,80 @@ var CreateTaskDialog = function (_Component) {
             };
 
             return _react2.default.createElement(
-                'dialog',
-                { id: 'createTaskDialog', className: 'alert createTaskDialog', ref: 'createTaskDialog' },
+                'div',
+                { className: this.state.isActive ? "modal is-active" : "modal" },
+                _react2.default.createElement('div', { className: 'modal-background' }),
                 _react2.default.createElement(
                     'div',
-                    null,
+                    { className: 'modal-content' },
                     _react2.default.createElement(
-                        'form',
-                        null,
+                        'label',
+                        { className: 'label' },
+                        'Task'
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'control' },
+                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'taskNameInput' })
+                    ),
+                    _react2.default.createElement(
+                        'label',
+                        { className: 'label' },
+                        'Notes'
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'control' },
+                        _react2.default.createElement('textarea', { className: 'textarea', placeholder: 'Notes', ref: 'taskNotesTextarea' })
+                    ),
+                    _react2.default.createElement(
+                        'label',
+                        { className: 'label' },
+                        'Due to'
+                    ),
+                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.startDate, onChange: this.handleDateChange.bind(this), style: datePickerStyles }),
+                    _react2.default.createElement(
+                        'label',
+                        { className: 'label' },
+                        'Task'
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'control' },
+                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Tags', ref: 'taskTagsInput' })
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'control' },
                         _react2.default.createElement(
-                            'div',
-                            { className: 'form-group' },
-                            _react2.default.createElement(
-                                'label',
-                                null,
-                                'Task'
-                            ),
-                            _react2.default.createElement('input', { type: 'text', className: 'form-control', placeholder: 'Task', ref: 'taskNameInput' })
-                        ),
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'form-group' },
-                            _react2.default.createElement(
-                                'label',
-                                null,
-                                'Notes'
-                            ),
-                            _react2.default.createElement('textarea', { className: 'form-control', rows: '3', ref: 'taskNotesTextarea' })
-                        ),
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'form-group' },
-                            _react2.default.createElement(
-                                'label',
-                                null,
-                                'Due to'
-                            ),
-                            _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.startDate, onChange: this.handleDateChange.bind(this), style: datePickerStyles })
-                        ),
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'form-group' },
-                            _react2.default.createElement(
-                                'label',
-                                null,
-                                'Tags'
-                            ),
-                            _react2.default.createElement('input', { type: 'text', className: 'form-control', placeholder: 'tags', ref: 'tagsInput' })
-                        ),
-                        _react2.default.createElement(
-                            'div',
+                            'label',
                             { className: 'checkbox' },
-                            _react2.default.createElement(
-                                'label',
-                                null,
-                                _react2.default.createElement('input', { type: 'checkbox', ref: 'repeatCheckbox' }),
-                                ' Repeat this task ?'
-                            )
+                            _react2.default.createElement('input', { type: 'checkbox', ref: 'taskRepeatCheckbox' }),
+                            'Repeat this task'
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'control' },
+                        _react2.default.createElement(
+                            'button',
+                            { className: 'button is-primary', onClick: function onClick() {
+                                    return _this3.addTask();
+                                } },
+                            'Submit'
+                        ),
+                        _react2.default.createElement(
+                            'button',
+                            { className: 'button is-link', onClick: function onClick() {
+                                    return _this3.closeModal();
+                                } },
+                            'Cancel'
                         )
                     )
                 ),
-                _react2.default.createElement(
-                    'footer',
-                    null,
-                    _react2.default.createElement(
-                        'div',
-                        { className: 'toolbar-actions' },
-                        _react2.default.createElement(
-                            'button',
-                            { id: 'cancel', className: 'btn btn-default', onClick: function onClick() {
-                                    return _this3.closeDialog();
-                                } },
-                            'Cancel'
-                        ),
-                        _react2.default.createElement(
-                            'button',
-                            { id: 'save', className: 'btn btn-primary pull-right', onClick: function onClick() {
-                                    return _this3.addTask();
-                                } },
-                            'Save'
-                        )
-                    )
-                )
+                _react2.default.createElement('button', { className: 'modal-close', onClick: function onClick() {
+                        return _this3.closeModal();
+                    } })
             );
         }
     }]);
@@ -35672,6 +35723,10 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _TagComponent = require('../navigation/Tag.component.jsx');
+
+var _TagComponent2 = _interopRequireDefault(_TagComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35690,13 +35745,24 @@ var Task = function (_Component) {
     }
 
     _createClass(Task, [{
-        key: 'removeTask',
-        value: function removeTask() {
+        key: 'deleteTask',
+        value: function deleteTask() {
             var _this2 = this;
 
             this.props.tasksDb.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
                 _this2.refreshTasks(); //Refresh tasklist after task is deleted
                 _this2.refreshTags(); //Refresh taglist after task is deleted
+            });
+        }
+    }, {
+        key: 'finishTask',
+        value: function finishTask() {
+            var _this3 = this;
+
+            console.log("finish task");
+
+            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { done: true } }, function (err, numReplaced) {
+                _this3.refreshTasks(); //Refresh tasklist after task is deleted
             });
         }
     }, {
@@ -35712,7 +35778,7 @@ var Task = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this4 = this;
 
             return _react2.default.createElement(
                 'div',
@@ -35741,7 +35807,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'strong',
                                     null,
-                                    'John Smith'
+                                    this.props.task.taskName
                                 ),
                                 ' ',
                                 _react2.default.createElement(
@@ -35755,8 +35821,13 @@ var Task = function (_Component) {
                                     null,
                                     '31m'
                                 ),
+                                this.props.task.done.toString(),
                                 _react2.default.createElement('br', null),
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.'
+                                this.props.task.notes,
+                                _react2.default.createElement('br', null),
+                                this.props.task.tags.map(function (tag) {
+                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this4 });
+                                })
                             )
                         ),
                         _react2.default.createElement(
@@ -35798,9 +35869,38 @@ var Task = function (_Component) {
                     _react2.default.createElement(
                         'div',
                         { className: 'media-right' },
-                        _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                return _this3.removeTask();
-                            } })
+                        this.props.task.done ? null : _react2.default.createElement(
+                            'a',
+                            { className: 'button is-success', onClick: function onClick() {
+                                    return _this4.finishTask();
+                                } },
+                            _react2.default.createElement(
+                                'span',
+                                null,
+                                'Finish'
+                            ),
+                            _react2.default.createElement(
+                                'span',
+                                { className: 'icon' },
+                                _react2.default.createElement('i', { className: 'fa fa-check' })
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'button is-danger', onClick: function onClick() {
+                                    return _this4.deleteTask();
+                                } },
+                            _react2.default.createElement(
+                                'span',
+                                null,
+                                'Delete'
+                            ),
+                            _react2.default.createElement(
+                                'span',
+                                { className: 'icon' },
+                                _react2.default.createElement('i', { className: 'fa fa-times' })
+                            )
+                        )
                     )
                 )
             );
@@ -35820,7 +35920,7 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"moment":33,"react":192}],204:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":199,"moment":33,"react":192}],204:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35870,8 +35970,9 @@ var TaskList = function (_Component) {
             var _this2 = this;
 
             if (tag) {
-                console.log("search with tag " + tag);
-                this.props.tasksDb.find({ tags: { $in: [tag] } }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                this.props.tasksDb.find({ $and: [{ done: false }, { tags: { $in: [tag] } }] }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    console.log("Filter tasks with tag: " + tag);
+
                     if (docs.length == 0) {
                         _this2.setState({
                             tasks: null
@@ -35882,8 +35983,53 @@ var TaskList = function (_Component) {
                         });
                     }
                 });
+            } else if (this.props.dbFilter === 'done') {
+                console.log("Filter tasks with done : true");
+                this.props.tasksDb.find({ done: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    if (docs.length == 0) {
+                        _this2.setState({
+                            tasks: null
+                        });
+                    } else {
+                        console.log(docs);
+
+                        _this2.setState({
+                            tasks: docs
+                        });
+                    }
+                });
+            } else if (this.props.dbFilter === 'starred') {
+                console.log("Filter tasks with starred : true");
+                this.props.tasksDb.find({ starred: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    if (docs.length == 0) {
+                        _this2.setState({
+                            tasks: null
+                        });
+                    } else {
+                        console.log(docs);
+
+                        _this2.setState({
+                            tasks: docs
+                        });
+                    }
+                });
+            } else if (this.props.dbFilter === 'deleted') {
+                console.log("Filter tasks with deleted : true");
+                this.props.tasksDb.find({ deleted: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                    if (docs.length == 0) {
+                        _this2.setState({
+                            tasks: null
+                        });
+                    } else {
+                        console.log(docs);
+
+                        _this2.setState({
+                            tasks: docs
+                        });
+                    }
+                });
             } else {
-                this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
+                this.props.tasksDb.find({ done: false }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this2.setState({
                             tasks: null
@@ -35897,6 +36043,11 @@ var TaskList = function (_Component) {
             }
         }
     }, {
+        key: 'openDialog',
+        value: function openDialog() {
+            this.props.parent.refs.createTaskDialog.showModal();
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this3 = this;
@@ -35907,7 +36058,14 @@ var TaskList = function (_Component) {
                     { className: 'list-group' },
                     this.state.tasks.map(function (task) {
                         return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, tasksDb: _this3.props.tasksDb, parent: _this3, edit: false });
-                    })
+                    }),
+                    _react2.default.createElement(
+                        'a',
+                        { className: 'button is-primary', onClick: function onClick() {
+                                return _this3.openDialog();
+                            } },
+                        'Add a task'
+                    )
                 );
             } else {
                 return _react2.default.createElement(
@@ -35925,6 +36083,13 @@ var TaskList = function (_Component) {
                                 'No tasks'
                             )
                         )
+                    ),
+                    _react2.default.createElement(
+                        'a',
+                        { className: 'button is-primary', onClick: function onClick() {
+                                return _this3.openDialog();
+                            } },
+                        'Add a task'
                     )
                 );
             }
