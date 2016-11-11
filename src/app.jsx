@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import Loading from 'react-loading';
 import Datastore from 'nedb';
 
 import ToolbarHeader from './components/navigation/ToolbarHeader.component.jsx';

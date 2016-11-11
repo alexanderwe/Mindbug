@@ -100,7 +100,6 @@ export default class TaskList extends Component{
                     {this.state.tasks.map((task)=>{
                         return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} parent={this} edit={false}/>
                     })}
-                    <a className="button is-primary" onClick={()=>this.openDialog()}>Add a task</a>
                 </ul>
             );
         } else{
@@ -111,7 +110,6 @@ export default class TaskList extends Component{
                             <strong>No tasks</strong>
                         </div>
                     </li>
-                    <a className="button is-primary" onClick={()=>this.openDialog()}>Add a task</a>
                 </ul>
             );
         }

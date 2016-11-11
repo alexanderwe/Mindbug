@@ -5,6 +5,15 @@
 
 
 /*------------------------------------*\
+    Colors
+\*------------------------------------*/
+
+colors ={
+    red: #ff3860,
+    green: #00d1b2,
+}
+
+/*------------------------------------*\
     Base styles and utilities
 \*------------------------------------*/
 
@@ -57,10 +66,14 @@ html, body
 
 .delete
     &:hover
-        background-color:#ff3860;
+        background-color: colors.red;
 
 .noSelect
     -webkit-user-select: none
+
+.pull-right{
+    float: right;
+}
 /*------------------------------------*\
     Navbar
 \*------------------------------------*/
@@ -78,6 +91,11 @@ html, body
 
 .menu-label
     color:#fff;
+    font-size: 14px;
+    .fa-plus
+        cursor: pointer;
+        &:hover
+            color: colors.green
 
 .menu-list
     a
@@ -107,4 +125,4 @@ html, body
 
 .modal-close
     &:hover
-        background-color:#ff3860;
+        background-color: colors.red;

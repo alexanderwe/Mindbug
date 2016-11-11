@@ -17,13 +17,24 @@ export default class Task extends Component {
     }
 
     finishTask(){
-
-        console.log("finish task");
-
-
         this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { done: true } },(err, numReplaced) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
         });
+    }
+
+    starTask(){
+
+        if(this.props.task.star = false){
+            console.log("star was true set to false");
+
+            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
+                this.refreshTasks(); //Refresh tasklist after task is deleted
+            });
+        }else{
+            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
+                this.refreshTasks(); //Refresh tasklist after task is deleted
+            });
+        }
     }
 
 
@@ -58,13 +69,7 @@ export default class Task extends Component {
                         </div>
                         <nav className="level">
                             <div className="level-left">
-                                <a className="level-item">
-                                    <span className="icon is-small"><i className="fa fa-reply"></i></span>
-                                </a>
-                                <a className="level-item">
-                                    <span className="icon is-small"><i className="fa fa-retweet"></i></span>
-                                </a>
-                                <a className="level-item">
+                                <a className="level-item" onClick={()=>this.starTask()}>
                                     <span className="icon is-small"><i className="fa fa-star"></i></span>
                                 </a>
                             </div>

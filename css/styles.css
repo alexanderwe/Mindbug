@@ -1,6 +1,8 @@
 @import '../node_modules/react-datepicker/dist/react-datepicker.css';
 @import '../node_modules/bulma/css/bulma.css';
 @import '../node_modules/font-awesome/css/font-awesome.css';
+/*------------------------------------*    Colors
+\*------------------------------------*/
 /*------------------------------------*    Base styles and utilities
 \*------------------------------------*/
 html,
@@ -55,6 +57,9 @@ body {
 .noSelect {
   -webkit-user-select: none;
 }
+.pull-right {
+  float: right;
+}
 /*------------------------------------*    Navbar
 \*------------------------------------*/
 .sidebar {
@@ -69,6 +74,13 @@ body {
 }
 .menu-label {
   color: #fff;
+  font-size: 14px;
+}
+.menu-label .fa-plus {
+  cursor: pointer;
+}
+.menu-label .fa-plus:hover {
+  color: #00d1b2;
 }
 .menu-list a {
   color: #fff;
