@@ -40,12 +40,24 @@ export default class CreateTaskDialog extends Component {
         });
     }
 
+    generateTags(){
+        console.log(this.refs.taskTagsInput.value.split(" ").filter(function(str) {
+            return /\S/.test(str);
+        }));
+
+        return this.refs.taskTagsInput.value.split(" ").filter(function(str) {
+            return /\S/.test(str);
+        });
+    }
+
+
     addTask(){
+
 
         var doc = {
             taskName: this.refs.taskNameInput.value,
             notes: this.refs.taskNotesTextarea.value,
-            tags: this.refs.taskTagsInput.value.split(" "),
+            tags: this.generateTags(),
             dueDate: new Date(),
             repeat: this.refs.taskRepeatCheckbox.checked,
             done: false,
@@ -71,11 +83,6 @@ export default class CreateTaskDialog extends Component {
     }
 
     render(){
-        const datePickerStyles={
-            width: "100%"
-        };
-
-
         return(
             <div className={this.state.isActive ? "modal is-active":"modal"}>
                 <div className="modal-background"></div>
@@ -90,7 +97,7 @@ export default class CreateTaskDialog extends Component {
                         <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
-                    <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} style={datePickerStyles} />
+                    <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} />
 
                     <label className="label">Task</label>
                     <p className="control">

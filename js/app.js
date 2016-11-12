@@ -35383,6 +35383,19 @@ var CreateTaskDialog = function (_Component) {
             });
         }
     }, {
+        key: 'generateTags',
+        value: function generateTags() {
+            console.log(this.refs.taskTagsInput.value.split(" ").filter(function (str) {
+                return (/\S/.test(str)
+                );
+            }));
+
+            return this.refs.taskTagsInput.value.split(" ").filter(function (str) {
+                return (/\S/.test(str)
+                );
+            });
+        }
+    }, {
         key: 'addTask',
         value: function addTask() {
             var _this2 = this;
@@ -35390,7 +35403,7 @@ var CreateTaskDialog = function (_Component) {
             var doc = {
                 taskName: this.refs.taskNameInput.value,
                 notes: this.refs.taskNotesTextarea.value,
-                tags: this.refs.taskTagsInput.value.split(" "),
+                tags: this.generateTags(),
                 dueDate: new Date(),
                 repeat: this.refs.taskRepeatCheckbox.checked,
                 done: false,
@@ -35419,10 +35432,6 @@ var CreateTaskDialog = function (_Component) {
         key: 'render',
         value: function render() {
             var _this3 = this;
-
-            var datePickerStyles = {
-                width: "100%"
-            };
 
             return _react2.default.createElement(
                 'div',
@@ -35456,7 +35465,7 @@ var CreateTaskDialog = function (_Component) {
                         { className: 'label' },
                         'Due to'
                     ),
-                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.startDate, onChange: this.handleDateChange.bind(this), style: datePickerStyles }),
+                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.startDate, onChange: this.handleDateChange.bind(this) }),
                     _react2.default.createElement(
                         'label',
                         { className: 'label' },
@@ -35576,14 +35585,16 @@ var Task = function (_Component) {
         value: function starTask() {
             var _this4 = this;
 
-            if (this.props.task.star = false) {
+            console.log(this.props.task.starred);
+
+            if (!this.props.task.starred) {
                 console.log("star was true set to false");
 
-                this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } }, function (err, numReplaced) {
+                this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } }, function (err, numReplaced) {
                     _this4.refreshTasks(); //Refresh tasklist after task is deleted
                 });
             } else {
-                this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } }, function (err, numReplaced) {
+                this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } }, function (err, numReplaced) {
                     _this4.refreshTasks(); //Refresh tasklist after task is deleted
                 });
             }
@@ -35605,7 +35616,7 @@ var Task = function (_Component) {
 
             return _react2.default.createElement(
                 'div',
-                { className: 'box' },
+                { className: 'box task' },
                 _react2.default.createElement(
                     'article',
                     { className: 'media' },
@@ -35661,7 +35672,7 @@ var Task = function (_Component) {
                                 { className: 'level-left' },
                                 _react2.default.createElement(
                                     'a',
-                                    { className: 'level-item', onClick: function onClick() {
+                                    { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
                                             return _this5.starTask();
                                         } },
                                     _react2.default.createElement(
@@ -35677,36 +35688,22 @@ var Task = function (_Component) {
                         'div',
                         { className: 'media-right' },
                         this.props.task.done ? null : _react2.default.createElement(
-                            'a',
-                            { className: 'button is-success', onClick: function onClick() {
-                                    return _this5.finishTask();
-                                } },
+                            'div',
+                            { className: 'media-right' },
                             _react2.default.createElement(
-                                'span',
-                                null,
-                                'Finish'
-                            ),
-                            _react2.default.createElement(
-                                'span',
-                                { className: 'icon' },
+                                'button',
+                                { className: 'btn-round btn-success', onClick: function onClick() {
+                                        return _this5.finishTask();
+                                    } },
                                 _react2.default.createElement('i', { className: 'fa fa-check' })
                             )
                         ),
                         _react2.default.createElement(
-                            'a',
-                            { className: 'button is-danger', onClick: function onClick() {
+                            'div',
+                            { className: 'media-right' },
+                            _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
                                     return _this5.deleteTask();
-                                } },
-                            _react2.default.createElement(
-                                'span',
-                                null,
-                                'Delete'
-                            ),
-                            _react2.default.createElement(
-                                'span',
-                                { className: 'icon' },
-                                _react2.default.createElement('i', { className: 'fa fa-times' })
-                            )
+                                } })
                         )
                     )
                 )

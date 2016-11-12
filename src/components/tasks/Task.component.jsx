@@ -23,15 +23,16 @@ export default class Task extends Component {
     }
 
     starTask(){
+        console.log(this.props.task.starred);
 
-        if(this.props.task.star = false){
+        if(!this.props.task.starred){
             console.log("star was true set to false");
 
-            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
+            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
         }else{
-            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
+            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
         }
@@ -47,7 +48,7 @@ export default class Task extends Component {
 
     render(){
         return (
-            <div className="box">
+            <div className="box task">
                 <article className="media">
                     <div className="media-left">
                         <figure className="image is-64x64">
@@ -69,7 +70,7 @@ export default class Task extends Component {
                         </div>
                         <nav className="level">
                             <div className="level-left">
-                                <a className="level-item" onClick={()=>this.starTask()}>
+                                <a className={this.props.task.starred ? 'item-level active': 'item-level'} onClick={()=>this.starTask()}>
                                     <span className="icon is-small"><i className="fa fa-star"></i></span>
                                 </a>
                             </div>
@@ -77,20 +78,15 @@ export default class Task extends Component {
                     </div>
                     <div className="media-right">
                         {this.props.task.done ? null: (
-                            <a className="button is-success" onClick={()=>this.finishTask()}>
-                            <span>Finish</span>
-                            <span className="icon">
-                                <i className="fa fa-check"></i>
-                            </span>
-                        </a>
+                             <div className="media-right">
+                                 <button className="btn-round btn-success" onClick={()=>this.finishTask()}>
+                                     <i className="fa fa-check" />
+                                 </button>
+                             </div>
                         ) }
-
-                        <a className="button is-danger" onClick={()=>this.deleteTask()}>
-                            <span>Delete</span>
-                            <span className="icon">
-                                <i className="fa fa-times"></i>
-                            </span>
-                        </a>
+                         <div className="media-right">
+                             <button className="delete" onClick={()=>this.deleteTask()}></button>
+                         </div>
                     </div>
                 </article>
             </div>

@@ -51,6 +51,9 @@ body {
 .tag {
   cursor: pointer;
 }
+.tag:hover {
+  background: #00bca0;
+}
 .delete:hover {
   background-color: #ff3860;
 }
@@ -97,12 +100,72 @@ body {
 .list-group {
   padding: 10px;
 }
+/*------------------------------------*    Task
+\*------------------------------------*/
+.task .tag {
+  margin-right: 5px;
+}
+.task button {
+  margin-top: 5px;
+}
+.task .active {
+  color: #ffd83d;
+}
+.task .active:hover {
+  color: #363636;
+}
+.btn-round {
+  -webkit-appearance: none;
+  background-color: rgba(10,10,10,0.1);
+  border: none;
+  border-radius: 290486px;
+  cursor: pointer;
+  display: inline-block;
+  height: 24px;
+  outline: none;
+  position: relative;
+  vertical-align: top;
+  width: 24px;
+  color: #fff;
+}
+.btn-success:hover {
+  background-color: #20bc56;
+}
 /*------------------------------------*    Modal
 \*------------------------------------*/
 .modal-content {
   padding: 10px;
   background-color: #fff;
   border-radius: 5px;
+}
+.modal-content .react-datepicker__input-container {
+  width: 100%;
+}
+.modal-content .react-datepicker__input-container input {
+  webkit-appearance: none;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  color: #363636;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  font-size: 14px;
+  height: 32px;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  line-height: 24px;
+  padding-left: 8px;
+  padding-right: 8px;
+  position: relative;
+  vertical-align: top;
+  box-shadow: inset 0 1px 2px rgba(10,10,10,0.1);
+  max-width: 100%;
+  width: 100%;
 }
 .modal-close:hover {
   background-color: #ff3860;
