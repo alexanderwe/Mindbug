@@ -25,8 +25,12 @@ export default class Navbar extends Component {
         });
     }
 
-    openDialog(){
+    openTaskDialog(){
         this.props.parent.refs.createTaskDialog.showModal();
+    }
+
+    openProjectDialog(){
+        this.props.parent.refs.createProjectDialog.showModal();
     }
 
 
@@ -73,7 +77,7 @@ export default class Navbar extends Component {
                         <li><a href="#"><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">
-                        Tasks <span className="pull-right" onClick={()=>this.openDialog()}><i className="fa fa-plus" aria-hidden="true"></i></span>
+                        Tasks <span className="pull-right" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></span>
                     </p>
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
@@ -81,9 +85,9 @@ export default class Navbar extends Component {
                         <li><a href="#" onClick={()=>this.goTo('tasks','starred')}><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
                         <li><a href="#" onClick={()=>this.goTo('tasks','deleted')}><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
                     </ul>
-                    <p className="menu-label">
-                        Projects
-                    </p>
+                        <p className="menu-label">
+                            Tasks <span className="pull-right" onClick={()=>this.openProjectDialog()}><i className="fa fa-plus" aria-hidden="true"></i></span>
+                        </p>
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('projects')}><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
                         <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>

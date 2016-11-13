@@ -58,8 +58,7 @@ export default class Task extends Component {
                     <div className="media-content">
                         <div className="content">
                             <p>
-                                <strong>{this.props.task.taskName}</strong> <small>@johnsmith</small> <small>31m</small>
-                                {this.props.task.done.toString()}
+                                <strong>{this.props.task.taskName}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')}</small>
                                 <br />
                                 {this.props.task.notes}
                                 <br />

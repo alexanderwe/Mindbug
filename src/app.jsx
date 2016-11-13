@@ -8,6 +8,7 @@ import Navbar from './components/navigation/Navbar.component.jsx';
 import TaskList from './components/tasks/TaskList.component.jsx';
 import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx';
 import Projects from './components/projects/Projects.component.jsx';
+import CreateProjectDialog from './components/projects/CreateProjectDialog.component.jsx';
 
 
 var tasksDb = new Datastore({
@@ -43,6 +44,7 @@ class Main extends Component {
             <div className="window">
 
                 <CreateTaskDialog ref="createTaskDialog" parent={this} tasksDb={tasksDb}/>
+                <CreateProjectDialog ref="createProjectDialog" parent={this} projectsDb={projectsDb}/>
                 <div className="window-content">
                     <div className="pane-group">
                         <div className="pane-sm sidebar">

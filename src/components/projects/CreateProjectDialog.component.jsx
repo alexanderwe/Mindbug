@@ -4,7 +4,7 @@ import InputMoment from 'input-moment';
 import moment from 'moment';
 
 
-export default class CreateTaskDialog extends Component {
+export default class CreateProjectDialog extends Component {
 
     constructor(props){
         super();
@@ -82,7 +82,7 @@ export default class CreateTaskDialog extends Component {
             <div className={this.state.isActive ? "modal is-active":"modal"}>
                 <div className="modal-background"></div>
                 <div className="modal-content">
-                    <label className="label">Task</label>
+                    <label className="label">Project</label>
                     <p className="control">
                         <input className="input" type="text" placeholder="Task" ref="taskNameInput" />
                     </p>
@@ -119,7 +119,7 @@ export default class CreateTaskDialog extends Component {
 }
 
 
-CreateTaskDialog.propTypes = {
+CreateProjectDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    tasksDb: React.PropTypes.object.isRequired,
+    projectsDb: React.PropTypes.object.isRequired,
 };
