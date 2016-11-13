@@ -68,7 +68,7 @@ export default class Navbar extends Component {
     render(){
         if(this.state.tags){
             return(
-                <aside className="menu draggable noSelect">
+                <aside className="menu noSelect">
                     <p className="menu-label ">
                         General
                     </p>

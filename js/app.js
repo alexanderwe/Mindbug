@@ -35463,7 +35463,7 @@ var Main = function (_Component) {
                         { className: 'pane-group' },
                         _react2.default.createElement(
                             'div',
-                            { className: 'pane-sm sidebar' },
+                            { className: 'pane-sm sidebar draggable' },
                             _react2.default.createElement(_NavbarComponent2.default, { ref: 'navbar', parent: this, tasksDb: tasksDb })
                         ),
                         _react2.default.createElement(
@@ -35614,7 +35614,7 @@ var Navbar = function (_Component) {
             if (this.state.tags) {
                 return _react2.default.createElement(
                     'aside',
-                    { className: 'menu draggable noSelect' },
+                    { className: 'menu noSelect' },
                     _react2.default.createElement(
                         'p',
                         { className: 'menu-label ' },

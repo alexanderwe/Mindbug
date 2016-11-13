@@ -47,7 +47,7 @@ class Main extends Component {
                 <CreateProjectDialog ref="createProjectDialog" parent={this} projectsDb={projectsDb}/>
                 <div className="window-content">
                     <div className="pane-group">
-                        <div className="pane-sm sidebar">
+                        <div className="pane-sm sidebar draggable">
                             <Navbar ref="navbar" parent={this} tasksDb={tasksDb}/>
                         </div>
                         <div className="pane main-content" id="mainPane">
