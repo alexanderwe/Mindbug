@@ -26,6 +26,9 @@ html, body
 a
     -webkit-app-region: no-drag;
 
+::-webkit-scrollbar{
+    display: none;
+}
 
 
 .draggable
@@ -94,9 +97,9 @@ a
     width: 150px;
     min-width: 150px;
     overflow-y: scroll;
+    padding: 10px
 
 .menu
-    padding: 10px
     padding-top: 30px
 
 .menu-label
@@ -105,24 +108,38 @@ a
     .fa-plus
         cursor: pointer;
         &:hover
-            color: colors.primary
+            color: colors.primary;
+    .add-btn
+        color:#fff;
+        &:hover
+            color: colors.primary;
 
 .menu-list
     a
         color: #fff;
         &:hover
-            color: #blue !important;
+            color: colors.primary !important;
             background-color: transparent !important;
+    .is-active
+        &:hover
+            color: #fff !important;
+            background-color: colors.primary !important;
 
 .tag-list
     .tag
         margin-top: 10px
 
 /*------------------------------------*\
+    Main
+\*------------------------------------*/
+
+.main-content
+    padding: 10px;
+
+
+/*------------------------------------*\
     Tasklist
 \*------------------------------------*/
-.list-group
-    padding: 10px
 
 /*------------------------------------*\
     Task

@@ -48,24 +48,23 @@ export default class CreateProjectDialog extends Component {
     }
 
 
-    addTask(){
+    addProject(){
         var doc = {
-            taskName: this.refs.taskNameInput.value,
-            notes: this.refs.taskNotesTextarea.value,
+            projectTitle: this.refs.projectTitleInput.value,
+            notes: this.refs.projectNotesTextarea.value,
             tags: this.generateTags(),
             dueDate: new Date(),
-            repeat: this.refs.taskRepeatCheckbox.checked,
             done: false,
             starred: false,
             deleted: false,
         };
 
         //Insert doc
-        this.props.tasksDb.insert(doc,(err, newDoc) => {   // Callback is optional
+        this.props.projectsDb.insert(doc,(err, newDoc) => {   // Callback is optional
             if(err){
                 console.log(err);
             }else{
-                this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
+                this.props.parent.refs.projectList.refreshProjects();  //app-->Tasklist
                 this.props.parent.refs.navbar.refreshTags(); //app-->Navbar
             }
         });
@@ -84,12 +83,12 @@ export default class CreateProjectDialog extends Component {
                 <div className="modal-content">
                     <label className="label">Project</label>
                     <p className="control">
-                        <input className="input" type="text" placeholder="Task" ref="taskNameInput" />
+                        <input className="input" type="text" placeholder="Task" ref="projectTitleInput" />
                     </p>
 
                     <label className="label">Notes</label>
                     <p className="control">
-                        <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
+                        <textarea className="textarea" placeholder="Notes" ref="projectNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
                     <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} />
@@ -102,13 +101,7 @@ export default class CreateProjectDialog extends Component {
                         <input className="input" type="text" placeholder="Tags" ref="taskTagsInput"/>
                     </p>
                     <p className="control">
-                        <label className="checkbox">
-                            <input type="checkbox" ref="taskRepeatCheckbox"/>
-                            Repeat this task
-                        </label>
-                    </p>
-                    <p className="control">
-                        <button className="button is-primary" onClick={()=>this.addTask()}>Submit</button>
+                        <button className="button is-primary" onClick={()=>this.addProject()}>Submit</button>
                         <button className="button is-link" onClick={()=>this.closeModal()}>Cancel</button>
                     </p>
                 </div>

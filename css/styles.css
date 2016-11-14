@@ -12,6 +12,9 @@ body {
 a {
   -webkit-app-region: no-drag;
 }
+::-webkit-scrollbar {
+  display: none;
+}
 .draggable {
   -webkit-app-region: drag;
 }
@@ -73,9 +76,9 @@ a {
   width: 150px;
   min-width: 150px;
   overflow-y: scroll;
+  padding: 10px;
 }
 .menu {
-  padding: 10px;
   padding-top: 30px;
 }
 .menu-label {
@@ -88,21 +91,33 @@ a {
 .menu-label .fa-plus:hover {
   color: #00d1b2;
 }
+.menu-label .add-btn {
+  color: #fff;
+}
+.menu-label .add-btn:hover {
+  color: #00d1b2;
+}
 .menu-list a {
   color: #fff;
 }
 .menu-list a:hover {
-  color: #bbb lue !important;
+  color: #00d1b2 !important;
   background-color: transparent !important;
+}
+.menu-list .is-active:hover {
+  color: #fff !important;
+  background-color: #00d1b2 !important;
 }
 .tag-list .tag {
   margin-top: 10px;
 }
-/*------------------------------------*    Tasklist
+/*------------------------------------*    Main
 \*------------------------------------*/
-.list-group {
+.main-content {
   padding: 10px;
 }
+/*------------------------------------*    Tasklist
+\*------------------------------------*/
 /*------------------------------------*    Task
 \*------------------------------------*/
 .task .tag {

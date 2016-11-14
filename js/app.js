@@ -35397,9 +35397,9 @@ var _CreateTaskDialogComponent = require('./components/tasks/CreateTaskDialog.co
 
 var _CreateTaskDialogComponent2 = _interopRequireDefault(_CreateTaskDialogComponent);
 
-var _ProjectsComponent = require('./components/projects/Projects.component.jsx');
+var _ProjectListComponent = require('./components/projects/ProjectList.component.jsx');
 
-var _ProjectsComponent2 = _interopRequireDefault(_ProjectsComponent);
+var _ProjectListComponent2 = _interopRequireDefault(_ProjectListComponent);
 
 var _CreateProjectDialogComponent = require('./components/projects/CreateProjectDialog.component.jsx');
 
@@ -35469,7 +35469,7 @@ var Main = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'pane main-content', id: 'mainPane' },
-                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb, dbFilter: this.state.dbFilter }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectsComponent2.default, { parent: this, tasksDb: tasksDb }) : null
+                            this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, tasksDb: tasksDb, dbFilter: this.state.dbFilter }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectListComponent2.default, { parent: this, tasksDb: tasksDb, projectsDb: projectsDb }) : null
                         )
                     )
                 )
@@ -35484,7 +35484,7 @@ var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(Main, null), main);
 
 }).call(this,"/src")
-},{"./components/navigation/Navbar.component.jsx":215,"./components/navigation/ToolbarHeader.component.jsx":217,"./components/projects/CreateProjectDialog.component.jsx":218,"./components/projects/Projects.component.jsx":219,"./components/tasks/CreateTaskDialog.component.jsx":220,"./components/tasks/TaskList.component.jsx":222,"nedb":52,"react":209,"react-dom":63}],215:[function(require,module,exports){
+},{"./components/navigation/Navbar.component.jsx":215,"./components/navigation/ToolbarHeader.component.jsx":217,"./components/projects/CreateProjectDialog.component.jsx":218,"./components/projects/ProjectList.component.jsx":220,"./components/tasks/CreateTaskDialog.component.jsx":221,"./components/tasks/TaskList.component.jsx":223,"nedb":52,"react":209,"react-dom":63}],215:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35519,6 +35519,7 @@ var Navbar = function (_Component) {
 
         _this.state = {
             activeItem: "tasks",
+            activeChildItem: "all",
             tags: null
         };
         return _this;
@@ -35531,7 +35532,8 @@ var Navbar = function (_Component) {
 
             //Set active item in the navbar
             this.setState({
-                activeItem: pageName
+                activeItem: pageName,
+                activeChildItem: dbFilter
             });
 
             //Set active item in the main component
@@ -35602,6 +35604,11 @@ var Navbar = function (_Component) {
             });
         }
     }, {
+        key: 'isActiveState',
+        value: function isActiveState(activeItem, activeChildItem) {
+            return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
+        }
+    }, {
         key: 'componentWillMount',
         value: function componentWillMount() {
             this.refreshTags();
@@ -35628,7 +35635,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('general', 'overview');
+                                    }, className: this.isActiveState('general', 'overview') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
                                 'Overview'
                             )
@@ -35638,7 +35647,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('general', 'today');
+                                    }, className: this.isActiveState('general', 'today') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
                                 'Today'
                             )
@@ -35649,8 +35660,8 @@ var Navbar = function (_Component) {
                         { className: 'menu-label' },
                         'Tasks ',
                         _react2.default.createElement(
-                            'span',
-                            { className: 'pull-right', onClick: function onClick() {
+                            'a',
+                            { className: 'pull-right add-btn', onClick: function onClick() {
                                     return _this3.openTaskDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
@@ -35665,8 +35676,8 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks');
-                                    } },
+                                        return _this3.goTo('tasks', 'all');
+                                    }, className: this.isActiveState('tasks', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
                                 'All'
                             )
@@ -35678,7 +35689,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'done');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'done') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
                                 'Done'
                             )
@@ -35690,7 +35701,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'starred');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35702,7 +35713,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'deleted');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
@@ -35711,10 +35722,10 @@ var Navbar = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'menu-label' },
-                        'Tasks ',
+                        'Projects ',
                         _react2.default.createElement(
-                            'span',
-                            { className: 'pull-right', onClick: function onClick() {
+                            'a',
+                            { className: 'pull-right add-btn', onClick: function onClick() {
                                     return _this3.openProjectDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
@@ -35729,8 +35740,8 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects');
-                                    } },
+                                        return _this3.goTo('projects', 'all');
+                                    }, className: this.isActiveState('projects', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
                                 'All'
                             )
@@ -35740,7 +35751,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects', 'starred');
+                                    }, className: this.isActiveState('projects', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35750,7 +35763,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects', 'deleted');
+                                    }, className: this.isActiveState('projects', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
@@ -35790,7 +35805,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('general', 'overview');
+                                    }, className: this.isActiveState('general', 'overview') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
                                 'Overview'
                             )
@@ -35800,7 +35817,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('general', 'today');
+                                    }, className: this.isActiveState('general', 'today') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
                                 'Today'
                             )
@@ -35809,7 +35828,14 @@ var Navbar = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'menu-label' },
-                        'Tasks'
+                        'Tasks ',
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'pull-right add-btn', onClick: function onClick() {
+                                    return _this3.openTaskDialog();
+                                } },
+                            _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
+                        )
                     ),
                     _react2.default.createElement(
                         'ul',
@@ -35820,8 +35846,8 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks');
-                                    } },
+                                        return _this3.goTo('tasks', 'all');
+                                    }, className: this.isActiveState('tasks', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
                                 'All'
                             )
@@ -35833,7 +35859,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'done');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'done') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
                                 'Done'
                             )
@@ -35845,7 +35871,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'starred');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35857,7 +35883,7 @@ var Navbar = function (_Component) {
                                 'a',
                                 { href: '#', onClick: function onClick() {
                                         return _this3.goTo('tasks', 'deleted');
-                                    } },
+                                    }, className: this.isActiveState('tasks', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
@@ -35866,7 +35892,14 @@ var Navbar = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'menu-label' },
-                        'Projects'
+                        'Projects ',
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'pull-right add-btn', onClick: function onClick() {
+                                    return _this3.openProjectDialog();
+                                } },
+                            _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
+                        )
                     ),
                     _react2.default.createElement(
                         'ul',
@@ -35877,8 +35910,8 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects');
-                                    } },
+                                        return _this3.goTo('projects', 'all');
+                                    }, className: this.isActiveState('projects', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
                                 'All'
                             )
@@ -35888,7 +35921,9 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects', 'starred');
+                                    }, className: this.isActiveState('projects', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
                             )
@@ -35898,11 +35933,18 @@ var Navbar = function (_Component) {
                             null,
                             _react2.default.createElement(
                                 'a',
-                                { href: '#' },
+                                { href: '#', onClick: function onClick() {
+                                        return _this3.goTo('projects', 'deleted');
+                                    }, className: this.isActiveState('projects', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
                             )
                         )
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
+                        'Tags'
                     ),
                     _react2.default.createElement(
                         'p',
@@ -35935,7 +35977,7 @@ Navbar.propTypes = {
 };
 
 },{"./Tag.component.jsx":216,"react":209}],216:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -35943,7 +35985,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -35965,25 +36007,25 @@ var Tag = function (_Component) {
     }
 
     _createClass(Tag, [{
-        key: "filterTasks",
+        key: 'filterTasks',
         value: function filterTasks() {
             console.log("hey");
 
-            if (!this.props.parent.props.parent.state.activeItem != "tasks") {
+            if (!this.props.parent.props.parent.state.activeItem != 'tasks') {
                 //navbar-->app
-                this.props.parent.goTo("tasks"); //TODO implement automatic tag search
+                this.props.parent.goTo('tasks', 'all'); //TODO implement automatic tag search
             } else {
                 this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
             }
         }
     }, {
-        key: "render",
+        key: 'render',
         value: function render() {
             var _this2 = this;
 
             return _react2.default.createElement(
-                "span",
-                { className: "tag is-primary", onClick: function onClick() {
+                'span',
+                { className: 'tag is-primary', onClick: function onClick() {
                         return _this2.filterTasks();
                     } },
                 this.props.name
@@ -36201,28 +36243,27 @@ var CreateProjectDialog = function (_Component) {
             });
         }
     }, {
-        key: 'addTask',
-        value: function addTask() {
+        key: 'addProject',
+        value: function addProject() {
             var _this2 = this;
 
             var doc = {
-                taskName: this.refs.taskNameInput.value,
-                notes: this.refs.taskNotesTextarea.value,
+                projectTitle: this.refs.projectTitleInput.value,
+                notes: this.refs.projectNotesTextarea.value,
                 tags: this.generateTags(),
                 dueDate: new Date(),
-                repeat: this.refs.taskRepeatCheckbox.checked,
                 done: false,
                 starred: false,
                 deleted: false
             };
 
             //Insert doc
-            this.props.tasksDb.insert(doc, function (err, newDoc) {
+            this.props.projectsDb.insert(doc, function (err, newDoc) {
                 // Callback is optional
                 if (err) {
                     console.log(err);
                 } else {
-                    _this2.props.parent.refs.taskList.refreshTasks(); //app-->Tasklist
+                    _this2.props.parent.refs.projectList.refreshProjects(); //app-->Tasklist
                     _this2.props.parent.refs.navbar.refreshTags(); //app-->Navbar
                 }
             });
@@ -36253,7 +36294,7 @@ var CreateProjectDialog = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'control' },
-                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'taskNameInput' })
+                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'projectTitleInput' })
                     ),
                     _react2.default.createElement(
                         'label',
@@ -36263,7 +36304,7 @@ var CreateProjectDialog = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'control' },
-                        _react2.default.createElement('textarea', { className: 'textarea', placeholder: 'Notes', ref: 'taskNotesTextarea' })
+                        _react2.default.createElement('textarea', { className: 'textarea', placeholder: 'Notes', ref: 'projectNotesTextarea' })
                     ),
                     _react2.default.createElement(
                         'label',
@@ -36285,19 +36326,9 @@ var CreateProjectDialog = function (_Component) {
                         'p',
                         { className: 'control' },
                         _react2.default.createElement(
-                            'label',
-                            { className: 'checkbox' },
-                            _react2.default.createElement('input', { type: 'checkbox', ref: 'taskRepeatCheckbox' }),
-                            'Repeat this task'
-                        )
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'control' },
-                        _react2.default.createElement(
                             'button',
                             { className: 'button is-primary', onClick: function onClick() {
-                                    return _this3.addTask();
+                                    return _this3.addProject();
                                 } },
                             'Submit'
                         ),
@@ -36349,38 +36380,164 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Projects = function (_Component) {
-    _inherits(Projects, _Component);
+var Project = function (_Component) {
+    _inherits(Project, _Component);
 
-    function Projects(props) {
-        _classCallCheck(this, Projects);
+    function Project(props) {
+        _classCallCheck(this, Project);
 
-        return _possibleConstructorReturn(this, (Projects.__proto__ || Object.getPrototypeOf(Projects)).call(this, props));
+        return _possibleConstructorReturn(this, (Project.__proto__ || Object.getPrototypeOf(Project)).call(this, props));
     }
 
-    _createClass(Projects, [{
+    _createClass(Project, [{
         key: "render",
         value: function render() {
             return _react2.default.createElement(
                 "div",
-                { className: "projects" },
-                "Projects"
+                { className: "tile is-child box project" },
+                _react2.default.createElement(
+                    "p",
+                    { className: "title" },
+                    this.props.projectTitle
+                ),
+                _react2.default.createElement(
+                    "p",
+                    null,
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis."
+                )
             );
         }
     }]);
 
-    return Projects;
+    return Project;
 }(_react.Component);
 
-exports.default = Projects;
+exports.default = Project;
 
 
-Projects.propTypes = {
-    parent: _react2.default.PropTypes.object.isRequired,
-    tasksDb: _react2.default.PropTypes.object.isRequired
-};
+Project.propTypes = {};
 
 },{"react":209}],220:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _ProjectComponent = require('./Project.component.jsx');
+
+var _ProjectComponent2 = _interopRequireDefault(_ProjectComponent);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ProjectList = function (_Component) {
+    _inherits(ProjectList, _Component);
+
+    function ProjectList(props) {
+        _classCallCheck(this, ProjectList);
+
+        return _possibleConstructorReturn(this, (ProjectList.__proto__ || Object.getPrototypeOf(ProjectList)).call(this, props));
+    }
+
+    _createClass(ProjectList, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                { className: 'tile is-ancestor' },
+                _react2.default.createElement(
+                    'div',
+                    { className: 'tile is-vertical is-parent' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'tile is-child box' },
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            'One'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            null,
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.'
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'tile is-child box' },
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            'Two'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            null,
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.'
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'tile is-vertical is-parent' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'tile is-child box' },
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            'Three'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            null,
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.'
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'tile is-child box' },
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            'Four'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            null,
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.'
+                        )
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ProjectList;
+}(_react.Component);
+
+exports.default = ProjectList;
+
+
+ProjectList.propTypes = {
+    parent: _react2.default.PropTypes.object.isRequired,
+    tasksDb: _react2.default.PropTypes.object.isRequired,
+    projectsDb: _react2.default.PropTypes.object.isRequired
+};
+
+},{"./Project.component.jsx":219,"react":209}],221:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36595,7 +36752,7 @@ CreateTaskDialog.propTypes = {
     tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
-},{"input-moment":34,"moment":49,"react":209,"react-datepicker":62}],221:[function(require,module,exports){
+},{"input-moment":34,"moment":49,"react":209,"react-datepicker":62}],222:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36795,7 +36952,7 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"../navigation/Tag.component.jsx":216,"moment":49,"react":209}],222:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":216,"moment":49,"react":209}],223:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36968,4 +37125,4 @@ TaskList.propTypes = {
     tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Task.component.jsx":221,"react":209}]},{},[214]);
+},{"./Task.component.jsx":222,"react":209}]},{},[214]);

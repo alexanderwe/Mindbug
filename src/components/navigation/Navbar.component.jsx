@@ -8,6 +8,7 @@ export default class Navbar extends Component {
         super();
         this.state ={
             activeItem: "tasks",
+            activeChildItem: "all",
             tags: null
         }
     }
@@ -15,7 +16,8 @@ export default class Navbar extends Component {
     goTo(pageName, dbFilter=""){
         //Set active item in the navbar
         this.setState({
-            activeItem: pageName
+            activeItem: pageName,
+            activeChildItem: dbFilter
         });
 
         //Set active item in the main component
@@ -61,6 +63,11 @@ export default class Navbar extends Component {
         });
     }
 
+
+    isActiveState(activeItem, activeChildItem){
+        return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
+    }
+
     componentWillMount(){
         this.refreshTags();
     }
@@ -73,25 +80,25 @@ export default class Navbar extends Component {
                         General
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#"><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
-                        <li><a href="#"><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'overview')} className={this.isActiveState('general', 'overview') ? 'is-active': null }><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">
-                        Tasks <span className="pull-right" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></span>
+                        Tasks <a className="pull-right add-btn" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','done')}><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')}><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','deleted')}><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks', 'all')} className={this.isActiveState('tasks', 'all') ? 'is-active': null }><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','done')} className={this.isActiveState('tasks', 'done') ? 'is-active': null }><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')} className={this.isActiveState('tasks', 'starred') ? 'is-active': null }><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','deleted')} className={this.isActiveState('tasks', 'deleted') ? 'is-active': null }><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
                     </ul>
                         <p className="menu-label">
-                            Tasks <span className="pull-right" onClick={()=>this.openProjectDialog()}><i className="fa fa-plus" aria-hidden="true"></i></span>
+                            Projects <a className="pull-right add-btn" onClick={()=>this.openProjectDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
                         </p>
                     <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('projects')}><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('projects','all')} className={this.isActiveState('projects','all') ? 'is-active': null }><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('projects','starred')} className={this.isActiveState('projects','starred') ? 'is-active': null }><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('projects','deleted')} className={this.isActiveState('projects','deleted') ? 'is-active': null }><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
                     </ul>
                     <p className="menu-label">
                         Tags
@@ -110,26 +117,29 @@ export default class Navbar extends Component {
                         General
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#"><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
-                        <li><a href="#"><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'overview')} className={this.isActiveState('general', 'overview') ? 'is-active': null }><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">
-                        Tasks
+                        Tasks <a className="pull-right add-btn" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('tasks')}><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','done')}><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')}><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#" onClick={()=>this.goTo('tasks','deleted')}><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
-                        </ul>
-                    <p className="menu-label">
-                        Projects
-                    </p>
-                    <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('projects')}><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
-                        <li><a href="#"><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
-                        <li><a href="#"><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks', 'all')} className={this.isActiveState('tasks', 'all') ? 'is-active': null }><i className="fa fa-tasks" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','done')} className={this.isActiveState('tasks', 'done') ? 'is-active': null }><i className="fa fa-check" aria-hidden="true"></i>Done</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','starred')} className={this.isActiveState('tasks', 'starred') ? 'is-active': null }><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('tasks','deleted')} className={this.isActiveState('tasks', 'deleted') ? 'is-active': null }><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
                     </ul>
+                        <p className="menu-label">
+                            Projects <a className="pull-right add-btn" onClick={()=>this.openProjectDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
+                        </p>
+                    <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('projects','all')} className={this.isActiveState('projects','all') ? 'is-active': null }><i className="fa fa-briefcase" aria-hidden="true"></i>All</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('projects','starred')} className={this.isActiveState('projects','starred') ? 'is-active': null }><i className="fa fa-star" aria-hidden="true"></i>Starred</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('projects','deleted')} className={this.isActiveState('projects','deleted') ? 'is-active': null }><i className="fa fa-trash" aria-hidden="true"></i>Deleted</a></li>
+                    </ul>
+                    <p className="menu-label">
+                        Tags
+                    </p>
                     <p className="menu-label">
                         Tags
                     </p>

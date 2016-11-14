@@ -7,7 +7,7 @@ import Navbar from './components/navigation/Navbar.component.jsx';
 
 import TaskList from './components/tasks/TaskList.component.jsx';
 import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx';
-import Projects from './components/projects/Projects.component.jsx';
+import ProjectList from './components/projects/ProjectList.component.jsx';
 import CreateProjectDialog from './components/projects/CreateProjectDialog.component.jsx';
 
 
@@ -55,7 +55,7 @@ class Main extends Component {
                             {this.state.activeItem === 'tasks' ? (
                                 <TaskList ref="taskList" parent={this} tasksDb={tasksDb} dbFilter={this.state.dbFilter} />
                             ) : this.state.activeItem === 'projects' ? (
-                                <Projects  parent={this} tasksDb={tasksDb}/>
+                                <ProjectList  parent={this} tasksDb={tasksDb} projectsDb={projectsDb}/>
                             ) : null}
                         </div>
                         {/*this.state.activeItem=== 'tasks' ? (
