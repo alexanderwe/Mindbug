@@ -11,10 +11,13 @@ export default class TaskList extends Component{
     }
 
     componentWillMount(){
+        console.log("new mount");
+
         this.refreshTasks();
     }
 
-    refreshTasks(tag){
+
+    refreshTasksWithTag(tag){
         if(tag){
             this.props.tasksDb.find({$and: [{done: false}, { tags: { $in: [tag] }}] }).sort({ createdAt: 1 }).exec((err,docs)=>{
                 console.log("Filter tasks with tag: " + tag);
@@ -27,9 +30,14 @@ export default class TaskList extends Component{
                     this.setState({
                         tasks: docs
                     });
+                    console.log(this.state.tasks);
                 }
             })
-        } else if (this.props.dbFilter === 'done'){
+        }
+    }
+
+    refreshTasks(){
+        if (this.props.dbFilter === 'done'){
             console.log("Filter tasks with done : true");
             this.props.tasksDb.find({done:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
                 if(docs.length==0){
@@ -74,7 +82,9 @@ export default class TaskList extends Component{
                         });
                     }
                 })
-        }else{
+        }else if((this.props.dbFilter === 'all')){
+            console.log("filter all");
+
             this.props.tasksDb.find({done:false}).sort({ createdAt: 1 }).exec((err,docs)=>{
                 if(docs.length==0){
                     this.setState({
@@ -98,7 +108,7 @@ export default class TaskList extends Component{
             return (
                 <ul className="list-group">
                     {this.state.tasks.map((task)=>{
-                        return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} parent={this} edit={false}/>
+                        return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} projectsDb={this.props.projectsDb} parent={this} edit={false}/>
                     })}
                 </ul>
             );

@@ -72,6 +72,7 @@ export default class Navbar extends Component {
         this.refreshTags();
     }
 
+    //TODO fix bug, that displays same content on navbar in the background while scrolling
     render(){
         if(this.state.tags){
             return(

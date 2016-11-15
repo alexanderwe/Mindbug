@@ -96,6 +96,7 @@ export default class Task extends Component {
 Task.propTypes = {
     task: React.PropTypes.object.isRequired,
     tasksDb: React.PropTypes.object.isRequired,
+    projectsDb: React.PropTypes.object.isRequired,
     parent: React.PropTypes.object.isRequired,
     edit: React.PropTypes.bool,
 };

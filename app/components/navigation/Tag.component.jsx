@@ -8,12 +8,11 @@ export default class Tag extends Component {
     }
 
     filterTasks(){
-        console.log("hey");
-
         if(!this.props.parent.props.parent.state.activeItem != 'tasks'){ //navbar-->app
             this.props.parent.goTo('tasks','all'); //TODO implement automatic tag search
+            this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name);
         } else{
-            this.props.parent.props.parent.refs.taskList.refreshTasks(this.props.name); //navbar-->app-->tasklist
+            this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name); //navbar-->app-->tasklist
         }
     }
 

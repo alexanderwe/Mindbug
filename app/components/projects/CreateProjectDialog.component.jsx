@@ -4,7 +4,7 @@ import InputMoment from 'input-moment';
 import moment from 'moment';
 
 
-export default class CreateTaskDialog extends Component {
+export default class CreateProjectDialog extends Component {
 
     constructor(props){
         super();
@@ -15,10 +15,9 @@ export default class CreateTaskDialog extends Component {
     }
 
     clearForm(){
-        this.refs.taskNameInput.value = "";
-        this.refs.taskNotesTextarea.value="";
-        this.refs.taskTagsInput.value = "";
-        this.refs.taskRepeatCheckbox.checked = false;
+        this.refs.projectTitleInput.value = "";
+        this.refs.projectNotesTextarea.value="";
+        this.refs.projectTagsInput.value = "";
     }
 
     showModal(){
@@ -42,31 +41,40 @@ export default class CreateTaskDialog extends Component {
     }
 
     generateTags(){
-        return this.refs.taskTagsInput.value.split(" ").filter(function(str) {
+        return this.refs.projectTagsInput.value.split(" ").filter(function(str) {
             return /\S/.test(str);
         });
     }
 
 
-    addTask(){
+    addProject(){
         var doc = {
-            taskName: this.refs.taskNameInput.value,
-            notes: this.refs.taskNotesTextarea.value,
+            projectTitle: this.refs.projectTitleInput.value,
+            notes: this.refs.projectNotesTextarea.value,
             tags: this.generateTags(),
+            tasks: {},
             dueDate: new Date(),
-            repeat: this.refs.taskRepeatCheckbox.checked,
-            done: false,
+            open: true,
             starred: false,
             deleted: false,
         };
 
         //Insert doc
-        this.props.tasksDb.insert(doc,(err, newDoc) => {   // Callback is optional
+        this.props.projectsDb.insert(doc,(err, newDoc) => {   // Callback is optional
             if(err){
                 console.log(err);
             }else{
-                this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
-                this.props.parent.refs.navbar.refreshTags(); //app-->Navbar
+                //When project list is not visible it will throw an error
+                try{
+                    this.props.parent.refs.projectList.refreshProjects();
+                }catch(e){
+                    console.log(e);
+
+                }
+                 //app-->Tasklist
+                this.props.parent.refs.navbar.refreshTags();//app-->Navbar
+                this.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
+                this.props.parent.refs.projectsList.refreshProjects()//app-> ProjectsList
             }
         });
 
@@ -82,14 +90,14 @@ export default class CreateTaskDialog extends Component {
             <div className={this.state.isActive ? "modal is-active":"modal"}>
                 <div className="modal-background"></div>
                 <div className="modal-content">
-                    <label className="label">Task</label>
+                    <label className="label">Project</label>
                     <p className="control">
-                        <input className="input" type="text" placeholder="Task" ref="taskNameInput" />
+                        <input className="input" type="text" placeholder="Task" ref="projectTitleInput" />
                     </p>
 
                     <label className="label">Notes</label>
                     <p className="control">
-                        <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
+                        <textarea className="textarea" placeholder="Notes" ref="projectNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
                     <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} />
@@ -99,16 +107,10 @@ export default class CreateTaskDialog extends Component {
                     />*/}
                     <label className="label">Task</label>
                     <p className="control">
-                        <input className="input" type="text" placeholder="Tags" ref="taskTagsInput"/>
+                        <input className="input" type="text" placeholder="Tags" ref="projectTagsInput"/>
                     </p>
                     <p className="control">
-                        <label className="checkbox">
-                            <input type="checkbox" ref="taskRepeatCheckbox"/>
-                            Repeat this task
-                        </label>
-                    </p>
-                    <p className="control">
-                        <button className="button is-primary" onClick={()=>this.addTask()}>Submit</button>
+                        <button className="button is-primary" onClick={()=>this.addProject()}>Submit</button>
                         <button className="button is-link" onClick={()=>this.closeModal()}>Cancel</button>
                     </p>
                 </div>
@@ -119,7 +121,7 @@ export default class CreateTaskDialog extends Component {
 }
 
 
-CreateTaskDialog.propTypes = {
+CreateProjectDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    tasksDb: React.PropTypes.object.isRequired,
+    projectsDb: React.PropTypes.object.isRequired,
 };
