@@ -69,6 +69,29 @@ a {
 .pull-right {
   float: right;
 }
+.btn-round {
+  -webkit-appearance: none;
+  background-color: rgba(10,10,10,0.1);
+  border: none;
+  border-radius: 290486px;
+  cursor: pointer;
+  display: inline-block;
+  height: 24px;
+  outline: none;
+  position: relative;
+  vertical-align: top;
+  width: 24px;
+  color: #fff;
+}
+.btn-round .fa {
+  margin-right: 0px !important;
+}
+.btn-success:hover {
+  background-color: #20bc56;
+}
+.btn-warning:hover {
+  background-color: #ffd83d;
+}
 /*------------------------------------*    Navbar
 \*------------------------------------*/
 .sidebar {
@@ -123,7 +146,7 @@ a {
 .task .tag {
   margin-right: 5px;
 }
-.task button {
+.task .media-right button {
   margin-top: 5px;
 }
 .task .active {
@@ -132,22 +155,8 @@ a {
 .task .active:hover {
   color: #363636;
 }
-.btn-round {
-  -webkit-appearance: none;
-  background-color: rgba(10,10,10,0.1);
-  border: none;
-  border-radius: 290486px;
-  cursor: pointer;
-  display: inline-block;
-  height: 24px;
-  outline: none;
-  position: relative;
-  vertical-align: top;
-  width: 24px;
-  color: #fff;
-}
-.btn-success:hover {
-  background-color: #20bc56;
+.is-edit {
+  border: 1px solid #00d1b2;
 }
 /*------------------------------------*    Modal
 \*------------------------------------*/

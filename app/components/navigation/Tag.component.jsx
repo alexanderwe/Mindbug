@@ -8,8 +8,8 @@ export default class Tag extends Component {
     }
 
     filterTasks(){
-        if(!this.props.parent.props.parent.state.activeItem != 'tasks'){ //navbar-->app
-            this.props.parent.goTo('tasks','all'); //TODO implement automatic tag search
+        if(!this.props.parent.props.parent.state.activeItem != 'tasks'){
+            this.props.parent.goTo('tasks','all'); //NavBar.goTo()
             this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name);
         } else{
             this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name); //navbar-->app-->tasklist
@@ -19,7 +19,10 @@ export default class Tag extends Component {
 
     render(){
         return(
-            <span className="tag is-primary" onClick={()=>this.filterTasks()}>{this.props.name}</span>
+            <span className="tag is-primary" onClick={()=>this.filterTasks()}>
+                {this.props.name}
+                <button className="delete is-small"></button>
+            </span>
         )
     }
 }

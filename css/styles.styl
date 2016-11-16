@@ -87,6 +87,32 @@ a
 .pull-right{
     float: right;
 }
+
+
+.btn-round
+    -webkit-appearance: none;
+    background-color: rgba(10, 10, 10, 0.1);
+    border: none;
+    border-radius: 290486px;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    outline: none;
+    position: relative;
+    vertical-align: top;
+    width: 24px;
+    color:#fff;
+    .fa
+        margin-right: 0px !important;
+
+.btn-success
+    &:hover
+        background-color: colors.green
+
+.btn-warning
+    &:hover
+        background-color: colors.yellow
+
 /*------------------------------------*\
     Navbar
 \*------------------------------------*/
@@ -147,32 +173,16 @@ a
 .task
     .tag
         margin-right: 5px;
-    button
-        margin-top: 5px
+    .media-right
+        button
+            margin-top: 5px
     .active
         color: colors.yellow;
         &:hover
             color: colors.dark-grey;
 
-
-.btn-round
-    -webkit-appearance: none;
-    background-color: rgba(10, 10, 10, 0.1);
-    border: none;
-    border-radius: 290486px;
-    cursor: pointer;
-    display: inline-block;
-    height: 24px;
-    outline: none;
-    position: relative;
-    vertical-align: top;
-    width: 24px;
-    color:#fff;
-
-.btn-success
-    &:hover
-        background-color: colors.green
-
+.is-edit
+    border: 1px solid colors.primary
 /*------------------------------------*\
     Modal
 \*------------------------------------*/

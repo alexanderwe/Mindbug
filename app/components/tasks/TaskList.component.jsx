@@ -94,6 +94,7 @@ export default class TaskList extends Component{
                     this.setState({
                         tasks: docs
                     });
+                    console.log(this.state.tasks);
                 }
             })
         }
@@ -108,7 +109,7 @@ export default class TaskList extends Component{
             return (
                 <ul className="list-group">
                     {this.state.tasks.map((task)=>{
-                        return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} projectsDb={this.props.projectsDb} parent={this} edit={false}/>
+                        return <Task task={task} key={task._id} tasksDb={this.props.tasksDb} projectsDb={this.props.projectsDb} parent={this}/>
                     })}
                 </ul>
             );

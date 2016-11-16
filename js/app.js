@@ -644,8 +644,7 @@ var Tag = function (_Component) {
         key: 'filterTasks',
         value: function filterTasks() {
             if (!this.props.parent.props.parent.state.activeItem != 'tasks') {
-                //navbar-->app
-                this.props.parent.goTo('tasks', 'all'); //TODO implement automatic tag search
+                this.props.parent.goTo('tasks', 'all'); //NavBar.goTo()
                 this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name);
             } else {
                 this.props.parent.props.parent.refs.taskList.refreshTasksWithTag(this.props.name); //navbar-->app-->tasklist
@@ -661,7 +660,8 @@ var Tag = function (_Component) {
                 { className: 'tag is-primary', onClick: function onClick() {
                         return _this2.filterTasks();
                     } },
-                this.props.name
+                this.props.name,
+                _react2.default.createElement('button', { className: 'delete is-small' })
             );
         }
     }]);
@@ -1498,7 +1498,12 @@ var Task = function (_Component) {
     function Task(props) {
         _classCallCheck(this, Task);
 
-        return _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this));
+        var _this = _possibleConstructorReturn(this, (Task.__proto__ || Object.getPrototypeOf(Task)).call(this));
+
+        _this.state = {
+            edit: false
+        };
+        return _this;
     }
 
     _createClass(Task, [{
@@ -1525,11 +1530,7 @@ var Task = function (_Component) {
         value: function starTask() {
             var _this4 = this;
 
-            console.log(this.props.task.starred);
-
             if (!this.props.task.starred) {
-                console.log("star was true set to false");
-
                 this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } }, function (err, numReplaced) {
                     _this4.refreshTasks(); //Refresh tasklist after task is deleted
                 });
@@ -1538,6 +1539,20 @@ var Task = function (_Component) {
                     _this4.refreshTasks(); //Refresh tasklist after task is deleted
                 });
             }
+        }
+    }, {
+        key: 'editTask',
+        value: function editTask() {
+            this.setState({
+                edit: true
+            });
+        }
+    }, {
+        key: 'saveEdit',
+        value: function saveEdit() {
+            this.setState({
+                edit: false
+            });
         }
     }, {
         key: 'refreshTasks',
@@ -1554,99 +1569,229 @@ var Task = function (_Component) {
         value: function render() {
             var _this5 = this;
 
-            return _react2.default.createElement(
-                'div',
-                { className: 'box task' },
-                _react2.default.createElement(
-                    'article',
-                    { className: 'media' },
+            if (!this.state.edit) {
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'box task' },
                     _react2.default.createElement(
-                        'div',
-                        { className: 'media-left' },
-                        _react2.default.createElement(
-                            'figure',
-                            { className: 'image is-64x64' },
-                            _react2.default.createElement('img', { src: 'http://placehold.it/128x128', alt: 'Image' })
-                        )
-                    ),
-                    _react2.default.createElement(
-                        'div',
-                        { className: 'media-content' },
+                        'article',
+                        { className: 'media' },
                         _react2.default.createElement(
                             'div',
-                            { className: 'content' },
+                            { className: 'media-left' },
                             _react2.default.createElement(
-                                'p',
-                                null,
-                                _react2.default.createElement(
-                                    'strong',
-                                    null,
-                                    this.props.task.taskName
-                                ),
-                                ' ',
-                                _react2.default.createElement(
-                                    'small',
-                                    null,
-                                    'Due to: '
-                                ),
-                                ' ',
-                                _react2.default.createElement(
-                                    'small',
-                                    null,
-                                    (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')
-                                ),
-                                _react2.default.createElement('br', null),
-                                this.props.task.notes,
-                                _react2.default.createElement('br', null),
-                                this.props.task.tags.map(function (tag) {
-                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this5 });
-                                })
+                                'figure',
+                                { className: 'image is-64x64' },
+                                _react2.default.createElement('img', { src: 'http://placehold.it/128x128', alt: 'Image' })
                             )
                         ),
                         _react2.default.createElement(
-                            'nav',
-                            { className: 'level' },
+                            'div',
+                            { className: 'media-content' },
                             _react2.default.createElement(
                                 'div',
-                                { className: 'level-left' },
+                                { className: 'content' },
                                 _react2.default.createElement(
-                                    'a',
-                                    { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
-                                            return _this5.starTask();
-                                        } },
+                                    'p',
+                                    null,
                                     _react2.default.createElement(
-                                        'span',
-                                        { className: 'icon is-small' },
-                                        _react2.default.createElement('i', { className: 'fa fa-star' })
+                                        'strong',
+                                        null,
+                                        this.props.task.taskName
+                                    ),
+                                    ' ',
+                                    _react2.default.createElement(
+                                        'small',
+                                        null,
+                                        'Due to: '
+                                    ),
+                                    ' ',
+                                    _react2.default.createElement(
+                                        'small',
+                                        null,
+                                        (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')
+                                    ),
+                                    _react2.default.createElement('br', null),
+                                    this.props.task.notes,
+                                    _react2.default.createElement(
+                                        'p',
+                                        null,
+                                        'Belongs to: ',
+                                        this.props.task.project
+                                    ),
+                                    _react2.default.createElement('br', null),
+                                    this.props.task.tags.map(function (tag) {
+                                        return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this5 });
+                                    })
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'nav',
+                                { className: 'level' },
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'level-left' },
+                                    _react2.default.createElement(
+                                        'a',
+                                        { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
+                                                return _this5.starTask();
+                                            } },
+                                        _react2.default.createElement(
+                                            'span',
+                                            { className: 'icon is-small' },
+                                            _react2.default.createElement('i', { className: 'fa fa-star' })
+                                        )
                                     )
                                 )
                             )
-                        )
-                    ),
-                    _react2.default.createElement(
-                        'div',
-                        { className: 'media-right' },
-                        this.props.task.done ? null : _react2.default.createElement(
+                        ),
+                        _react2.default.createElement(
                             'div',
                             { className: 'media-right' },
+                            this.props.task.done ? null : _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement(
+                                    'button',
+                                    { className: 'btn-round btn-success', onClick: function onClick() {
+                                            return _this5.finishTask();
+                                        } },
+                                    _react2.default.createElement('i', { className: 'fa fa-check' })
+                                )
+                            ),
                             _react2.default.createElement(
-                                'button',
-                                { className: 'btn-round btn-success', onClick: function onClick() {
-                                        return _this5.finishTask();
-                                    } },
-                                _react2.default.createElement('i', { className: 'fa fa-check' })
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement(
+                                    'button',
+                                    { className: 'btn-round btn-warning', onClick: function onClick() {
+                                            return _this5.editTask();
+                                        } },
+                                    _react2.default.createElement('i', { className: 'fa fa-edit' })
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                                        return _this5.deleteTask();
+                                    } })
+                            )
+                        )
+                    )
+                );
+            } else {
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'box task is-edit' },
+                    _react2.default.createElement(
+                        'article',
+                        { className: 'media' },
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'media-left' },
+                            _react2.default.createElement(
+                                'figure',
+                                { className: 'image is-64x64' },
+                                _react2.default.createElement('img', { src: 'http://placehold.it/128x128', alt: 'Image' })
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'media-content' },
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'content' },
+                                _react2.default.createElement(
+                                    'p',
+                                    null,
+                                    _react2.default.createElement(
+                                        'strong',
+                                        null,
+                                        this.props.task.taskName
+                                    ),
+                                    ' ',
+                                    _react2.default.createElement(
+                                        'small',
+                                        null,
+                                        'Due to: '
+                                    ),
+                                    ' ',
+                                    _react2.default.createElement(
+                                        'small',
+                                        null,
+                                        (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')
+                                    ),
+                                    _react2.default.createElement('br', null),
+                                    this.props.task.notes,
+                                    _react2.default.createElement(
+                                        'p',
+                                        null,
+                                        'Belongs to: ',
+                                        this.props.task.project
+                                    ),
+                                    _react2.default.createElement('br', null),
+                                    this.props.task.tags.map(function (tag) {
+                                        return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this5 });
+                                    })
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'nav',
+                                { className: 'level' },
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'level-left' },
+                                    _react2.default.createElement(
+                                        'a',
+                                        { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
+                                                return _this5.starTask();
+                                            } },
+                                        _react2.default.createElement(
+                                            'span',
+                                            { className: 'icon is-small' },
+                                            _react2.default.createElement('i', { className: 'fa fa-star' })
+                                        )
+                                    )
+                                )
                             )
                         ),
                         _react2.default.createElement(
                             'div',
                             { className: 'media-right' },
-                            _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                    return _this5.deleteTask();
-                                } })
+                            this.props.task.done ? null : _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement(
+                                    'button',
+                                    { className: 'btn-round btn-success', onClick: function onClick() {
+                                            return _this5.finishTask();
+                                        } },
+                                    _react2.default.createElement('i', { className: 'fa fa-check' })
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement(
+                                    'button',
+                                    { className: 'btn-round btn-warning', onClick: function onClick() {
+                                            return _this5.saveEdit();
+                                        } },
+                                    _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                                        return _this5.deleteTask();
+                                    } })
+                            )
                         )
                     )
-                )
-            );
+                );
+            }
         }
     }]);
 
@@ -1794,6 +1939,7 @@ var TaskList = function (_Component) {
                         _this3.setState({
                             tasks: docs
                         });
+                        console.log(_this3.state.tasks);
                     }
                 });
             }
@@ -1813,7 +1959,7 @@ var TaskList = function (_Component) {
                     'ul',
                     { className: 'list-group' },
                     this.state.tasks.map(function (task) {
-                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, tasksDb: _this4.props.tasksDb, projectsDb: _this4.props.projectsDb, parent: _this4, edit: false });
+                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, tasksDb: _this4.props.tasksDb, projectsDb: _this4.props.projectsDb, parent: _this4 });
                     })
                 );
             } else {
