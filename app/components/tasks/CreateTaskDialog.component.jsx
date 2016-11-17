@@ -16,7 +16,7 @@ export default class CreateTaskDialog extends Component {
     }
 
     clearForm(){
-        this.refs.taskNameInput.value = "";
+        this.refs.taskTitleInput.value = "";
         this.refs.taskNotesTextarea.value="";
         this.refs.taskTagsInput.value = "";
         this.refs.taskRepeatCheckbox.checked = false;
@@ -45,7 +45,6 @@ export default class CreateTaskDialog extends Component {
                 this.setState({
                     projects: docs
                 });
-                console.log(this.state.projects);
             }
         })
     }
@@ -58,7 +57,7 @@ export default class CreateTaskDialog extends Component {
                         <select ref="projectSelect">
                             <option></option>
                             {this.state.projects.map((project)=>{
-                                return <option>{project.projectTitle}</option>
+                                return <option key={project._id}>{project.title}</option>
                             })}
                         </select>
                     </span>
@@ -70,7 +69,6 @@ export default class CreateTaskDialog extends Component {
     }
 
     handleDateChange(date){
-        console.log(date);
         this.setState({
             startDate: date
         });
@@ -85,14 +83,12 @@ export default class CreateTaskDialog extends Component {
 
     addTask(){
 
-
-
         var doc = {
-            taskName: this.refs.taskNameInput.value,
+            title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
             project: this.refs.projectSelect ? this.refs.projectSelect.value: null,
             tags: this.generateTags(),
-            dueDate: new Date(),
+            dueDate: this.state.startDate,
             repeat: this.refs.taskRepeatCheckbox.checked,
             done: false,
             starred: false,
@@ -104,10 +100,32 @@ export default class CreateTaskDialog extends Component {
             if(err){
                 console.log(err);
             }else{
-                this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
+                //If task is associated with a project, add the task to the project
+                if (this.refs.projectSelect.value){
+                    console.log("Adding task: " + newDoc._id + "to Project: " + this.refs.projectSelect.value);
+
+                    this.props.projectsDb.update({ title: this.refs.projectSelect.value }, { $push: { tasks: newDoc._id} }, { multi: true },(err, numReplaced) => {
+                        if (err) {
+                            console.log(err);
+
+                        } else {
+                            console.log(numReplaced);
+                        }
+                    });
+                }
+
+                //Refresh the views
+                if (this.props.parent.state.activeItem === 'tasks') {
+                    this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
+                } else if (this.props.parent.state.activeItem === 'projects') {
+                    this.props.parent.refs.projectsList.refreshProjects();  //app-->Tasklist
+                }
                 this.props.parent.refs.navbar.refreshTags(); //app-->Navbar
             }
         });
+
+
+
 
         //Clean inputs
         this.clearForm();
@@ -127,7 +145,7 @@ export default class CreateTaskDialog extends Component {
                 <div className="modal-content">
                     <label className="label">Task</label>
                     <p className="control">
-                        <input className="input" type="text" placeholder="Task" ref="taskNameInput" />
+                        <input className="input" type="text" placeholder="Task" ref="taskTitleInput" />
                     </p>
 
                     <label className="label">Notes</label>

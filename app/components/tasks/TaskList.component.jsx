@@ -11,8 +11,6 @@ export default class TaskList extends Component{
     }
 
     componentWillMount(){
-        console.log("new mount");
-
         this.refreshTasks();
     }
 
@@ -20,17 +18,14 @@ export default class TaskList extends Component{
     refreshTasksWithTag(tag){
         if(tag){
             this.props.tasksDb.find({$and: [{done: false}, { tags: { $in: [tag] }}] }).sort({ createdAt: 1 }).exec((err,docs)=>{
-                console.log("Filter tasks with tag: " + tag);
-
-                if(docs.length==0){
+                if (docs.length==0) {
                     this.setState({
                         tasks: null
                     });
-                } else{
+                } else {
                     this.setState({
                         tasks: docs
                     });
-                    console.log(this.state.tasks);
                 }
             })
         }
@@ -38,63 +33,51 @@ export default class TaskList extends Component{
 
     refreshTasks(){
         if (this.props.dbFilter === 'done'){
-            console.log("Filter tasks with done : true");
             this.props.tasksDb.find({done:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
-                if(docs.length==0){
+                if (docs.length==0) {
                     this.setState({
                         tasks: null
                     });
-                } else{
-                    console.log(docs);
-
+                } else {
                     this.setState({
                         tasks: docs
                     });
                 }
             })
         } else if (this.props.dbFilter === 'starred') {
-            console.log("Filter tasks with starred : true");
                 this.props.tasksDb.find({starred:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
-                    if(docs.length==0){
+                    if (docs.length==0) {
                         this.setState({
                             tasks: null
                         });
-                    } else{
-                        console.log(docs);
-
+                    } else {
                         this.setState({
                             tasks: docs
                         });
                     }
                 })
         } else if (this.props.dbFilter === 'deleted') {
-            console.log("Filter tasks with deleted : true");
                 this.props.tasksDb.find({deleted:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
-                    if(docs.length==0){
+                    if (docs.length==0) {
                         this.setState({
                             tasks: null
                         });
-                    } else{
-                        console.log(docs);
-
+                    } else {
                         this.setState({
                             tasks: docs
                         });
                     }
                 })
         }else if((this.props.dbFilter === 'all')){
-            console.log("filter all");
-
             this.props.tasksDb.find({done:false}).sort({ createdAt: 1 }).exec((err,docs)=>{
-                if(docs.length==0){
+                if (docs.length==0) {
                     this.setState({
                         tasks: null
                     });
-                } else{
+                } else {
                     this.setState({
                         tasks: docs
                     });
-                    console.log(this.state.tasks);
                 }
             })
         }

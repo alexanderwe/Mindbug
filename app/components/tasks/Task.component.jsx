@@ -16,6 +16,17 @@ export default class Task extends Component {
         this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
             this.refreshTags(); //Refresh taglist after task is deleted
+            if (this.props.task.project){
+
+                //Remove task reference in project
+                this.props.projectsDb.update({ title: this.props.task.project }, { $pull: { tasks: this.props.task._id} }, {}, (err, numReplaced)=>{
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(numReplaced);
+                    }
+                });
+            }
         });
     }
 
@@ -26,11 +37,11 @@ export default class Task extends Component {
     }
 
     starTask(){
-        if(!this.props.task.starred){
+        if (!this.props.task.starred) {
             this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
-        }else{
+        } else {
             this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
@@ -57,7 +68,7 @@ export default class Task extends Component {
     }
 
     render(){
-        if(!this.state.edit){
+        if (!this.state.edit) {
             return (
                 <div className="box task">
                     <article className="media">
@@ -69,10 +80,10 @@ export default class Task extends Component {
                         <div className="media-content">
                             <div className="content">
                                 <p>
-                                    <strong>{this.props.task.taskName}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')}</small>
+                                    <strong>{this.props.task.title}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')}</small>
                                     <br />
                                     {this.props.task.notes}
-                                    <p>Belongs to: {this.props.task.project}</p>
+                                    <span>In project: {this.props.task.project}</span>
                                     <br />
                                     {this.props.task.tags.map((tag)=>{
                                         return <Tag name={tag} key={tag} parent={this}/>
@@ -107,7 +118,7 @@ export default class Task extends Component {
                     </article>
                 </div>
             )
-        } else{
+        } else {
             return (
                 <div className="box task is-edit">
                     <article className="media">
@@ -119,10 +130,10 @@ export default class Task extends Component {
                         <div className="media-content">
                             <div className="content">
                                 <p>
-                                    <strong>{this.props.task.taskName}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')}</small>
+                                    <strong>{this.props.task.title}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')}</small>
                                     <br />
                                     {this.props.task.notes}
-                                    <p>Belongs to: {this.props.task.project}</p>
+                                    <span>In project: {this.props.task.project}</span>
                                     <br />
                                     {this.props.task.tags.map((tag)=>{
                                         return <Tag name={tag} key={tag} parent={this}/>
@@ -145,7 +156,6 @@ export default class Task extends Component {
                                      </button>
                                  </div>
                             ) }
-
                             <div className="media-right">
                                 <button className="btn-round btn-warning" onClick={()=>this.saveEdit()}>
                                     <i className="fa fa-floppy-o" />

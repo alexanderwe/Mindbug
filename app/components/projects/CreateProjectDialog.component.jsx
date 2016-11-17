@@ -40,19 +40,19 @@ export default class CreateProjectDialog extends Component {
         });
     }
 
-    generateTags(){
+    generateTags() {
         return this.refs.projectTagsInput.value.split(" ").filter(function(str) {
             return /\S/.test(str);
         });
     }
 
 
-    addProject(){
+    addProject() {
         var doc = {
-            projectTitle: this.refs.projectTitleInput.value,
+            title: this.refs.projectTitleInput.value,
             notes: this.refs.projectNotesTextarea.value,
             tags: this.generateTags(),
-            tasks: {},
+            tasks: new Array(),
             dueDate: new Date(),
             open: true,
             starred: false,
@@ -61,15 +61,14 @@ export default class CreateProjectDialog extends Component {
 
         //Insert doc
         this.props.projectsDb.insert(doc,(err, newDoc) => {   // Callback is optional
-            if(err){
+            if (err) {
                 console.log(err);
-            }else{
+            } else {
                 //When project list is not visible it will throw an error
-                try{
+                try {
                     this.props.parent.refs.projectList.refreshProjects();
-                }catch(e){
+                } catch(e) {
                     console.log(e);
-
                 }
                  //app-->Tasklist
                 this.props.parent.refs.navbar.refreshTags();//app-->Navbar

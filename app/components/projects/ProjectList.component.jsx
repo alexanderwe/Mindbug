@@ -12,16 +12,21 @@ export default class ProjectList extends Component{
     }
 
     refreshProjects(){
+
+        this.setState({
+            projects: null,
+        });
+
+
         this.props.projectsDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
-            if(docs.length==0){
+            if (docs.length==0) {
                 this.setState({
                     projects: null
                 });
-            } else{
+            } else {
                 this.setState({
                     projects: docs
                 });
-                console.log(this.state.projects);
             }
         })
     }
@@ -32,17 +37,17 @@ export default class ProjectList extends Component{
 
 
     render(){
-        if(this.state.projects){
+        if (this.state.projects) {
             return(
                 <div className="tile is-ancestor">
                     <div className="tile is-vertical is-parent">
                         {this.state.projects.map((project)=>{
-                            return <Project project={project} projectsDb={this.props.projectsDb} id={project._id} parent={this} />
+                            return <Project project={project} tasksDb={this.props.tasksDb} projectsDb={this.props.projectsDb} id={project._id} parent={this} key={project._id}/>
                         })}
                     </div>
                 </div>
             );
-        }else{
+        } else {
             return(
                 <div className="tile is-ancestor">
                     <div className="tile is-vertical is-parent">

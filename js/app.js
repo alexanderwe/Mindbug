@@ -11,10 +11,6 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _nedb = require('nedb');
-
-var _nedb2 = _interopRequireDefault(_nedb);
-
 var _TasksDatastore = require('./data/TasksDatastore.jsx');
 
 var _TasksDatastore2 = _interopRequireDefault(_TasksDatastore);
@@ -66,7 +62,6 @@ var Main = function (_Component) {
         _this.state = {
             activeItem: "tasks",
             dbFilter: "all"
-
         };
         return _this;
     }
@@ -77,7 +72,11 @@ var Main = function (_Component) {
     _createClass(Main, [{
         key: 'componentDidUpdate',
         value: function componentDidUpdate() {
-            this.refs.taskList.refreshTasks();
+            if (this.state.activeItem === "tasks") {
+                this.refs.taskList.refreshTasks();
+            } else if (this.state.activeItem === "projects") {
+                this.refs.projectsList.refreshProjects();
+            }
         }
     }, {
         key: 'render',
@@ -115,7 +114,7 @@ var Main = function (_Component) {
 var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(Main, null), main);
 
-},{"./components/navigation/Navbar.component.jsx":2,"./components/navigation/ToolbarHeader.component.jsx":4,"./components/projects/CreateProjectDialog.component.jsx":5,"./components/projects/ProjectList.component.jsx":7,"./components/tasks/CreateTaskDialog.component.jsx":8,"./components/tasks/TaskList.component.jsx":10,"./data/ProjectsDatastore.jsx":11,"./data/TasksDatastore.jsx":12,"nedb":64,"react":221,"react-dom":75}],2:[function(require,module,exports){
+},{"./components/navigation/Navbar.component.jsx":2,"./components/navigation/ToolbarHeader.component.jsx":4,"./components/projects/CreateProjectDialog.component.jsx":5,"./components/projects/ProjectList.component.jsx":7,"./components/tasks/CreateTaskDialog.component.jsx":8,"./components/tasks/TaskList.component.jsx":10,"./data/ProjectsDatastore.jsx":11,"./data/TasksDatastore.jsx":12,"react":221,"react-dom":75}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -880,10 +879,10 @@ var CreateProjectDialog = function (_Component) {
             var _this2 = this;
 
             var doc = {
-                projectTitle: this.refs.projectTitleInput.value,
+                title: this.refs.projectTitleInput.value,
                 notes: this.refs.projectNotesTextarea.value,
                 tags: this.generateTags(),
-                tasks: {},
+                tasks: new Array(),
                 dueDate: new Date(),
                 open: true,
                 starred: false,
@@ -1001,7 +1000,7 @@ CreateProjectDialog.propTypes = {
 };
 
 },{"input-moment":46,"moment":61,"react":221,"react-datepicker":74}],6:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -1009,7 +1008,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -1027,47 +1026,114 @@ var Project = function (_Component) {
     function Project(props) {
         _classCallCheck(this, Project);
 
-        return _possibleConstructorReturn(this, (Project.__proto__ || Object.getPrototypeOf(Project)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (Project.__proto__ || Object.getPrototypeOf(Project)).call(this, props));
+
+        _this.state = {
+            tasks: new Array()
+        };
+        return _this;
     }
 
     _createClass(Project, [{
-        key: "deleteTask",
-        value: function deleteTask() {
+        key: 'deleteProject',
+        value: function deleteProject() {
             var _this2 = this;
 
             this.props.projectsDb.remove({ _id: this.props.project._id }, {}, function (err, numRemoved) {
                 _this2.refreshProjects(); //Refresh tasklist after task is deleted
                 _this2.refreshTags(); //Refresh taglist after task is deleted
+
+                //Remove project reference in Tasks
+                _this2.props.project.tasks.map(function (taskId) {
+                    _this2.props.tasksDb.update({ _id: taskId }, { $set: { project: '' } }, function (err, numReplaced) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log(numReplaced);
+                        }
+                    });
+                });
             });
         }
     }, {
-        key: "refreshProjects",
+        key: 'refreshProjects',
         value: function refreshProjects() {
-            this.props.parent.refreshProjects(); //ProjectList.refreshTasks()
-            this.props.parent.props.parent.refs.CreateTaskDialog.refreshProjects(); //CreateTaskDialog.refreshProjects()
+            this.props.parent.refreshProjects(); //ProjectList.refreshProjects()
+            this.props.parent.props.parent.refs.createTaskDialog.refreshProjects(); //CreateTaskDialog.refreshProjects()
         }
     }, {
-        key: "refreshTags",
+        key: 'refreshTasks',
+        value: function refreshTasks() {
+            var _this3 = this;
+
+            this.props.tasksDb.find({ project: this.props.project.title }).sort({ createdAt: 1 }).exec(function (err, docs) {
+                if (docs.length == 0) {
+                    //doNothing
+                } else {
+                    _this3.setState({
+                        tasks: docs
+                    });
+                }
+            });
+        }
+    }, {
+        key: 'refreshTags',
         value: function refreshTags() {
             this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
         }
     }, {
-        key: "render",
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            this.refreshTasks();
+        }
+    }, {
+        key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this4 = this;
 
-            return _react2.default.createElement(
-                "div",
-                { className: "tile is-child box project" },
-                _react2.default.createElement(
-                    "p",
-                    { className: "title" },
-                    this.props.project.projectTitle
-                ),
-                _react2.default.createElement("button", { className: "delete", onClick: function onClick() {
-                        return _this3.deleteTask();
-                    } })
-            );
+            if (this.state.tasks.length > 0) {
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'tile is-child box project' },
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'title' },
+                        this.props.project.title
+                    ),
+                    this.state.tasks.map(function (task) {
+                        return _react2.default.createElement(
+                            'p',
+                            { key: task._id },
+                            task.title
+                        );
+                    }),
+                    _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                            return _this4.deleteProject();
+                        } })
+                );
+            } else {
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'tile is-child box project' },
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'title' },
+                        this.props.project.title
+                    ),
+                    _react2.default.createElement(
+                        'ul',
+                        null,
+                        _react2.default.createElement(
+                            'li',
+                            null,
+                            'No Tasks in this project'
+                        )
+                    ),
+                    _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                            return _this4.deleteProject();
+                        } })
+                );
+            }
         }
     }]);
 
@@ -1120,6 +1186,10 @@ var ProjectList = function (_Component) {
         value: function refreshProjects() {
             var _this2 = this;
 
+            this.setState({
+                projects: null
+            });
+
             this.props.projectsDb.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
                 if (docs.length == 0) {
                     _this2.setState({
@@ -1129,7 +1199,6 @@ var ProjectList = function (_Component) {
                     _this2.setState({
                         projects: docs
                     });
-                    console.log(_this2.state.projects);
                 }
             });
         }
@@ -1151,7 +1220,7 @@ var ProjectList = function (_Component) {
                         'div',
                         { className: 'tile is-vertical is-parent' },
                         this.state.projects.map(function (project) {
-                            return _react2.default.createElement(_ProjectComponent2.default, { project: project, projectsDb: _this3.props.projectsDb, id: project._id, parent: _this3 });
+                            return _react2.default.createElement(_ProjectComponent2.default, { project: project, tasksDb: _this3.props.tasksDb, projectsDb: _this3.props.projectsDb, id: project._id, parent: _this3, key: project._id });
                         })
                     )
                 );
@@ -1237,7 +1306,7 @@ var CreateTaskDialog = function (_Component) {
     _createClass(CreateTaskDialog, [{
         key: 'clearForm',
         value: function clearForm() {
-            this.refs.taskNameInput.value = "";
+            this.refs.taskTitleInput.value = "";
             this.refs.taskNotesTextarea.value = "";
             this.refs.taskTagsInput.value = "";
             this.refs.taskRepeatCheckbox.checked = false;
@@ -1271,7 +1340,6 @@ var CreateTaskDialog = function (_Component) {
                     _this2.setState({
                         projects: docs
                     });
-                    console.log(_this2.state.projects);
                 }
             });
         }
@@ -1292,8 +1360,8 @@ var CreateTaskDialog = function (_Component) {
                             this.state.projects.map(function (project) {
                                 return _react2.default.createElement(
                                     'option',
-                                    null,
-                                    project.projectTitle
+                                    { key: project._id },
+                                    project.title
                                 );
                             })
                         )
@@ -1310,7 +1378,6 @@ var CreateTaskDialog = function (_Component) {
     }, {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
-            console.log(date);
             this.setState({
                 startDate: date
             });
@@ -1329,11 +1396,11 @@ var CreateTaskDialog = function (_Component) {
             var _this3 = this;
 
             var doc = {
-                taskName: this.refs.taskNameInput.value,
+                title: this.refs.taskTitleInput.value,
                 notes: this.refs.taskNotesTextarea.value,
                 project: this.refs.projectSelect ? this.refs.projectSelect.value : null,
                 tags: this.generateTags(),
-                dueDate: new Date(),
+                dueDate: this.state.startDate,
                 repeat: this.refs.taskRepeatCheckbox.checked,
                 done: false,
                 starred: false,
@@ -1346,7 +1413,25 @@ var CreateTaskDialog = function (_Component) {
                 if (err) {
                     console.log(err);
                 } else {
-                    _this3.props.parent.refs.taskList.refreshTasks(); //app-->Tasklist
+                    //If task is associated with a project, add the task to the project
+                    if (_this3.refs.projectSelect.value) {
+                        console.log("Adding task: " + newDoc._id + "to Project: " + _this3.refs.projectSelect.value);
+
+                        _this3.props.projectsDb.update({ title: _this3.refs.projectSelect.value }, { $push: { tasks: newDoc._id } }, { multi: true }, function (err, numReplaced) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log(numReplaced);
+                            }
+                        });
+                    }
+
+                    //Refresh the views
+                    if (_this3.props.parent.state.activeItem === 'tasks') {
+                        _this3.props.parent.refs.taskList.refreshTasks(); //app-->Tasklist
+                    } else if (_this3.props.parent.state.activeItem === 'projects') {
+                        _this3.props.parent.refs.projectsList.refreshProjects(); //app-->Tasklist
+                    }
                     _this3.props.parent.refs.navbar.refreshTags(); //app-->Navbar
                 }
             });
@@ -1382,7 +1467,7 @@ var CreateTaskDialog = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'control' },
-                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'taskNameInput' })
+                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'taskTitleInput' })
                     ),
                     _react2.default.createElement(
                         'label',
@@ -1514,6 +1599,17 @@ var Task = function (_Component) {
             this.props.tasksDb.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
                 _this2.refreshTasks(); //Refresh tasklist after task is deleted
                 _this2.refreshTags(); //Refresh taglist after task is deleted
+                if (_this2.props.task.project) {
+
+                    //Remove task reference in project
+                    _this2.props.projectsDb.update({ title: _this2.props.task.project }, { $pull: { tasks: _this2.props.task._id } }, {}, function (err, numReplaced) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log(numReplaced);
+                        }
+                    });
+                }
             });
         }
     }, {
@@ -1597,7 +1693,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'strong',
                                         null,
-                                        this.props.task.taskName
+                                        this.props.task.title
                                     ),
                                     ' ',
                                     _react2.default.createElement(
@@ -1609,14 +1705,14 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'small',
                                         null,
-                                        (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')
+                                        (0, _moment2.default)(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')
                                     ),
                                     _react2.default.createElement('br', null),
                                     this.props.task.notes,
                                     _react2.default.createElement(
-                                        'p',
+                                        'span',
                                         null,
-                                        'Belongs to: ',
+                                        'In project: ',
                                         this.props.task.project
                                     ),
                                     _react2.default.createElement('br', null),
@@ -1708,7 +1804,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'strong',
                                         null,
-                                        this.props.task.taskName
+                                        this.props.task.title
                                     ),
                                     ' ',
                                     _react2.default.createElement(
@@ -1720,14 +1816,14 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'small',
                                         null,
-                                        (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm')
+                                        (0, _moment2.default)(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')
                                     ),
                                     _react2.default.createElement('br', null),
                                     this.props.task.notes,
                                     _react2.default.createElement(
-                                        'p',
+                                        'span',
                                         null,
-                                        'Belongs to: ',
+                                        'In project: ',
                                         this.props.task.project
                                     ),
                                     _react2.default.createElement('br', null),
@@ -1851,8 +1947,6 @@ var TaskList = function (_Component) {
     _createClass(TaskList, [{
         key: 'componentWillMount',
         value: function componentWillMount() {
-            console.log("new mount");
-
             this.refreshTasks();
         }
     }, {
@@ -1862,8 +1956,6 @@ var TaskList = function (_Component) {
 
             if (tag) {
                 this.props.tasksDb.find({ $and: [{ done: false }, { tags: { $in: [tag] } }] }).sort({ createdAt: 1 }).exec(function (err, docs) {
-                    console.log("Filter tasks with tag: " + tag);
-
                     if (docs.length == 0) {
                         _this2.setState({
                             tasks: null
@@ -1872,7 +1964,6 @@ var TaskList = function (_Component) {
                         _this2.setState({
                             tasks: docs
                         });
-                        console.log(_this2.state.tasks);
                     }
                 });
             }
@@ -1883,53 +1974,42 @@ var TaskList = function (_Component) {
             var _this3 = this;
 
             if (this.props.dbFilter === 'done') {
-                console.log("Filter tasks with done : true");
                 this.props.tasksDb.find({ done: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this3.setState({
                             tasks: null
                         });
                     } else {
-                        console.log(docs);
-
                         _this3.setState({
                             tasks: docs
                         });
                     }
                 });
             } else if (this.props.dbFilter === 'starred') {
-                console.log("Filter tasks with starred : true");
                 this.props.tasksDb.find({ starred: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this3.setState({
                             tasks: null
                         });
                     } else {
-                        console.log(docs);
-
                         _this3.setState({
                             tasks: docs
                         });
                     }
                 });
             } else if (this.props.dbFilter === 'deleted') {
-                console.log("Filter tasks with deleted : true");
                 this.props.tasksDb.find({ deleted: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this3.setState({
                             tasks: null
                         });
                     } else {
-                        console.log(docs);
-
                         _this3.setState({
                             tasks: docs
                         });
                     }
                 });
             } else if (this.props.dbFilter === 'all') {
-                console.log("filter all");
-
                 this.props.tasksDb.find({ done: false }).sort({ createdAt: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
                         _this3.setState({
@@ -1939,7 +2019,6 @@ var TaskList = function (_Component) {
                         _this3.setState({
                             tasks: docs
                         });
-                        console.log(_this3.state.tasks);
                     }
                 });
             }
