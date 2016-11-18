@@ -6,9 +6,7 @@
     "main": "main.js",
     "dependencies": {
         "bulma": "^0.2.3",
-        "dotenv": "^2.0.0",
         "font-awesome": "^4.7.0",
-        "input-moment": "^0.3.0",
         "moment": "^2.15.2",
         "nedb": "^1.8.0",
         "react": "^15.3.2",

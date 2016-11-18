@@ -5,7 +5,6 @@ app/node_modules/*
 #ignore settings files
 settings.json
 
-
 #ignore dist folder
 dist/*
 

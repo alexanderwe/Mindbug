@@ -48,8 +48,8 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'Learn More',
-        click () { require('electron').shell.openExternal('http://electron.atom.io') }
+        label: 'Visit at github',
+        click () { require('electron').shell.openExternal('https://github.com/alexanderwe/mindbug') }
       }
     ]
   }

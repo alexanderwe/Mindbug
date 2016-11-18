@@ -104,7 +104,7 @@ export default class Task extends Component {
                                 <p>
                                     <strong>{this.props.task.title}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')}</small>
                                     <br />
-                                    {this.props.task.notes}
+                                    {this.props.task.notes}<br />
                                     <span>In project: {this.props.task.project}</span>
                                     <br />
                                     {this.props.task.tags.map((tag)=>{
@@ -154,7 +154,7 @@ export default class Task extends Component {
                                 <p>
                                     <strong>{this.props.task.title}</strong> <small>Due to: </small> <small>{moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm')}</small>
                                     <br />
-                                    {this.props.task.notes}
+                                    {this.props.task.notes}<br />
                                     <span>In project: {this.props.task.project}</span>
                                     <br />
                                     {this.props.task.tags.map((tag)=>{

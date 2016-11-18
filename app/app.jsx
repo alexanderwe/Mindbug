@@ -32,6 +32,17 @@ class Main extends Component {
         }
     }
 
+    /**
+    * Create a desktop notification
+    * @param {String} title - notification title
+    * @param {String} body - notification body
+    */
+    notify(title, body){
+        new Notification(title, {
+            body: body
+        });
+    }
+
     render(){
         return (
             <div className="window">

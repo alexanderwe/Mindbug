@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import DatePicker from 'react-datepicker';
-import InputMoment from 'input-moment';
 import moment from 'moment';
 
 
