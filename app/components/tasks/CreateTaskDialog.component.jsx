@@ -15,6 +15,9 @@ export default class CreateTaskDialog extends Component {
         }
     }
 
+    /**
+    * Clears the values of each input in the form
+    */
     clearForm(){
         this.refs.taskTitleInput.value = "";
         this.refs.taskNotesTextarea.value="";
@@ -22,12 +25,18 @@ export default class CreateTaskDialog extends Component {
         this.refs.taskRepeatCheckbox.checked = false;
     }
 
+    /**
+    * Set the state to isActive:true to show the modal
+    */
     showModal(){
         this.setState({
             isActive: true
         });
     }
 
+    /**
+    * Set the state to isActive:false to close the modal, and also clearing all inputs
+    */
     closeModal(){
         this.setState({
             isActive: false
@@ -35,6 +44,9 @@ export default class CreateTaskDialog extends Component {
         this.clearForm();
     }
 
+    /**
+    * Refreshes the projects available in the selection
+    */
     refreshProjects(){
         this.props.projectsDb.find({open:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if(docs.length==0){
@@ -49,6 +61,9 @@ export default class CreateTaskDialog extends Component {
         })
     }
 
+    /**
+    * Creates the project selection input
+    */
     projectInput(){
         if(this.state.projects){
             return(
@@ -68,12 +83,18 @@ export default class CreateTaskDialog extends Component {
         }
     }
 
+    /**
+    * Saves the currently selected date to the satet
+    */
     handleDateChange(date){
         this.setState({
             startDate: date
         });
     }
 
+    /**
+    * Generating tags from the value of the tagsInput
+    */
     generateTags(){
         return this.refs.taskTagsInput.value.split(" ").filter(function(str) {
             return /\S/.test(str);
@@ -81,8 +102,13 @@ export default class CreateTaskDialog extends Component {
     }
 
 
+    /**
+    * Adds a a task to the tasksDb.
+    * If a project was selected in the selection input, then the corresporending project gets a reference to this specific task.
+    * Refreshes tasks and project views to make the changes visible.
+    * Refreshes tags in the navbar.
+    */
     addTask(){
-
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,

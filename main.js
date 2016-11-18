@@ -14,13 +14,13 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 1000,
+    width: 800,
+    height: 500,
     minHeight: 300,
     minWidth: 520,
     titleBarStyle: 'hidden',
     title: 'Mindbug',
-    vibrancy: 'dark',
+    vibrancy: 'dark'
 });
 
   // and load the index.html of the app.

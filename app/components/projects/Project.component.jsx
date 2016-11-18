@@ -9,6 +9,12 @@ export default class Project extends Component{
         }
     }
 
+    /**
+    * Deletes a project with this.props.project._id.
+    * Refreshes the ProjectList.
+    * Refreshes the selection option for projects in the CreateTaskDialog.
+    * Remove references from Tasks to this now deleted project.
+    */
     deleteProject(){
         this.props.projectsDb.remove({ _id: this.props.project._id}, {}, (err, numRemoved) => {
             this.refreshProjects(); //Refresh tasklist after task is deleted
@@ -27,11 +33,17 @@ export default class Project extends Component{
         });
     }
 
+    /**
+    * Refresh the ProjectList and the project selection in the createTaskDialog
+    */
     refreshProjects(){
         this.props.parent.refreshProjects(); //ProjectList.refreshProjects()
-        this.props.parent.props.parent.refs.createTaskDialog.refreshProjects() //CreateTaskDialog.refreshProjects()
+        this.props.parent.props.parent.refs.createTaskDialog.refreshProjects()
     }
 
+    /**
+    * Refresh this.state.tasks with all tasks associated with this.props.project._id
+    */
     refreshTasks(){
         this.props.tasksDb.find({project: this.props.project.title}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if (docs.length==0) {
@@ -44,6 +56,9 @@ export default class Project extends Component{
         });
     }
 
+    /**
+    * Refresh the tags in the navbar.
+    */
     refreshTags(){
         this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
     }

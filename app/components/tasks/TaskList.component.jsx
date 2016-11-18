@@ -15,6 +15,9 @@ export default class TaskList extends Component{
     }
 
 
+    /**
+    * Search tasks with tag
+    */
     refreshTasksWithTag(tag){
         if(tag){
             this.props.tasksDb.find({$and: [{done: false}, { tags: { $in: [tag] }}] }).sort({ createdAt: 1 }).exec((err,docs)=>{
@@ -31,6 +34,9 @@ export default class TaskList extends Component{
         }
     }
 
+    /**
+    * Refreshes the tasks depending on a filter set in the props
+    */
     refreshTasks(){
         if (this.props.dbFilter === 'done'){
             this.props.tasksDb.find({done:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
@@ -81,10 +87,6 @@ export default class TaskList extends Component{
                 }
             })
         }
-    }
-
-    openDialog(){
-        this.props.parent.refs.createTaskDialog.showModal();
     }
 
     render(){

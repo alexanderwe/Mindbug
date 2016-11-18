@@ -14,18 +14,27 @@ export default class CreateProjectDialog extends Component {
         }
     }
 
+    /**
+    * Clears the values of each input in the form
+    */
     clearForm(){
         this.refs.projectTitleInput.value = "";
         this.refs.projectNotesTextarea.value="";
         this.refs.projectTagsInput.value = "";
     }
 
+    /**
+    * Set the state to isActive:true to show the modal
+    */
     showModal(){
         this.setState({
             isActive: true
         });
     }
 
+    /**
+    * Set the state to isActive:false to close the modal, and also clearing all inputs
+    */
     closeModal(){
         this.setState({
             isActive: false
@@ -33,6 +42,9 @@ export default class CreateProjectDialog extends Component {
         this.clearForm();
     }
 
+    /**
+    * Saves the currently selected date to the satet
+    */
     handleDateChange(date){
         console.log(date);
         this.setState({
@@ -40,6 +52,9 @@ export default class CreateProjectDialog extends Component {
         });
     }
 
+    /**
+    * Generating tags from the value of the tagsInput
+    */
     generateTags() {
         return this.refs.projectTagsInput.value.split(" ").filter(function(str) {
             return /\S/.test(str);
@@ -47,6 +62,13 @@ export default class CreateProjectDialog extends Component {
     }
 
 
+    /**
+    * Adds a project to the projectsDb.
+    * Refreshes the tags in the navbar.
+    * Refreshes the selection option for projects in the CreateTaskDialog.
+    * Refreshes ProjectList in app.jsx.
+    * Clearing the form and closing the modal.
+    */
     addProject() {
         var doc = {
             title: this.refs.projectTitleInput.value,

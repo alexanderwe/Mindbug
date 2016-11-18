@@ -11,13 +11,13 @@ export default class ProjectList extends Component{
         }
     }
 
+    /**
+    * Refresh the projects in this list. First set this.state.projects = null, then pull projects
+    */
     refreshProjects(){
-
         this.setState({
             projects: null,
         });
-
-
         this.props.projectsDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if (docs.length==0) {
                 this.setState({

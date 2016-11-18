@@ -13,6 +13,11 @@ export default class Navbar extends Component {
         }
     }
 
+    /**
+    * Switch to a specific page with a specific filterTasks
+    * @param {String} pageName - parent page name
+    * @param {String} dbFilter - child filter; default=""
+    */
     goTo(pageName, dbFilter=""){
         //Set active item in the navbar
         this.setState({
@@ -27,15 +32,24 @@ export default class Navbar extends Component {
         });
     }
 
+    /**
+    * Opens the task creation dialog
+    */
     openTaskDialog(){
         this.props.parent.refs.createTaskDialog.showModal();
     }
 
+    /**
+    * Opens the proejct creation dialog
+    */
     openProjectDialog(){
         this.props.parent.refs.createProjectDialog.showModal();
     }
 
 
+    /**
+    *Refreshes the tags list in the navbar
+    */
     refreshTags(){
         var tagsArray = [];
         this.props.tasksDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
@@ -63,7 +77,12 @@ export default class Navbar extends Component {
         });
     }
 
-
+    /**
+    * Checks if a item and a child item is activeItem
+    * @param {String} activeItem - active item name to check
+    * @param {String} activeChildItem - active child item name to check
+    * @return {bool} bool - true/false
+    */
     isActiveState(activeItem, activeChildItem){
         return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
     }

@@ -7,6 +7,9 @@ export default class Tag extends Component {
         super(props);
     }
 
+    /**
+    * Filter tasks accoirding to the clicked tag.props.name
+    */
     filterTasks(){
         if(!this.props.parent.props.parent.state.activeItem != 'tasks'){
             this.props.parent.goTo('tasks','all'); //NavBar.goTo()
@@ -21,7 +24,7 @@ export default class Tag extends Component {
         return(
             <span className="tag is-primary" onClick={()=>this.filterTasks()}>
                 {this.props.name}
-                <button className="delete is-small"></button>
+                {/*<button className="delete is-small"></button>*/}
             </span>
         )
     }

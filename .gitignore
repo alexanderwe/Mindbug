@@ -1,9 +1,9 @@
 #ignore node modules
 node_modules/*
+app/node_modules/*
 
 #ignore settings files
 settings.json
 
 #ignore DS_Store
 .DS_Store
-

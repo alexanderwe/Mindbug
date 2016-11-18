@@ -12,6 +12,9 @@ export default class Task extends Component {
         }
     }
 
+    /**
+    * Deletes a task and if this task was related to a project, delete the reference in the project aswell.
+    */
     deleteTask(){
         this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
@@ -30,12 +33,18 @@ export default class Task extends Component {
         });
     }
 
+    /**
+    * Sets task.done = true
+    */
     finishTask(){
         this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { done: true } },(err, numReplaced) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
         });
     }
 
+    /**
+    * Sets task.starred = true or false
+    */
     starTask(){
         if (!this.props.task.starred) {
             this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
@@ -48,21 +57,34 @@ export default class Task extends Component {
         }
     }
 
+    /**
+    * Makes this task editable
+    */
     editTask(){
         this.setState({
             edit:true,
         });
     }
 
+    /**
+    * Saves the edits and make this task uneditable
+    */
     saveEdit(){
         this.setState({
             edit:false,
         });
     }
 
+    /**
+    * Refreshes the tasks in the TaskList
+    */
     refreshTasks(){
         this.props.parent.refreshTasks(); //TaskList.refreshTasks()
     }
+
+    /**
+    * Refreshes the tags in the Navbar
+    */
     refreshTags(){
         this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
     }
