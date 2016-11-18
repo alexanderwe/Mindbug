@@ -3,7 +3,7 @@
     "description": "Simple GTD app for everyone made with Electron and React.",
     "version": "0.0.1",
     "author": "Alexander Weiß <test@test.de>",
-    "main": "main.js",
+    "main": "../main.js",
     "dependencies": {
         "bulma": "^0.2.3",
         "dotenv": "^2.0.0",

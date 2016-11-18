@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "start": "browserify -t [ babelify --presets [ react es2015 ] ] app/app.jsx -o js/app.js && stylus css/styles.styl -o css/styles.css && electron main.js",
+        "start": "browserify -t [ babelify --presets [ react es2015 ] ] app/app.jsx -o app/js/app.js && stylus app/css/styles.styl -o app/css/styles.css && electron app/main.js",
         "dev": "NODE_ENV='development' npm run start",
         "dist": "build -mwl --x64 --ia32"
     },
@@ -12,6 +12,16 @@
     ],
     "author": "Alexander Weiß",
     "license": "CC0-1.0",
+    "build": {
+        "appId": "com.github.alxanderwe.mindbug",
+        "category": "public.app-category.productivity",
+        "mac": {
+            "category": "public.app-category.productivity"
+        },
+        "win": {
+            "iconUrl": "(windows-only) https link to icon"
+        }
+    },
     "devDependencies": {
         "babel-preset-es2015": "^6.9.0",
         "babel-preset-react": "^6.5.0",

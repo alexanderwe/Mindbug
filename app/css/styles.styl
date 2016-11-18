@@ -1,0 +1,223 @@
+@import '../node_modules/react-datepicker/dist/react-datepicker.css';
+@import '../node_modules/bulma/css/bulma.css';
+@import '../node_modules/font-awesome/css/font-awesome.css';
+
+
+/*------------------------------------*\
+    Colors
+\*------------------------------------*/
+
+colors ={
+    primary: #00d1b2,
+    red: #ff3860,
+    green: #20bc56,
+    yellow: #ffd83d,
+    dark-grey: #363636,
+}
+
+/*------------------------------------*\
+    Base styles and utilities
+\*------------------------------------*/
+
+html, body
+    background: rgba(0, 0, 0, 0)
+
+a
+    -webkit-app-region: no-drag;
+
+::-webkit-scrollbar{
+    display: none;
+}
+
+
+.draggable
+    -webkit-app-region: drag;
+
+
+/*From Photon.css*/
+.window
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+
+.window-content
+    position: relative;
+    overflow-y: auto;
+    display: flex;
+    flex: 1;
+
+.pane-group
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+
+.pane
+    position: relative;
+    overflow-y: auto;
+    flex: 1;
+
+.main-content
+    background-color: #FFF;
+
+
+.fa
+    margin-right: 5px
+    vertical-align: baseline
+
+.tag
+    cursor: pointer;
+    &:hover
+        background: darken(colors.primary, 10%);
+
+.delete
+    &:hover
+        background-color: colors.red;
+
+.noSelect
+    -webkit-user-select: none
+
+.pull-right{
+    float: right;
+}
+
+
+.btn-round
+    -webkit-appearance: none;
+    background-color: rgba(10, 10, 10, 0.1);
+    border: none;
+    border-radius: 290486px;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    outline: none;
+    position: relative;
+    vertical-align: top;
+    width: 24px;
+    color:#fff;
+    .fa
+        margin-right: 0px !important;
+
+.btn-success
+    &:hover
+        background-color: colors.green
+
+.btn-warning
+    &:hover
+        background-color: colors.yellow
+
+/*------------------------------------*\
+    Navbar
+\*------------------------------------*/
+
+
+.sidebar
+    //background-color: rgba(0,0,0,1);
+    width: 150px;
+    min-width: 150px;
+    overflow-y: scroll;
+    padding: 10px
+
+.menu
+    padding-top: 30px
+
+.menu-label
+    color:#fff;
+    font-size: 14px;
+    .fa-plus
+        cursor: pointer;
+        &:hover
+            color: colors.primary;
+    .add-btn
+        color:#fff;
+        &:hover
+            color: colors.primary;
+
+.menu-list
+    a
+        color: #fff;
+        &:hover
+            color: colors.primary !important;
+            background-color: transparent !important;
+    .is-active
+        &:hover
+            color: #fff !important;
+            background-color: colors.primary !important;
+
+.tag-list
+    .tag
+        margin-top: 10px
+
+/*------------------------------------*\
+    Main
+\*------------------------------------*/
+
+.main-content
+    padding: 10px;
+
+
+/*------------------------------------*\
+    Tasklist
+\*------------------------------------*/
+
+/*------------------------------------*\
+    Task
+\*------------------------------------*/
+.task
+    .tag
+        margin-right: 5px;
+    .media-right
+        button
+            margin-top: 5px
+    .active
+        color: colors.yellow;
+        &:hover
+            color: colors.dark-grey;
+
+.is-edit
+    border: 1px solid colors.primary
+/*------------------------------------*\
+    Modal
+\*------------------------------------*/
+
+.modal-content
+    padding: 10px
+    background-color: #fff;
+    border-radius: 5px;
+    .react-datepicker__input-container
+        width: 100%;
+        input
+            webkit-appearance: none;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            color: #363636;
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            font-size: 14px;
+            height: 32px;
+            -webkit-box-pack: start;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+            line-height: 24px;
+            padding-left: 8px;
+            padding-right: 8px;
+            position: relative;
+            vertical-align: top;
+            box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
+            max-width: 100%;
+            width: 100%
+
+.modal-close
+    &:hover
+        background-color: colors.red;
