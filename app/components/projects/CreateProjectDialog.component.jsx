@@ -89,12 +89,13 @@ export default class CreateProjectDialog extends Component {
                 try {
                     this.props.parent.refs.projectList.refreshProjects();
                 } catch(e) {
-                    console.log(e);
+                    
                 }
                  //app-->Tasklist
                 this.props.parent.refs.navbar.refreshTags();//app-->Navbar
                 this.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
                 this.props.parent.refs.projectsList.refreshProjects()//app-> ProjectsList
+                this.props.parent.refs.tasklist.refreshTasks()//app-> ProjectsList
             }
         });
 

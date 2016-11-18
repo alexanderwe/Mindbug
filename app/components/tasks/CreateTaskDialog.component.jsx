@@ -8,7 +8,7 @@ export default class CreateTaskDialog extends Component {
     constructor(props){
         super();
         this.state={
-            startDate: moment(),
+            dueDate: moment(),
             projects: null,
             isActive: false,
         }
@@ -87,7 +87,7 @@ export default class CreateTaskDialog extends Component {
     */
     handleDateChange(date){
         this.setState({
-            startDate: date
+            dueDate: date
         });
     }
 
@@ -95,7 +95,7 @@ export default class CreateTaskDialog extends Component {
     * Generating tags from the value of the tagsInput
     */
     generateTags(){
-        return this.refs.taskTagsInput.value.split(" ").filter(function(str) {
+        return this.refs.taskTagsInput.value.split(",").filter(function(str) {
             return /\S/.test(str);
         });
     }
@@ -113,7 +113,7 @@ export default class CreateTaskDialog extends Component {
             notes: this.refs.taskNotesTextarea.value,
             project: this.refs.projectSelect ? this.refs.projectSelect.value: null,
             tags: this.generateTags(),
-            dueDate: this.state.startDate,
+            dueDate: this.state.dueDate,
             repeat: this.refs.taskRepeatCheckbox.checked,
             done: false,
             starred: false,
@@ -126,7 +126,7 @@ export default class CreateTaskDialog extends Component {
                 console.log(err);
             }else{
                 //If task is associated with a project, add the task to the project
-                if (this.refs.projectSelect.value){
+                if (this.refs.projectSelect && this.refs.projectSelect.value != ''){
                     console.log("Adding task: " + newDoc._id + "to Project: " + this.refs.projectSelect.value);
 
                     this.props.projectsDb.update({ title: this.refs.projectSelect.value }, { $push: { tasks: newDoc._id} }, { multi: true },(err, numReplaced) => {
@@ -178,7 +178,7 @@ export default class CreateTaskDialog extends Component {
                         <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
-                    <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} />
+                    <DatePicker  selected={this.state.dueDate} onChange={this.handleDateChange.bind(this)} />
                     <label className="label">Add to project</label>
                     {this.projectInput()}
                     <label className="label">Task</label>

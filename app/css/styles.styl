@@ -1,7 +1,6 @@
-@import '../node_modules/react-datepicker/dist/react-datepicker.css';
 @import '../node_modules/bulma/css/bulma.css';
 @import '../node_modules/font-awesome/css/font-awesome.css';
-
+@import './react-datepicker-styles.styl';
 
 /*------------------------------------*\
     Colors
@@ -182,6 +181,7 @@ a
 
 .is-edit
     border: 1px solid colors.primary
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 /*------------------------------------*\
     Modal
 \*------------------------------------*/
@@ -190,33 +190,6 @@ a
     padding: 10px
     background-color: #fff;
     border-radius: 5px;
-    .react-datepicker__input-container
-        width: 100%;
-        input
-            webkit-appearance: none;
-            -webkit-box-align: center;
-            -ms-flex-align: center;
-            align-items: center;
-            background-color: white;
-            border: 1px solid #dbdbdb;
-            border-radius: 3px;
-            color: #363636;
-            display: -webkit-inline-box;
-            display: -ms-inline-flexbox;
-            display: inline-flex;
-            font-size: 14px;
-            height: 32px;
-            -webkit-box-pack: start;
-            -ms-flex-pack: start;
-            justify-content: flex-start;
-            line-height: 24px;
-            padding-left: 8px;
-            padding-right: 8px;
-            position: relative;
-            vertical-align: top;
-            box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
-            max-width: 100%;
-            width: 100%
 
 .modal-close
     &:hover

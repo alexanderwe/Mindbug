@@ -9,6 +9,14 @@ export default class Project extends Component{
         }
     }
 
+
+    componentDidMount(){
+        console.log("Mount project");
+        console.log(this.props.project);
+
+
+    }
+
     /**
     * Deletes a project with this.props.project._id.
     * Refreshes the ProjectList.
@@ -16,18 +24,25 @@ export default class Project extends Component{
     * Remove references from Tasks to this now deleted project.
     */
     deleteProject(){
+        console.log("deleting project");
         this.props.projectsDb.remove({ _id: this.props.project._id}, {}, (err, numRemoved) => {
-            this.refreshProjects(); //Refresh tasklist after task is deleted
-            this.refreshTags(); //Refresh taglist after task is deleted
+
+
+            if(!err){
+                console.log("Project was successfully deleted");
+            }
 
             //Remove project reference in Tasks
             this.props.project.tasks.map((taskId)=>{
+                console.log("Removing project field from : " + taskId);
+
                 this.props.tasksDb.update({ _id: taskId }, { $set: { project: '' }},  (err, numReplaced)=>{
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log(numReplaced);
+                    if (!err) {
+                        console.log("Reference from project to task was successfully deleted");
                     }
+                    this.refreshProjects(); //Refresh project list after task is deleted
+                    this.refreshTags(); //Refresh taglist after task is deleted
+                    this.refreshTaskList();
                 });
             })
         });
@@ -39,6 +54,13 @@ export default class Project extends Component{
     refreshProjects(){
         this.props.parent.refreshProjects(); //ProjectList.refreshProjects()
         this.props.parent.props.parent.refs.createTaskDialog.refreshProjects()
+    }
+
+    /**
+    * Refresh the TaskList
+    */
+    refreshTaskList(){
+        this.props.parent.props.parent.refs.taskList.refreshTasks();
     }
 
     /**

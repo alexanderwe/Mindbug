@@ -20,7 +20,7 @@ export default class TaskList extends Component{
     */
     refreshTasksWithTag(tag){
         if(tag){
-            this.props.tasksDb.find({$and: [{done: false}, { tags: { $in: [tag] }}] }).sort({ createdAt: 1 }).exec((err,docs)=>{
+            this.props.tasksDb.find({$and: [{done: false}, { tags: { $in: [tag] }}] }).sort({ dueDate: 1 }).exec((err,docs)=>{
                 if (docs.length==0) {
                     this.setState({
                         tasks: null
@@ -38,8 +38,13 @@ export default class TaskList extends Component{
     * Refreshes the tasks depending on a filter set in the props
     */
     refreshTasks(){
+
+        //Force a new state
+        this.setState({
+            tasks:null,
+        });
         if (this.props.dbFilter === 'done'){
-            this.props.tasksDb.find({done:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
+            this.props.tasksDb.find({done:true}).sort({ dueDate: 1 }).exec((err,docs)=>{
                 if (docs.length==0) {
                     this.setState({
                         tasks: null
@@ -51,7 +56,7 @@ export default class TaskList extends Component{
                 }
             })
         } else if (this.props.dbFilter === 'starred') {
-                this.props.tasksDb.find({starred:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
+                this.props.tasksDb.find({starred:true}).sort({ dueDate: 1 }).exec((err,docs)=>{
                     if (docs.length==0) {
                         this.setState({
                             tasks: null
@@ -63,7 +68,7 @@ export default class TaskList extends Component{
                     }
                 })
         } else if (this.props.dbFilter === 'deleted') {
-                this.props.tasksDb.find({deleted:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
+                this.props.tasksDb.find({deleted:true}).sort({ dueDate: 1 }).exec((err,docs)=>{
                     if (docs.length==0) {
                         this.setState({
                             tasks: null
@@ -75,7 +80,7 @@ export default class TaskList extends Component{
                     }
                 })
         }else if((this.props.dbFilter === 'all')){
-            this.props.tasksDb.find({done:false}).sort({ createdAt: 1 }).exec((err,docs)=>{
+            this.props.tasksDb.find({done:false}).sort({ dueDate: 1 }).exec((err,docs)=>{
                 if (docs.length==0) {
                     this.setState({
                         tasks: null

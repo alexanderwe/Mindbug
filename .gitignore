@@ -1,6 +1,9 @@
-#ignore node modules
+#ignore node modules and node related stuff
 node_modules/*
 app/node_modules/*
+npm-debug.log
+
+
 
 #ignore settings files
 settings.json
