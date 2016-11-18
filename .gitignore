@@ -5,5 +5,9 @@ app/node_modules/*
 #ignore settings files
 settings.json
 
+
+#ignore dist folder
+dist/*
+
 #ignore DS_Store
 .DS_Store
