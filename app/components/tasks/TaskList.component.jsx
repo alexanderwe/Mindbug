@@ -38,11 +38,13 @@ export default class TaskList extends Component{
     * Refreshes the tasks depending on a filter set in the props
     */
     refreshTasks(){
+        console.log("tasklist is refreshing tasks");
 
         //Force a new state
         this.setState({
             tasks:null,
         });
+
         if (this.props.dbFilter === 'done'){
             this.props.tasksDb.find({done:true}).sort({ dueDate: 1 }).exec((err,docs)=>{
                 if (docs.length==0) {

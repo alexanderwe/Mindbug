@@ -32,19 +32,24 @@ export default class Project extends Component{
                 console.log("Project was successfully deleted");
             }
 
-            //Remove project reference in Tasks
-            this.props.project.tasks.map((taskId)=>{
-                console.log("Removing project field from : " + taskId);
+            if(this.props.project.tasks.length > 0){
+                this.props.project.tasks.map((taskId)=>{
+                    console.log("Removing project field from : " + taskId);
 
-                this.props.tasksDb.update({ _id: taskId }, { $set: { project: '' }},  (err, numReplaced)=>{
-                    if (!err) {
-                        console.log("Reference from project to task was successfully deleted");
-                    }
-                    this.refreshProjects(); //Refresh project list after task is deleted
-                    this.refreshTags(); //Refresh taglist after task is deleted
-                    this.refreshTaskList();
-                });
-            })
+                    this.props.tasksDb.update({ _id: taskId }, { $set: { project: '' }},  (err, numReplaced)=>{
+                        if (!err) {
+                            console.log("Reference from project to task was successfully deleted");
+                        }
+                        this.refreshProjects(); //Refresh project list after task is deleted
+                        this.refreshTags(); //Refresh taglist after task is deleted
+                        this.refreshTaskList();
+                    });
+                })
+            } else{
+                this.refreshProjects(); //Refresh project list after task is deleted
+                this.refreshTags(); //Refresh taglist after task is deleted
+                this.refreshTaskList();
+            }
         });
     }
 

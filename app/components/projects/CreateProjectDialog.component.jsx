@@ -87,15 +87,23 @@ export default class CreateProjectDialog extends Component {
             } else {
                 //When project list is not visible it will throw an error
                 try {
-                    this.props.parent.refs.projectList.refreshProjects();
+                    this.props.parent.refs.projectsList.refreshProjects()//app-> ProjectsList
                 } catch(e) {
-                    
+
                 }
-                 //app-->Tasklist
+
+                try {
+                    this.props.parent.refs.taskList.refreshTasks()//app-> ProjectsList
+                } catch(e) {
+                    console.log(e);
+
+                }
+
                 this.props.parent.refs.navbar.refreshTags();//app-->Navbar
                 this.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
-                this.props.parent.refs.projectsList.refreshProjects()//app-> ProjectsList
-                this.props.parent.refs.tasklist.refreshTasks()//app-> ProjectsList
+                 //app-->Tasklist
+
+
             }
         });
 

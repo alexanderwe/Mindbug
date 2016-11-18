@@ -975,13 +975,19 @@ var CreateProjectDialog = function (_Component) {
                 } else {
                     //When project list is not visible it will throw an error
                     try {
-                        _this2.props.parent.refs.projectList.refreshProjects();
+                        _this2.props.parent.refs.projectsList.refreshProjects(); //app-> ProjectsList
                     } catch (e) {}
-                    //app-->Tasklist
+
+                    try {
+                        _this2.props.parent.refs.taskList.refreshTasks(); //app-> ProjectsList
+                    } catch (e) {
+                        console.log(e);
+                    }
+
                     _this2.props.parent.refs.navbar.refreshTags(); //app-->Navbar
                     _this2.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
-                    _this2.props.parent.refs.projectsList.refreshProjects(); //app-> ProjectsList
-                    _this2.props.parent.refs.tasklist.refreshTasks(); //app-> ProjectsList
+                    //app-->Tasklist
+
                 }
             });
 
@@ -1137,19 +1143,24 @@ var Project = function (_Component) {
                     console.log("Project was successfully deleted");
                 }
 
-                //Remove project reference in Tasks
-                _this2.props.project.tasks.map(function (taskId) {
-                    console.log("Removing project field from : " + taskId);
+                if (_this2.props.project.tasks.length > 0) {
+                    _this2.props.project.tasks.map(function (taskId) {
+                        console.log("Removing project field from : " + taskId);
 
-                    _this2.props.tasksDb.update({ _id: taskId }, { $set: { project: '' } }, function (err, numReplaced) {
-                        if (!err) {
-                            console.log("Reference from project to task was successfully deleted");
-                        }
-                        _this2.refreshProjects(); //Refresh project list after task is deleted
-                        _this2.refreshTags(); //Refresh taglist after task is deleted
-                        _this2.refreshTaskList();
+                        _this2.props.tasksDb.update({ _id: taskId }, { $set: { project: '' } }, function (err, numReplaced) {
+                            if (!err) {
+                                console.log("Reference from project to task was successfully deleted");
+                            }
+                            _this2.refreshProjects(); //Refresh project list after task is deleted
+                            _this2.refreshTags(); //Refresh taglist after task is deleted
+                            _this2.refreshTaskList();
+                        });
                     });
-                });
+                } else {
+                    _this2.refreshProjects(); //Refresh project list after task is deleted
+                    _this2.refreshTags(); //Refresh taglist after task is deleted
+                    _this2.refreshTaskList();
+                }
             });
         }
 
@@ -1882,8 +1893,6 @@ var Task = function (_Component) {
                     dueDate: this.state.dueDate,
                     project: this.refs.projectSelect ? this.refs.projectSelect.value : null
                 } }, function (err, numReplaced) {
-                console.log("new projekt: " + _this5.refs.projectSelect.value);
-
                 if (_this5.refs.projectSelect && _this5.refs.projectSelect.value != '') {
                     console.log("Adding task: " + _this5.props.task._id + "to Project: " + _this5.refs.projectSelect.value);
                     _this5.props.projectsDb.update({ title: _this5.refs.projectSelect.value }, { $push: { tasks: _this5.props.task._id } }, { multi: true }, function (err, numReplaced) {
@@ -2283,10 +2292,13 @@ var TaskList = function (_Component) {
         value: function refreshTasks() {
             var _this3 = this;
 
+            console.log("tasklist is refreshing tasks");
+
             //Force a new state
             this.setState({
                 tasks: null
             });
+
             if (this.props.dbFilter === 'done') {
                 this.props.tasksDb.find({ done: true }).sort({ dueDate: 1 }).exec(function (err, docs) {
                     if (docs.length == 0) {
