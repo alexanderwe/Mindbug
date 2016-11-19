@@ -40,15 +40,11 @@ export default class Project extends Component{
                         if (!err) {
                             console.log("Reference from project to task was successfully deleted");
                         }
-                        this.refreshProjects(); //Refresh project list after task is deleted
-                        this.refreshTags(); //Refresh taglist after task is deleted
-                        this.refreshTaskList();
+                        this.props.parent.props.parent.refreshAll();
                     });
                 })
             } else{
-                this.refreshProjects(); //Refresh project list after task is deleted
-                this.refreshTags(); //Refresh taglist after task is deleted
-                this.refreshTaskList();
+                this.props.parent.props.parent.refreshAll();
             }
         });
     }

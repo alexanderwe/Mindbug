@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DatePicker from 'react-datepicker';
+import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 
 
@@ -8,7 +8,7 @@ export default class CreateTaskDialog extends Component {
     constructor(props){
         super();
         this.state={
-            dueDate: moment(),
+            dueDate: null,
             projects: null,
             isActive: false,
         }
@@ -84,18 +84,19 @@ export default class CreateTaskDialog extends Component {
 
     /**
     * Saves the currently selected date to the satet
+    + @param {moment} date - date to set
     */
     handleDateChange(date){
         this.setState({
-            dueDate: date
+            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
         });
     }
 
     /**
     * Generating tags from the value of the tagsInput
     */
-    generateTags(){
-        return this.refs.taskTagsInput.value.split(",").filter(function(str) {
+    generateTags() {
+        return this.refs.taskTagsInput.value.replace(/\s/g,'').split(",").filter(function(str) {
             return /\S/.test(str);
         });
     }
@@ -108,6 +109,10 @@ export default class CreateTaskDialog extends Component {
     * Refreshes tags in the navbar.
     */
     addTask(){
+        console.log("current dueDate");
+        console.log(this.state.dueDate);
+
+
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
@@ -138,19 +143,9 @@ export default class CreateTaskDialog extends Component {
                         }
                     });
                 }
-
-                //Refresh the views
-                if (this.props.parent.state.activeItem === 'tasks') {
-                    this.props.parent.refs.taskList.refreshTasks();  //app-->Tasklist
-                } else if (this.props.parent.state.activeItem === 'projects') {
-                    this.props.parent.refs.projectsList.refreshProjects();  //app-->Tasklist
-                }
-                this.props.parent.refs.navbar.refreshTags(); //app-->Navbar
+                this.props.parent.refreshAll();
             }
         });
-
-
-
 
         //Clean inputs
         this.clearForm();
@@ -178,7 +173,7 @@ export default class CreateTaskDialog extends Component {
                         <textarea className="textarea" placeholder="Notes" ref="taskNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
-                    <DatePicker  selected={this.state.dueDate} onChange={this.handleDateChange.bind(this)} />
+                    <Flatpickr data-enable-time   onChange={(_, str) => this.handleDateChange(str)} />
                     <label className="label">Add to project</label>
                     {this.projectInput()}
                     <label className="label">Task</label>
@@ -202,8 +197,8 @@ export default class CreateTaskDialog extends Component {
     }
 }
 
-
 CreateTaskDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
     tasksDb: React.PropTypes.object.isRequired,
+    projectsDb: React.PropTypes.object.isRequired,
 };

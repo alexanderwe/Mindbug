@@ -78,6 +78,17 @@ var Main = function (_Component) {
                 this.refs.projectsList.refreshProjects();
             }
         }
+    }, {
+        key: 'refreshAll',
+        value: function refreshAll() {
+            this.refs.createTaskDialog.refreshProjects(); //Refreshes the project selection
+            this.refs.navbar.refreshTags();
+            if (this.state.activeItem === "tasks") {
+                this.refs.taskList.refreshTasks();
+            } else if (this.state.activeItem === "projects") {
+                this.refs.projectsList.refreshProjects();
+            }
+        }
 
         /**
         * Create a desktop notification
@@ -848,9 +859,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDatepicker = require('react-datepicker');
+var _reactFlatpickr = require('react-flatpickr');
 
-var _reactDatepicker2 = _interopRequireDefault(_reactDatepicker);
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
 
 var _moment = require('moment');
 
@@ -873,7 +884,7 @@ var CreateProjectDialog = function (_Component) {
         var _this = _possibleConstructorReturn(this, (CreateProjectDialog.__proto__ || Object.getPrototypeOf(CreateProjectDialog)).call(this));
 
         _this.state = {
-            startDate: (0, _moment2.default)(),
+            startDate: null,
             isActive: false
         };
         return _this;
@@ -919,14 +930,14 @@ var CreateProjectDialog = function (_Component) {
 
         /**
         * Saves the currently selected date to the satet
+        + @param {moment} date - date to set
         */
 
     }, {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
-            console.log(date);
             this.setState({
-                startDate: date
+                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
             });
         }
 
@@ -937,7 +948,7 @@ var CreateProjectDialog = function (_Component) {
     }, {
         key: 'generateTags',
         value: function generateTags() {
-            return this.refs.projectTagsInput.value.split(" ").filter(function (str) {
+            return this.refs.projectTagsInput.value.replace(/\s/g, '').split(",").filter(function (str) {
                 return (/\S/.test(str)
                 );
             });
@@ -961,7 +972,7 @@ var CreateProjectDialog = function (_Component) {
                 notes: this.refs.projectNotesTextarea.value,
                 tags: this.generateTags(),
                 tasks: new Array(),
-                dueDate: new Date(),
+                dueDate: this.state.dueDate,
                 open: true,
                 starred: false,
                 deleted: false
@@ -973,21 +984,7 @@ var CreateProjectDialog = function (_Component) {
                 if (err) {
                     console.log(err);
                 } else {
-                    //When project list is not visible it will throw an error
-                    try {
-                        _this2.props.parent.refs.projectsList.refreshProjects(); //app-> ProjectsList
-                    } catch (e) {}
-
-                    try {
-                        _this2.props.parent.refs.taskList.refreshTasks(); //app-> ProjectsList
-                    } catch (e) {
-                        console.log(e);
-                    }
-
-                    _this2.props.parent.refs.navbar.refreshTags(); //app-->Navbar
-                    _this2.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
-                    //app-->Tasklist
-
+                    _this2.props.parent.refreshAll();
                 }
             });
 
@@ -1034,7 +1031,9 @@ var CreateProjectDialog = function (_Component) {
                         { className: 'label' },
                         'Due to'
                     ),
-                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.startDate, onChange: this.handleDateChange.bind(this) }),
+                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, onChange: function onChange(_, str) {
+                            return _this3.handleDateChange(str);
+                        } }),
                     _react2.default.createElement(
                         'label',
                         { className: 'label' },
@@ -1082,7 +1081,7 @@ CreateProjectDialog.propTypes = {
     projectsDb: _react2.default.PropTypes.object.isRequired
 };
 
-},{"moment":42,"react":206,"react-datepicker":53}],6:[function(require,module,exports){
+},{"moment":43,"react":206,"react-flatpickr":181}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1151,15 +1150,11 @@ var Project = function (_Component) {
                             if (!err) {
                                 console.log("Reference from project to task was successfully deleted");
                             }
-                            _this2.refreshProjects(); //Refresh project list after task is deleted
-                            _this2.refreshTags(); //Refresh taglist after task is deleted
-                            _this2.refreshTaskList();
+                            _this2.props.parent.props.parent.refreshAll();
                         });
                     });
                 } else {
-                    _this2.refreshProjects(); //Refresh project list after task is deleted
-                    _this2.refreshTags(); //Refresh taglist after task is deleted
-                    _this2.refreshTaskList();
+                    _this2.props.parent.props.parent.refreshAll();
                 }
             });
         }
@@ -1404,9 +1399,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDatepicker = require('react-datepicker');
+var _reactFlatpickr = require('react-flatpickr');
 
-var _reactDatepicker2 = _interopRequireDefault(_reactDatepicker);
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
 
 var _moment = require('moment');
 
@@ -1429,7 +1424,7 @@ var CreateTaskDialog = function (_Component) {
         var _this = _possibleConstructorReturn(this, (CreateTaskDialog.__proto__ || Object.getPrototypeOf(CreateTaskDialog)).call(this));
 
         _this.state = {
-            dueDate: (0, _moment2.default)(),
+            dueDate: null,
             projects: null,
             isActive: false
         };
@@ -1536,13 +1531,14 @@ var CreateTaskDialog = function (_Component) {
 
         /**
         * Saves the currently selected date to the satet
+        + @param {moment} date - date to set
         */
 
     }, {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: date
+                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
             });
         }
 
@@ -1553,7 +1549,7 @@ var CreateTaskDialog = function (_Component) {
     }, {
         key: 'generateTags',
         value: function generateTags() {
-            return this.refs.taskTagsInput.value.split(",").filter(function (str) {
+            return this.refs.taskTagsInput.value.replace(/\s/g, '').split(",").filter(function (str) {
                 return (/\S/.test(str)
                 );
             });
@@ -1570,6 +1566,9 @@ var CreateTaskDialog = function (_Component) {
         key: 'addTask',
         value: function addTask() {
             var _this3 = this;
+
+            console.log("current dueDate");
+            console.log(this.state.dueDate);
 
             var doc = {
                 title: this.refs.taskTitleInput.value,
@@ -1601,14 +1600,7 @@ var CreateTaskDialog = function (_Component) {
                             }
                         });
                     }
-
-                    //Refresh the views
-                    if (_this3.props.parent.state.activeItem === 'tasks') {
-                        _this3.props.parent.refs.taskList.refreshTasks(); //app-->Tasklist
-                    } else if (_this3.props.parent.state.activeItem === 'projects') {
-                        _this3.props.parent.refs.projectsList.refreshProjects(); //app-->Tasklist
-                    }
-                    _this3.props.parent.refs.navbar.refreshTags(); //app-->Navbar
+                    _this3.props.parent.refreshAll();
                 }
             });
 
@@ -1660,7 +1652,9 @@ var CreateTaskDialog = function (_Component) {
                         { className: 'label' },
                         'Due to'
                     ),
-                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.dueDate, onChange: this.handleDateChange.bind(this) }),
+                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, onChange: function onChange(_, str) {
+                            return _this4.handleDateChange(str);
+                        } }),
                     _react2.default.createElement(
                         'label',
                         { className: 'label' },
@@ -1721,10 +1715,11 @@ exports.default = CreateTaskDialog;
 
 CreateTaskDialog.propTypes = {
     parent: _react2.default.PropTypes.object.isRequired,
-    tasksDb: _react2.default.PropTypes.object.isRequired
+    tasksDb: _react2.default.PropTypes.object.isRequired,
+    projectsDb: _react2.default.PropTypes.object.isRequired
 };
 
-},{"moment":42,"react":206,"react-datepicker":53}],9:[function(require,module,exports){
+},{"moment":43,"react":206,"react-flatpickr":181}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1737,9 +1732,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDatepicker = require('react-datepicker');
+var _reactFlatpickr = require('react-flatpickr');
 
-var _reactDatepicker2 = _interopRequireDefault(_reactDatepicker);
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
 
 var _moment = require('moment');
 
@@ -1797,8 +1792,7 @@ var Task = function (_Component) {
             console.log("Deleting task");
 
             this.props.tasksDb.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
-                _this2.refreshTasks(); //Refresh tasklist after task is deleted
-                _this2.refreshTags(); //Refresh taglist after task is deleted
+                _this2.props.parent.props.parent.refreshAll();
                 if (!err) {
                     console.log("Task successfully deleted.");
                 }
@@ -1857,10 +1851,10 @@ var Task = function (_Component) {
     }, {
         key: 'generateTags',
         value: function generateTags() {
-            return this.refs.taskTagsInput.value.split(",").filter(function (str) {
+            return this.refs.taskTagsInput.value.replace(/\s/g, '').split(",").filter(function (str) {
                 return (/\S/.test(str)
                 );
-            });
+            });;
         }
 
         /**
@@ -1885,7 +1879,6 @@ var Task = function (_Component) {
             var _this5 = this;
 
             console.log("Updating task");
-
             this.props.tasksDb.update({ _id: this.props.task._id }, { $set: {
                     title: this.refs.taskTitleInput.value,
                     notes: this.refs.taskNotesTextarea.value,
@@ -1903,6 +1896,18 @@ var Task = function (_Component) {
                     _this5.refreshTasks(); //Refresh tasklist after task is edited
                     _this5.refreshTags(); //Refresh navbar tags after task is edited
                 }
+            });
+        }
+
+        /**
+        * Leave edit mode
+        */
+
+    }, {
+        key: 'cancelEdit',
+        value: function cancelEdit() {
+            this.setState({
+                edit: false
             });
         }
 
@@ -1928,13 +1933,14 @@ var Task = function (_Component) {
 
         /**
         * Saves the currently selected date to the satet
+        + @param {moment} date - date to set
         */
 
     }, {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: date
+                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
             });
         }
 
@@ -2034,7 +2040,7 @@ var Task = function (_Component) {
                                 'div',
                                 { className: 'content' },
                                 _react2.default.createElement(
-                                    'strong',
+                                    'h3',
                                     null,
                                     this.props.task.title
                                 ),
@@ -2048,7 +2054,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'small',
                                     null,
-                                    this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY') : null
+                                    this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null
                                 ),
                                 _react2.default.createElement('br', null),
                                 this.props.task.notes,
@@ -2120,8 +2126,6 @@ var Task = function (_Component) {
                     )
                 );
             } else {
-                console.log(this.state.dueDate);
-
                 return _react2.default.createElement(
                     'div',
                     { className: 'box task is-edit' },
@@ -2148,8 +2152,10 @@ var Task = function (_Component) {
                                     null,
                                     _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
                                     _react2.default.createElement('br', null),
-                                    'Due to: ',
-                                    _react2.default.createElement(_reactDatepicker2.default, { selected: this.state.dueDate ? this.state.dueDate : (0, _moment2.default)(), onChange: this.handleDateChange.bind(this) }),
+                                    'Due to:',
+                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null, onChange: function onChange(_, str) {
+                                            return _this8.handleDateChange(str);
+                                        } }),
                                     _react2.default.createElement('br', null),
                                     _react2.default.createElement('textarea', { className: 'textarea', ref: 'taskNotesTextarea', defaultValue: this.props.task.notes }),
                                     _react2.default.createElement('br', null),
@@ -2187,11 +2193,18 @@ var Task = function (_Component) {
                                 { className: 'media-right' },
                                 _react2.default.createElement(
                                     'button',
-                                    { className: 'btn-round btn-warning', onClick: function onClick() {
+                                    { className: 'btn-round btn-success', onClick: function onClick() {
                                             return _this8.saveEdit();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
                                 )
+                            ),
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'media-right' },
+                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
+                                        return _this8.cancelEdit();
+                                    } })
                             )
                         )
                     )
@@ -2214,7 +2227,7 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"../navigation/Tag.component.jsx":3,"moment":42,"react":206,"react-datepicker":53}],10:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":3,"moment":43,"react":206,"react-flatpickr":181}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2418,7 +2431,7 @@ var projectsDb = new _nedb2.default({
 exports.default = projectsDb;
 
 }).call(this,"/app/data")
-},{"nedb":45}],12:[function(require,module,exports){
+},{"nedb":46}],12:[function(require,module,exports){
 (function (__dirname){
 'use strict';
 
@@ -2441,7 +2454,7 @@ var tasksDb = new _nedb2.default({
 exports.default = tasksDb;
 
 }).call(this,"/app/data")
-},{"nedb":45}],13:[function(require,module,exports){
+},{"nedb":46}],13:[function(require,module,exports){
 (function (process){
 /*global setImmediate: false, setTimeout: false, console: false */
 (function () {
@@ -5557,6 +5570,1514 @@ if (process.env.NODE_ENV !== 'production') {
 module.exports = warning;
 }).call(this,require('_process'))
 },{"./emptyFunction":25,"_process":210}],41:[function(require,module,exports){
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/*! flatpickr v2.1.1, @license MIT */
+function Flatpickr(element, config) {
+	var self = this;
+
+	function init() {
+		if (element._flatpickr) destroy(element._flatpickr);
+
+		element._flatpickr = self;
+
+		self.element = element;
+		self.instanceConfig = config || {};
+
+		setupFormats();
+
+		parseConfig();
+		setupLocale();
+		setupInputs();
+		setupDates();
+
+		setupHelperFunctions();
+
+		self.isOpen = self.config.inline;
+		self.changeMonth = changeMonth;
+		self.clear = clear;
+		self.close = close;
+		self.destroy = destroy;
+		self.formatDate = formatDate;
+		self.jumpToDate = jumpToDate;
+		self.open = open;
+		self.parseDate = parseDate;
+		self.redraw = redraw;
+		self.set = set;
+		self.setDate = setDate;
+		self.toggle = toggle;
+
+		self.isMobile = !self.config.disableMobile && self.config.mode === "single" && !self.config.disable.length && !self.config.enable.length && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+		if (!self.isMobile) build();
+
+		bind();
+
+		if (self.selectedDates.length) {
+			if (self.config.enableTime) setHoursFromDate();
+			updateValue();
+		}
+
+		triggerEvent("Ready");
+	}
+
+	function updateTime(e) {
+		if (self.config.noCalendar && !self.selectedDates.length)
+			// picking time only
+			self.selectedDates = [self.now];
+
+		timeWrapper(e);
+
+		if (!self.selectedDates.length) return;
+
+		setHoursFromInputs();
+		updateValue();
+	}
+
+	function setHoursFromInputs() {
+		if (!self.config.enableTime) return;
+
+		var hours = parseInt(self.hourElement.value, 10) || 0,
+		    minutes = (60 + (parseInt(self.minuteElement.value, 10) || 0)) % 60,
+		    seconds = self.config.enableSeconds ? (60 + parseInt(self.secondElement.value, 10) || 0) % 60 : 0;
+
+		if (self.amPM) hours = hours % 12 + 12 * (self.amPM.innerHTML === "PM");
+
+		setHours(hours, minutes, seconds);
+	}
+
+	function setHoursFromDate(dateObj) {
+		setHours((dateObj || latestSelectedDateObj()).getHours(), (dateObj || latestSelectedDateObj()).getMinutes(), (dateObj || latestSelectedDateObj()).getSeconds());
+	}
+
+	function setHours(hours, minutes, seconds) {
+		if (self.selectedDates.length) self.selectedDates[self.selectedDates.length - 1].setHours(hours % 24, minutes, seconds || 0, 0);
+
+		if (!self.config.enableTime) return;
+
+		self.hourElement.value = self.pad(!self.config.time_24hr ? (12 + hours) % 12 + 12 * (hours % 12 === 0) : hours);
+
+		self.minuteElement.value = self.pad(minutes);
+
+		if (!self.config.time_24hr && self.selectedDates.length) self.amPM.textContent = latestSelectedDateObj().getHours() >= 12 ? "PM" : "AM";
+
+		if (self.config.enableSeconds) self.secondElement.value = self.pad(seconds);
+	}
+
+	function bind() {
+		if (self.config.wrap) {
+			["open", "close", "toggle", "clear"].forEach(function (el) {
+				try {
+					self.element.querySelector("[data-" + el + "]").addEventListener("click", self[el]);
+				} catch (e) {
+					//
+				}
+			});
+		}
+
+		if ("createEvent" in document) {
+			self.changeEvent = document.createEvent("HTMLEvents");
+			self.changeEvent.initEvent("change", false, true);
+		}
+
+		if (self.isMobile) return setupMobile();
+
+		self.debouncedResize = debounce(onResize, 100);
+		self.triggerChange = function () {
+			return triggerEvent("Change");
+		};
+		self.debouncedChange = debounce(self.triggerChange, 1000);
+
+		if (self.config.mode === "range") self.days.addEventListener("mouseover", onMouseOver);
+
+		document.addEventListener("keydown", onKeyDown);
+		window.addEventListener("resize", self.debouncedResize);
+
+		document.addEventListener("click", documentClick);
+		document.addEventListener("blur", documentClick);
+
+		if (self.config.clickOpens) (self.altInput || self.input).addEventListener("focus", open);
+
+		if (!self.config.noCalendar) {
+			self.prevMonthNav.addEventListener("click", function () {
+				return changeMonth(-1);
+			});
+			self.nextMonthNav.addEventListener("click", function () {
+				return changeMonth(1);
+			});
+
+			self.currentYearElement.addEventListener("wheel", function (e) {
+				return debounce(yearScroll(e), 50);
+			});
+			self.currentYearElement.addEventListener("focus", function () {
+				self.currentYearElement.select();
+			});
+
+			self.currentYearElement.addEventListener("input", function (event) {
+				if (event.target.value.length === 4) {
+					self.currentYearElement.blur();
+					handleYearChange(event.target.value);
+					event.target.value = self.currentYear;
+				}
+			});
+
+			self.days.addEventListener("click", selectDate);
+		}
+
+		if (self.config.enableTime) {
+			self.timeContainer.addEventListener("wheel", function (e) {
+				return debounce(updateTime(e), 5);
+			});
+			self.timeContainer.addEventListener("input", updateTime);
+
+			self.timeContainer.addEventListener("wheel", self.debouncedChange);
+			self.timeContainer.addEventListener("input", self.triggerChange);
+
+			self.hourElement.addEventListener("focus", function () {
+				self.hourElement.select();
+			});
+			self.minuteElement.addEventListener("focus", function () {
+				self.minuteElement.select();
+			});
+
+			if (self.secondElement) {
+				self.secondElement.addEventListener("focus", function () {
+					self.secondElement.select();
+				});
+			}
+
+			if (self.amPM) {
+				self.amPM.addEventListener("click", function (e) {
+					updateTime(e);
+					self.triggerChange(e);
+				});
+			}
+		}
+	}
+
+	function jumpToDate(jumpDate) {
+		jumpDate = jumpDate ? parseDate(jumpDate) : latestSelectedDateObj() || (self.config.minDate > self.now ? self.config.minDate : self.now);
+
+		try {
+			self.currentYear = jumpDate.getFullYear();
+			self.currentMonth = jumpDate.getMonth();
+		} catch (e) {
+			console.error(e.stack);
+			console.warn("Invalid date supplied: " + jumpDate);
+		}
+
+		self.redraw();
+	}
+
+	function build() {
+		var fragment = document.createDocumentFragment();
+		self.calendarContainer = createElement("div", "flatpickr-calendar");
+		self.numInputType = navigator.userAgent.indexOf("MSIE 9.0") > 0 ? "text" : "number";
+
+		if (!self.config.noCalendar) {
+			fragment.appendChild(buildMonthNav());
+			self.innerContainer = createElement("div", "flatpickr-innerContainer");
+
+			if (self.config.weekNumbers) self.innerContainer.appendChild(buildWeeks());
+
+			self.rContainer = createElement("div", "flatpickr-rContainer");
+			self.rContainer.appendChild(buildWeekdays());
+			self.rContainer.appendChild(buildDays());
+			self.innerContainer.appendChild(self.rContainer);
+			fragment.appendChild(self.innerContainer);
+		}
+
+		if (self.config.enableTime) fragment.appendChild(buildTime());
+
+		self.calendarContainer.appendChild(fragment);
+
+		if (self.config.inline || self.config.static) {
+			self.calendarContainer.classList.add(self.config.inline ? "inline" : "static");
+			positionCalendar();
+
+			if (self.config.appendTo && self.config.appendTo.nodeType) self.config.appendTo.appendChild(self.calendarContainer);else {
+				self.element.parentNode.insertBefore(self.calendarContainer, (self.altInput || self.input).nextSibling);
+			}
+		} else document.body.appendChild(self.calendarContainer);
+	}
+
+	function buildDays() {
+		if (!self.days) {
+			self.days = createElement("div", "flatpickr-days");
+			self.days.tabIndex = -1;
+		}
+
+		self.firstOfMonth = (new Date(self.currentYear, self.currentMonth, 1).getDay() - self.l10n.firstDayOfWeek + 7) % 7;
+
+		self.prevMonthDays = self.utils.getDaysinMonth((self.currentMonth - 1 + 12) % 12);
+
+		var daysInMonth = self.utils.getDaysinMonth(),
+		    days = document.createDocumentFragment();
+
+		var dayNumber = self.prevMonthDays + 1 - self.firstOfMonth,
+		    currentDate = void 0,
+		    dateIsDisabled = void 0;
+
+		if (self.config.weekNumbers) self.weekNumbers.innerHTML = "";
+
+		if (self.config.mode === "range") {
+			var dateLimits = self.config.enable.length || self.config.disable.length || self.config.mixDate || self.config.maxDate;
+			self.minRangeDate = new Date(self.currentYear, self.currentMonth - 1, dayNumber);
+			self.maxRangeDate = new Date(self.currentYear, self.currentMonth + 1, (42 - self.firstOfMonth) % daysInMonth);
+		}
+
+		self.days.innerHTML = "";
+
+		// prepend days from the ending of previous month
+		for (var i = 0; dayNumber <= self.prevMonthDays; i++, dayNumber++) {
+			var curDate = new Date(self.currentYear, self.currentMonth - 1, dayNumber, 0, 0, 0, 0, 0),
+			    dateIsEnabled = isEnabled(curDate),
+			    dayElement = createElement("span", "flatpickr-day prevMonthDay" + (!dateIsEnabled ? " disabled" : "") + (isDateInRange(curDate) ? " inRange" : "") + (self.selectedDates.length === 1 && (curDate < self.minRangeDate || curDate > self.maxRangeDate) ? " notAllowed" : "") + (isDateSelected(curDate) !== false ? " selected" : ""), dayNumber);
+
+			dayElement.dateObj = curDate;
+
+			if (dateIsEnabled) dayElement.tabIndex = 0;else if (self.selectedDates[0] && curDate > self.minRangeDate && curDate < self.selectedDates[0]) self.minRangeDate = curDate;else if (self.selectedDates[0] && curDate < self.maxRangeDate && curDate > self.selectedDates[0]) self.maxRangeDate = curDate;
+
+			triggerEvent("DayCreate", dayElement);
+			days.appendChild(dayElement);
+		}
+
+		// Start at 1 since there is no 0th day
+		for (dayNumber = 1; dayNumber <= daysInMonth; dayNumber++) {
+			currentDate = new Date(self.currentYear, self.currentMonth, dayNumber, 0, 0, 0, 0, 0);
+
+			if (self.config.weekNumbers && dayNumber % 7 === 1) {
+				self.weekNumbers.insertAdjacentHTML("beforeend", "<span class='disabled flatpickr-day'>" + self.config.getWeek(currentDate) + "</span>");
+			}
+
+			dateIsDisabled = !isEnabled(currentDate);
+
+			var _dayElement = createElement("span", dateIsDisabled ? "flatpickr-day disabled" : "flatpickr-day" + (isDateInRange(currentDate) ? " inRange" : "") + (self.selectedDates.length === 1 && (currentDate < self.minRangeDate || currentDate > self.maxRangeDate) ? " notAllowed" : ""), dayNumber);
+
+			_dayElement.dateObj = currentDate;
+
+			if (equalDates(currentDate, self.now)) _dayElement.classList.add("today");
+
+			if (!dateIsDisabled) {
+				_dayElement.tabIndex = 0;
+
+				if (isDateSelected(currentDate)) {
+					_dayElement.classList.add("selected");
+					self.selectedDateElem = _dayElement;
+
+					if (self.config.mode === "range") {
+						_dayElement.className += equalDates(currentDate, self.selectedDates[0]) ? " startRange" : self.selectedDates.length > 1 ? " endRange" : "";
+					}
+				}
+			} else if (self.selectedDates[0] && currentDate > self.minRangeDate && currentDate < self.selectedDates[0]) self.minRangeDate = currentDate;else if (self.selectedDates[0] && currentDate < self.maxRangeDate && currentDate > self.selectedDates[0]) self.maxRangeDate = currentDate;
+
+			triggerEvent("DayCreate", _dayElement);
+			days.appendChild(_dayElement);
+		}
+
+		// append days from the next month
+		for (var dayNum = daysInMonth + 1; dayNum <= 42 - self.firstOfMonth; dayNum++) {
+			var _curDate = new Date(self.currentYear, self.currentMonth + 1, dayNum % daysInMonth, 0, 0, 0, 0, 0),
+			    _dateIsEnabled = isEnabled(_curDate),
+			    _dayElement2 = createElement("span", "flatpickr-day nextMonthDay" + (!_dateIsEnabled ? " disabled" : "") + (isDateInRange(_curDate) ? " inRange" : "") + (self.selectedDates.length === 1 && (_curDate < self.minRangeDate || _curDate > self.maxRangeDate) ? " notAllowed" : "") + (isDateSelected(_curDate) !== false ? " selected" : ""), dayNum % daysInMonth);
+
+			_dayElement2.dateObj = _curDate;
+
+			if (self.config.weekNumbers && dayNum % 7 === 1) {
+				self.weekNumbers.insertAdjacentHTML("beforeend", "<span class='disabled flatpickr-day'>" + self.config.getWeek(_curDate) + "</span>");
+			}
+
+			if (_dateIsEnabled) _dayElement2.tabIndex = 0;else if (self.selectedDates[0] && _curDate > self.minRangeDate && _curDate < self.selectedDates[0]) self.minRangeDate = _curDate;else if (self.selectedDates[0] && _curDate < self.maxRangeDate && _curDate > self.selectedDates[0]) self.maxRangeDate = _curDate;
+
+			triggerEvent("DayCreate", _dayElement2);
+			days.appendChild(_dayElement2);
+		}
+		self.days.appendChild(days);
+		return self.days;
+	}
+
+	function buildMonthNav() {
+		var monthNavFragment = document.createDocumentFragment();
+		self.monthNav = createElement("div", "flatpickr-month");
+
+		self.prevMonthNav = createElement("span", "flatpickr-prev-month");
+		self.prevMonthNav.innerHTML = self.config.prevArrow;
+
+		self.currentMonthElement = createElement("span", "cur-month");
+
+		self.currentYearElement = createElement("input", "cur-year");
+		self.currentYearElement.type = self.numInputType;
+		self.currentYearElement.title = self.l10n.scrollTitle;
+
+		if (self.config.minDate) self.currentYearElement.min = self.config.minDate.getFullYear();
+
+		if (self.config.maxDate) {
+			self.currentYearElement.max = self.config.maxDate.getFullYear();
+
+			self.currentYearElement.disabled = self.config.minDate && self.config.minDate.getFullYear() === self.config.maxDate.getFullYear();
+		}
+
+		self.nextMonthNav = createElement("span", "flatpickr-next-month");
+		self.nextMonthNav.innerHTML = self.config.nextArrow;
+
+		self.navigationCurrentMonth = createElement("span", "flatpickr-current-month");
+		self.navigationCurrentMonth.appendChild(self.currentMonthElement);
+		self.navigationCurrentMonth.appendChild(self.currentYearElement);
+
+		monthNavFragment.appendChild(self.prevMonthNav);
+		monthNavFragment.appendChild(self.navigationCurrentMonth);
+		monthNavFragment.appendChild(self.nextMonthNav);
+		self.monthNav.appendChild(monthNavFragment);
+
+		updateNavigationCurrentMonth();
+
+		return self.monthNav;
+	}
+
+	function buildTime() {
+		self.calendarContainer.classList.add("hasTime");
+		self.timeContainer = createElement("div", "flatpickr-time");
+		self.timeContainer.tabIndex = -1;
+		var separator = createElement("span", "flatpickr-time-separator", ":");
+
+		self.hourElement = createElement("input", "flatpickr-hour");
+		self.minuteElement = createElement("input", "flatpickr-minute");
+
+		self.hourElement.tabIndex = self.minuteElement.tabIndex = 0;
+		self.hourElement.type = self.minuteElement.type = self.numInputType;
+		self.hourElement.pattern = self.minuteElement.pattern = "\d*";
+
+		self.hourElement.value = self.pad(latestSelectedDateObj() ? latestSelectedDateObj().getHours() : self.config.defaultHour);
+
+		self.minuteElement.value = self.pad(latestSelectedDateObj() ? latestSelectedDateObj().getMinutes() : self.config.defaultMinute);
+
+		self.hourElement.step = self.config.hourIncrement;
+		self.minuteElement.step = self.config.minuteIncrement;
+
+		self.hourElement.min = -(self.config.time_24hr ? 1 : 0);
+		self.hourElement.max = self.config.time_24hr ? 24 : 13;
+
+		self.minuteElement.min = -self.minuteElement.step;
+		self.minuteElement.max = 60;
+
+		self.hourElement.title = self.minuteElement.title = self.l10n.scrollTitle;
+
+		self.timeContainer.appendChild(self.hourElement);
+		self.timeContainer.appendChild(separator);
+		self.timeContainer.appendChild(self.minuteElement);
+
+		if (self.config.enableSeconds) {
+			self.timeContainer.classList.add("has-seconds");
+
+			self.secondElement = createElement("input", "flatpickr-second");
+			self.secondElement.type = self.numInputType;
+			self.secondElement.pattern = self.hourElement.pattern;
+			self.secondElement.value = latestSelectedDateObj() ? self.pad(latestSelectedDateObj().getSeconds()) : "00";
+
+			self.secondElement.step = self.minuteElement.step;
+			self.secondElement.min = self.minuteElement.min;
+			self.secondElement.max = self.minuteElement.max;
+
+			self.timeContainer.appendChild(createElement("span", "flatpickr-time-separator", ":"));
+			self.timeContainer.appendChild(self.secondElement);
+		}
+
+		if (!self.config.time_24hr) {
+			// add self.amPM if appropriate
+			self.amPM = createElement("span", "flatpickr-am-pm", ["AM", "PM"][self.hourElement.value > 11 | 0]);
+			self.amPM.title = self.l10n.toggleTitle;
+			self.amPM.tabIndex = 0;
+			self.timeContainer.appendChild(self.amPM);
+		}
+
+		return self.timeContainer;
+	}
+
+	function buildWeekdays() {
+		if (!self.weekdayContainer) self.weekdayContainer = createElement("div", "flatpickr-weekdays");
+
+		var firstDayOfWeek = self.l10n.firstDayOfWeek;
+		var weekdays = self.l10n.weekdays.shorthand.slice();
+
+		if (firstDayOfWeek > 0 && firstDayOfWeek < weekdays.length) {
+			weekdays = [].concat(weekdays.splice(firstDayOfWeek, weekdays.length), weekdays.splice(0, firstDayOfWeek));
+		}
+
+		self.weekdayContainer.innerHTML = "\n\t\t<span class=flatpickr-weekday>\n\t\t\t" + weekdays.join("</span><span class=flatpickr-weekday>") + "\n\t\t</span>\n\t\t";
+
+		return self.weekdayContainer;
+	}
+
+	function buildWeeks() {
+		self.calendarContainer.classList.add("hasWeeks");
+		self.weekWrapper = createElement("div", "flatpickr-weekwrapper");
+		self.weekWrapper.appendChild(createElement("span", "flatpickr-weekday", self.l10n.weekAbbreviation));
+		self.weekNumbers = createElement("div", "flatpickr-weeks");
+		self.weekWrapper.appendChild(self.weekNumbers);
+		return self.weekWrapper;
+	}
+
+	function changeMonth(value, is_offset) {
+		self.currentMonth = typeof is_offset === "undefined" || is_offset ? self.currentMonth + value : value;
+
+		handleYearChange();
+		updateNavigationCurrentMonth();
+		buildDays();
+
+		if (!self.config.noCalendar) self.days.focus();
+
+		triggerEvent("MonthChange");
+	}
+
+	function clear() {
+		self.input.value = "";
+
+		if (self.altInput) self.altInput.value = "";
+
+		if (self.mobileInput) self.mobileInput.value = "";
+
+		self.selectedDates = [];
+
+		triggerEvent("Change");
+	}
+
+	function close() {
+		self.isOpen = false;
+		self.calendarContainer.classList.remove("open");
+		(self.altInput || self.input).classList.remove("active");
+
+		triggerEvent("Close");
+	}
+
+	function destroy(instance) {
+		instance = instance || self;
+		instance.clear();
+
+		document.removeEventListener("keydown", onKeyDown);
+		window.removeEventListener("resize", instance.debouncedResize);
+
+		document.removeEventListener("click", documentClick);
+		document.removeEventListener("blur", documentClick);
+
+		if (instance.isMobile && instance.mobileInput && instance.mobileInput.parentNode) instance.mobileInput.parentNode.removeChild(instance.mobileInput);else if (instance.calendarContainer && instance.calendarContainer.parentNode) instance.calendarContainer.parentNode.removeChild(instance.calendarContainer);
+
+		if (instance.altInput) {
+			instance.input.type = "text";
+			if (instance.altInput.parentNode) instance.altInput.parentNode.removeChild(instance.altInput);
+		}
+
+		instance.input.classList.remove("flatpickr-input");
+		instance.input.removeEventListener("focus", open);
+		instance.input.removeAttribute("readonly");
+	}
+
+	function isCalendarElem(elem) {
+		var e = elem;
+		while (e) {
+			if (/flatpickr-day|flatpickr-calendar/.test(e.className)) return true;
+			e = e.parentNode;
+		}
+
+		return false;
+	}
+
+	function documentClick(e) {
+		var isInput = self.element.contains(e.target) || e.target === self.input || e.target === self.altInput;
+
+		if (self.isOpen && !isCalendarElem(e.target) && !isInput) {
+			self.close();
+
+			if (self.config.mode === "range" && self.selectedDates.length === 1) {
+				self.clear();
+				self.redraw();
+			}
+		}
+	}
+
+	function formatDate(frmt, dateObj) {
+		var chars = frmt.split("");
+		return chars.map(function (c, i) {
+			return self.formats[c] && chars[i - 1] !== "\\" ? self.formats[c](dateObj) : c !== "\\" ? c : "";
+		}).join("");
+	}
+
+	function handleYearChange(newYear) {
+		if (self.currentMonth < 0 || self.currentMonth > 11) {
+			self.currentYear += self.currentMonth % 11;
+			self.currentMonth = (self.currentMonth + 12) % 12;
+			triggerEvent("YearChange");
+		} else if (newYear && (!self.currentYearElement.min || newYear >= self.currentYearElement.min) && (!self.currentYearElement.max || newYear <= self.currentYearElement.max)) {
+			self.currentYear = parseInt(newYear, 10) || self.currentYear;
+
+			if (self.config.maxDate && self.currentYear === self.config.maxDate.getFullYear()) self.currentMonth = Math.min(self.config.maxDate.getMonth(), self.currentMonth);else if (self.config.minDate && self.currentYear === self.config.minDate.getFullYear()) self.currentMonth = Math.max(self.config.minDate.getMonth(), self.currentMonth);
+
+			self.redraw();
+			triggerEvent("YearChange");
+		}
+	}
+
+	function isEnabled(dateToCheck) {
+		if (self.config.minDate && dateToCheck < self.config.minDate || self.config.maxDate && dateToCheck > self.config.maxDate) return false;
+
+		if (!self.config.enable.length && !self.config.disable.length) return true;
+
+		dateToCheck = parseDate(dateToCheck, true); // timeless
+
+		var bool = self.config.enable.length > 0,
+		    array = bool ? self.config.enable : self.config.disable;
+
+		for (var i = 0, d; i < array.length; i++) {
+			d = array[i];
+
+			if (d instanceof Function && d(dateToCheck)) // disabled by function
+				return bool;else if ((d instanceof Date || typeof d === "string") && parseDate(d, true).getTime() === dateToCheck.getTime())
+				// disabled by date string
+				return bool;else if ( // disabled by range
+			(typeof d === "undefined" ? "undefined" : _typeof(d)) === "object" && d.from && d.to && dateToCheck >= parseDate(d.from) && dateToCheck <= parseDate(d.to)) return bool;
+		}
+
+		return !bool;
+	}
+
+	function onKeyDown(e) {
+		if (self.isOpen) {
+			switch (e.which) {
+				case 13:
+					if (self.timeContainer && self.timeContainer.contains(e.target)) updateValue();else selectDate(e);
+
+					break;
+
+				case 27:
+					// escape
+					self.clear();
+					self.redraw();
+					self.close();
+					break;
+
+				case 37:
+					if (e.target !== self.input & e.target !== self.altInput) changeMonth(-1);
+					break;
+
+				case 38:
+					e.preventDefault();
+
+					if (self.timeContainer && self.timeContainer.contains(e.target)) updateTime(e);else {
+						self.currentYear++;
+						self.redraw();
+					}
+
+					break;
+
+				case 39:
+					if (e.target !== self.input & e.target !== self.altInput) changeMonth(1);
+					break;
+
+				case 40:
+					e.preventDefault();
+					if (self.timeContainer && self.timeContainer.contains(e.target)) updateTime(e);else {
+						self.currentYear--;
+						self.redraw();
+					}
+
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	function onMouseOver(e) {
+		if (self.selectedDates.length !== 1 || !e.target.classList.contains("flatpickr-day")) return;
+
+		var hoverDate = e.target.dateObj,
+		    rangeStartDate = Math.min(hoverDate.getTime(), self.selectedDates[0].getTime()),
+		    rangeEndDate = Math.max(hoverDate.getTime(), self.selectedDates[0].getTime()),
+		    containsDisabled = false;
+
+		for (var t = rangeStartDate; t < rangeEndDate; t += self.utils.duration.DAY) {
+			if (!isEnabled(new Date(t))) {
+				containsDisabled = true;
+				break;
+			}
+		}
+
+		for (var timestamp = self.days.childNodes[0].dateObj.getTime(), i = 0; i < 42; i++, timestamp += self.utils.duration.DAY) {
+			if (timestamp < self.minRangeDate.getTime() || timestamp > self.maxRangeDate.getTime()) {
+				self.days.childNodes[i].classList.add("notAllowed");
+				self.days.childNodes[i].classList.remove("inRange");
+			} else if (!containsDisabled && timestamp > Math.max(self.minRangeDate.getTime(), rangeStartDate) && timestamp < Math.min(self.maxRangeDate.getTime(), rangeEndDate)) self.days.childNodes[i].classList.add("inRange");else self.days.childNodes[i].classList.remove("inRange");
+		}
+	}
+
+	function onResize() {
+		if (self.isOpen && !self.config.inline && !self.config.static) positionCalendar();
+	}
+
+	function open(e) {
+		if (self.isMobile) {
+			e.preventDefault();
+			e.target.blur();
+
+			setTimeout(function () {
+				self.mobileInput.click();
+			}, 0);
+
+			triggerEvent("Open");
+			return;
+		} else if (self.isOpen || (self.altInput || self.input).disabled || self.config.inline) return;
+
+		self.calendarContainer.classList.add("open");
+
+		if (!self.config.static) positionCalendar();
+
+		self.isOpen = true;
+
+		if (!self.config.allowInput) {
+			(self.altInput || self.input).blur();
+			(self.config.noCalendar ? self.timeContainer : self.selectedDateElem ? self.selectedDateElem : self.days).focus();
+		}
+
+		(self.altInput || self.input).classList.add("active");
+		triggerEvent("Open");
+	}
+
+	function parseConfig() {
+		var boolOpts = ["utc", "wrap", "weekNumbers", "allowInput", "clickOpens", "time_24hr", "enableTime", "noCalendar", "altInput", "shorthandCurrentMonth", "inline", "static", "enableSeconds", "disableMobile"];
+		self.config = Object.create(Flatpickr.defaultConfig);
+		var userConfig = _extends({}, self.instanceConfig, self.element.dataset || {});
+
+		Object.defineProperty(self.config, "minDate", {
+			get: function get() {
+				return this._minDate;
+			},
+			set: function set(date) {
+				this._minDate = parseDate(date, true);
+				if (self.days) redraw();
+
+				if (!self.currentYearElement) return;
+
+				if (date && this._minDate instanceof Date) self.currentYearElement.min = this._minDate.getFullYear();else {
+					self.currentYearElement.removeAttribute("min");
+				}
+
+				self.currentYearElement.disabled = this._maxDate && this._minDate && this._maxDate.getFullYear() === this._minDate.getFullYear();
+			}
+		});
+
+		Object.defineProperty(self.config, "maxDate", {
+			get: function get() {
+				return this._maxDate;
+			},
+			set: function set(date) {
+				this._maxDate = parseDate(date);
+				this._maxDate instanceof Date && this._maxDate.setHours(23, 59, 59, 999);
+				if (self.days) redraw();
+
+				if (!self.currentYearElement) return;
+
+				if (date && this._maxDate instanceof Date) self.currentYearElement.max = this._maxDate.getFullYear();else self.currentYearElement.removeAttribute("max");
+
+				self.currentYearElement.disabled = this._maxDate && this._minDate && this._maxDate.getFullYear() === this._minDate.getFullYear();
+			}
+		});
+
+		_extends(self.config, userConfig);
+
+		for (var i = 0; i < boolOpts.length; i++) {
+			self.config[boolOpts[i]] = self.config[boolOpts[i]] === true || self.config[boolOpts[i]] === "true";
+		}if (!userConfig.dateFormat && userConfig.enableTime) {
+			self.config.dateFormat = self.config.noCalendar ? "H:i" + (self.config.enableSeconds ? ":S" : "") : Flatpickr.defaultConfig.dateFormat + " H:i" + (self.config.enableSeconds ? ":S" : "");
+		}
+
+		if (userConfig.altInput && userConfig.enableTime && !userConfig.altFormat) {
+			self.config.altFormat = self.config.noCalendar ? "h:i" + (self.config.enableSeconds ? ":S K" : " K") : Flatpickr.defaultConfig.altFormat + (" h:i" + (self.config.enableSeconds ? ":S" : "") + " K");
+		}
+	}
+
+	function setupLocale() {
+		if (_typeof(self.config.locale) !== "object" && typeof Flatpickr.l10ns[self.config.locale] === "undefined") console.warn("flatpickr: invalid locale " + self.config.locale);
+
+		self.l10n = _extends(Object.create(Flatpickr.l10ns.default), _typeof(self.config.locale) === "object" ? self.config.locale : self.config.locale !== "default" ? Flatpickr.l10ns[self.config.locale] || {} : {});
+	}
+
+	function parseDate(date) {
+		var timeless = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+		if (!date) return null;
+
+		var dateTimeRegex = /(\d+)/g,
+		    timeRegex = /^(\d{1,2})[:\s](\d\d)?[:\s]?(\d\d)?\s?(a|p)?/i,
+		    timestamp = /^(\d+)$/g,
+		    date_orig = date;
+
+		if (date.toFixed) // timestamp
+			date = new Date(date);else if (typeof date === "string") {
+			date = date.trim();
+
+			if (date === "today") {
+				date = new Date();
+				timeless = true;
+			} else if (self.config.parseDate) date = self.config.parseDate(date);else if (timeRegex.test(date)) {
+				// time picker
+				var m = date.match(timeRegex),
+				    hours = !m[4] ? m[1] // military time, no conversion needed
+				: m[1] % 12 + (m[4].toLowerCase() === "p" ? 12 : 0); // am/pm
+
+				date = new Date();
+				date.setHours(hours, m[2] || 0, m[3] || 0);
+			} else if (/Z$/.test(date) || /GMT$/.test(date)) // datestrings w/ timezone
+				date = new Date(date);else if (dateTimeRegex.test(date) && /^[0-9]/.test(date)) {
+				var d = date.match(dateTimeRegex);
+				date = new Date(d[0] + "/" + (d[1] || 1) + "/" + (d[2] || 1) + " " + (d[3] || 0) + ":" + (d[4] || 0) + ":" + (d[5] || 0));
+			} else // fallback
+				date = new Date(date);
+		}
+
+		if (!(date instanceof Date)) {
+			console.warn("flatpickr: invalid date " + date_orig);
+			console.info(self.element);
+			return null;
+		}
+
+		if (self.config.utc && !date.fp_isUTC) date = date.fp_toUTC();
+
+		if (timeless) date.setHours(0, 0, 0, 0);
+
+		return date;
+	}
+
+	function positionCalendar() {
+		var calendarHeight = self.calendarContainer.offsetHeight,
+		    input = self.altInput || self.input,
+		    inputBounds = input.getBoundingClientRect(),
+		    distanceFromBottom = window.innerHeight - inputBounds.bottom + input.offsetHeight;
+
+		var top = void 0,
+		    left = window.pageXOffset + inputBounds.left;
+
+		if (distanceFromBottom < calendarHeight) {
+			top = window.pageYOffset - calendarHeight + inputBounds.top - 2;
+			self.calendarContainer.classList.remove("arrowTop");
+			self.calendarContainer.classList.add("arrowBottom");
+		} else {
+			top = window.pageYOffset + input.offsetHeight + inputBounds.top + 2;
+			self.calendarContainer.classList.remove("arrowBottom");
+			self.calendarContainer.classList.add("arrowTop");
+		}
+
+		if (!self.config.inline && !self.config.static) {
+			self.calendarContainer.style.top = top + "px";
+			self.calendarContainer.style.left = left + "px";
+		}
+	}
+
+	function redraw() {
+		if (self.config.noCalendar || self.isMobile) return;
+
+		buildWeekdays();
+		updateNavigationCurrentMonth();
+		buildDays();
+	}
+
+	function selectDate(e) {
+		if (self.config.allowInput && e.which === 13 && e.target === (self.altInput || self.input)) return self.setDate((self.altInput || self.input).value), e.target.blur();
+
+		if (!e.target.classList.contains("flatpickr-day") || e.target.classList.contains("disabled") || e.target.classList.contains("notAllowed")) return;
+
+		var selectedDate = e.target.dateObj;
+		self.selectedDateElem = e.target;
+
+		if (self.config.mode === "single") {
+			self.selectedDates = [selectedDate];
+
+			if (!self.config.enableTime) self.close();
+		} else if (self.config.mode === "multiple") {
+			var selectedIndex = isDateSelected(selectedDate);
+			if (selectedIndex) self.selectedDates.splice(selectedIndex, 1);else self.selectedDates.push(selectedDate);
+		} else if (self.config.mode === "range") {
+			if (self.selectedDates.length === 2) self.clear();
+
+			self.selectedDates.push(selectedDate);
+			self.selectedDates.sort(function (a, b) {
+				return a.getTime() - b.getTime();
+			});
+		}
+
+		setHoursFromInputs();
+
+		if (selectedDate.getMonth() !== self.currentMonth && self.config.mode !== "range") {
+			self.currentYear = selectedDate.getFullYear();
+			self.currentMonth = selectedDate.getMonth();
+			updateNavigationCurrentMonth();
+		}
+
+		updateValue();
+		buildDays();
+		triggerEvent("Change");
+
+		if (self.config.mode === "range" && self.selectedDates.length === 1) onMouseOver(e);
+	}
+
+	function set(option, value) {
+		self.config[option] = value;
+		self.redraw();
+		jumpToDate();
+	}
+
+	function setDate(date, triggerChange) {
+		if (!date) return self.clear();
+
+		self.selectedDates = (Array.isArray(date) ? date.map(parseDate) : [parseDate(date)]).filter(function (d) {
+			return d instanceof Date;
+		});
+		self.redraw();
+		jumpToDate();
+
+		setHoursFromDate();
+		updateValue();
+
+		if (triggerChange) triggerEvent("Change");
+	}
+
+	function setupDates() {
+		self.selectedDates = [];
+		self.now = new Date();
+		var inputDate = self.config.defaultDate || self.input.value;
+
+		if (Array.isArray(inputDate)) self.selectedDates = inputDate.map(parseDate);else if (inputDate) {
+			switch (self.config.mode) {
+				case "single":
+					self.selectedDates = [parseDate(inputDate)];
+					break;
+
+				case "multiple":
+					self.selectedDates = inputDate.split("; ").map(parseDate);
+					break;
+
+				case "range":
+					self.selectedDates = inputDate.split(" to ").map(parseDate);
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		self.selectedDates = self.selectedDates.filter(function (d) {
+			return d instanceof Date && d.getTime() && isEnabled(d);
+		});
+
+		var initialDate = self.selectedDates.length ? self.selectedDates[0] : self.config.minDate > self.now ? self.config.minDate : self.now;
+
+		self.currentYear = initialDate.getFullYear();
+		self.currentMonth = initialDate.getMonth();
+	}
+
+	function setupHelperFunctions() {
+		self.utils = {
+			duration: {
+				DAY: 86400000
+			},
+			getDaysinMonth: function getDaysinMonth() {
+				var month = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : self.currentMonth;
+				var yr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : self.currentYear;
+
+				if (month === 1 && yr % 4 === 0 && yr % 100 !== 0 || yr % 400 === 0) return 29;
+				return self.l10n.daysInMonth[month];
+			},
+
+			monthToStr: function monthToStr(monthNumber) {
+				var short = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : self.config.shorthandCurrentMonth;
+				return self.l10n.months[(short ? "short" : "long") + "hand"][monthNumber];
+			}
+		};
+	}
+
+	function setupFormats() {
+		self.formats = {
+			// weekday name, short, e.g. Thu
+			D: function D(date) {
+				return self.l10n.weekdays.shorthand[self.formats.w(date)];
+			},
+
+			// full month name e.g. January
+			F: function F(date) {
+				return self.utils.monthToStr(self.formats.n(date) - 1, false);
+			},
+
+			// hours with leading zero e.g. 03
+			H: function H(date) {
+				return Flatpickr.prototype.pad(date.getHours());
+			},
+
+			// day (1-30) with ordinal suffix e.g. 1st, 2nd
+			J: function J(date) {
+				return date.getDate() + self.l10n.ordinal(date.getDate());
+			},
+
+			// AM/PM
+			K: function K(date) {
+				return date.getHours() > 11 ? "PM" : "AM";
+			},
+
+			// shorthand month e.g. Jan, Sep, Oct, etc
+			M: function M(date) {
+				return self.utils.monthToStr(date.getMonth(), true);
+			},
+
+			// seconds 00-59
+			S: function S(date) {
+				return Flatpickr.prototype.pad(date.getSeconds());
+			},
+
+			// unix timestamp
+			U: function U(date) {
+				return date.getTime() / 1000;
+			},
+
+			// full year e.g. 2016
+			Y: function Y(date) {
+				return date.getFullYear();
+			},
+
+			// day in month, padded (01-30)
+			d: function d(date) {
+				return Flatpickr.prototype.pad(self.formats.j(date));
+			},
+
+			// hour from 1-12 (am/pm)
+			h: function h(date) {
+				return date.getHours() % 12 ? date.getHours() % 12 : 12;
+			},
+
+			// minutes, padded with leading zero e.g. 09
+			i: function i(date) {
+				return Flatpickr.prototype.pad(date.getMinutes());
+			},
+
+			// day in month (1-30)
+			j: function j(date) {
+				return date.getDate();
+			},
+
+			// weekday name, full, e.g. Thursday
+			l: function l(date) {
+				return self.l10n.weekdays.longhand[self.formats.w(date)];
+			},
+
+			// padded month number (01-12)
+			m: function m(date) {
+				return Flatpickr.prototype.pad(self.formats.n(date));
+			},
+
+			// the month number (1-12)
+			n: function n(date) {
+				return date.getMonth() + 1;
+			},
+
+			// seconds 0-59
+			s: function s(date) {
+				return date.getSeconds();
+			},
+
+			// number of the day of the week
+			w: function w(date) {
+				return date.getDay();
+			},
+
+			// last two digits of year e.g. 16 for 2016
+			y: function y(date) {
+				return String(self.formats.Y(date)).substring(2);
+			}
+		};
+	}
+
+	function setupInputs() {
+		self.input = self.config.wrap ? self.element.querySelector("[data-input]") : self.element;
+
+		self.input.classList.add("flatpickr-input");
+		if (self.config.altInput) {
+			// replicate self.element
+			self.altInput = createElement(self.input.nodeName, self.config.altInputClass);
+			self.altInput.placeholder = self.input.placeholder;
+			self.altInput.type = "text";
+
+			self.input.type = "hidden";
+			if (self.input.parentNode) self.input.parentNode.insertBefore(self.altInput, self.input.nextSibling);
+		}
+
+		if (!self.config.allowInput) (self.altInput || self.input).setAttribute("readonly", "readonly");
+	}
+
+	function setupMobile() {
+		var inputType = self.config.enableTime ? self.config.noCalendar ? "time" : "datetime-local" : "date";
+
+		self.mobileInput = createElement("input", "flatpickr-input flatpickr-mobile");
+		self.mobileInput.step = "any";
+		self.mobileInput.tabIndex = -1;
+		self.mobileInput.type = inputType;
+		self.mobileInput.disabled = self.input.disabled;
+
+		self.mobileFormatStr = inputType === "datetime-local" ? "Y-m-d\\TH:i:S" : inputType === "date" ? "Y-m-d" : "H:i:S";
+
+		if (self.selectedDates.length) {
+			self.mobileInput.defaultValue = self.mobileInput.value = formatDate(self.mobileFormatStr, self.selectedDates[0]);
+		}
+
+		if (self.config.minDate) self.mobileInput.min = formatDate("Y-m-d", self.config.minDate);
+
+		if (self.config.maxDate) self.mobileInput.max = formatDate("Y-m-d", self.config.maxDate);
+
+		self.input.type = "hidden";
+		if (self.config.altInput) self.altInput.type = "hidden";
+
+		try {
+			self.input.parentNode.insertBefore(self.mobileInput, self.input.nextSibling);
+		} catch (e) {
+			//
+		}
+
+		self.mobileInput.addEventListener("change", function (e) {
+			self.setDate(e.target.value);
+			triggerEvent("Change");
+			triggerEvent("Close");
+		});
+	}
+
+	function toggle() {
+		if (self.isOpen) self.close();else self.open();
+	}
+
+	function triggerEvent(event, data) {
+		if (self.config["on" + event]) {
+			var hooks = Array.isArray(self.config["on" + event]) ? self.config["on" + event] : [self.config["on" + event]];
+
+			for (var i = 0; i < hooks.length; i++) {
+				hooks[i](self.selectedDates, self.input.value, self, data);
+			}
+		}
+
+		if (event === "Change") {
+			try {
+				self.input.dispatchEvent(new Event("change", { "bubbles": true }));
+
+				// many front-end frameworks bind to the input event
+				self.input.dispatchEvent(new Event("input", { "bubbles": true }));
+			} catch (e) {
+				if ("createEvent" in document) return self.input.dispatchEvent(self.changeEvent);
+
+				self.input.fireEvent("onchange");
+			}
+		}
+	}
+
+	function latestSelectedDateObj() {
+		if (self.selectedDates.length) return self.selectedDates[self.selectedDates.length - 1];
+		return null;
+	}
+
+	function isDateSelected(date) {
+		for (var i = 0; i < self.selectedDates.length; i++) {
+			if (equalDates(self.selectedDates[i], date)) return "" + i;
+		}
+
+		return false;
+	}
+
+	function isDateInRange(date) {
+		if (self.config.mode !== "range" || self.selectedDates.length < 2) return false;
+		return date > self.selectedDates[0] && date < self.selectedDates[1];
+	}
+
+	function updateNavigationCurrentMonth() {
+		if (self.config.noCalendar || self.isMobile || !self.monthNav) return;
+
+		self.currentMonthElement.textContent = self.utils.monthToStr(self.currentMonth) + " ";
+		self.currentYearElement.value = self.currentYear;
+
+		if (self.config.minDate) {
+			var hidePrevMonthArrow = self.currentYear === self.config.minDate.getFullYear() ? (self.currentMonth + 11) % 12 < self.config.minDate.getMonth() : self.currentYear < self.config.minDate.getFullYear();
+
+			self.prevMonthNav.style.display = hidePrevMonthArrow ? "none" : "block";
+		} else self.prevMonthNav.style.display = "block";
+
+		if (self.config.maxDate) {
+			var hideNextMonthArrow = self.currentYear === self.config.maxDate.getFullYear() ? self.currentMonth + 1 > self.config.maxDate.getMonth() : self.currentYear > self.config.maxDate.getFullYear();
+
+			self.nextMonthNav.style.display = hideNextMonthArrow ? "none" : "block";
+		} else self.nextMonthNav.style.display = "block";
+	}
+
+	function updateValue() {
+		if (!self.selectedDates.length) return self.clear();
+
+		if (self.isMobile) {
+			self.mobileInput.value = self.selectedDates.length ? formatDate(self.mobileFormatStr, latestSelectedDateObj()) : "";
+		}
+
+		var joinChar = self.config.mode !== "range" ? "; " : " to ";
+
+		self.input.value = self.selectedDates.map(function (dObj) {
+			return formatDate(self.config.dateFormat, dObj);
+		}).join(joinChar);
+
+		if (self.config.altInput) {
+			self.altInput.value = self.selectedDates.map(function (dObj) {
+				return formatDate(self.config.altFormat, dObj);
+			}).join(joinChar);
+		}
+
+		triggerEvent("ValueUpdate");
+	}
+
+	function yearScroll(e) {
+		e.preventDefault();
+
+		var delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.deltaY)),
+		    newYear = parseInt(e.target.value, 10) + delta;
+
+		handleYearChange(newYear);
+		e.target.value = self.currentYear;
+	}
+
+	function createElement(tag) {
+		var className = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+		var content = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
+
+		var e = document.createElement(tag);
+		e.className = className;
+
+		if (content) e.textContent = content;
+
+		return e;
+	}
+
+	function debounce(func, wait, immediate) {
+		var timeout = void 0;
+		return function () {
+			for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+				args[_key] = arguments[_key];
+			}
+
+			var context = this;
+			var later = function later() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (immediate && !timeout) func.apply(context, args);
+		};
+	}
+
+	function equalDates(date1, date2) {
+		if (!(date1 instanceof Date) || !(date2 instanceof Date)) return false;
+		return date1.getDate() === date2.getDate() && date1.getMonth() === date2.getMonth() && date1.getFullYear() === date2.getFullYear();
+	}
+
+	function timeWrapper(e) {
+		e.preventDefault();
+		if (e && ((e.target.value || e.target.textContent).length >= 2 || e.type !== "keydown" && e.type !== "input")) e.target.blur();
+
+		if (e.target.className === "flatpickr-am-pm") {
+			e.target.textContent = ["AM", "PM"][e.target.textContent === "AM" | 0];
+			return;
+		}
+
+		var min = parseInt(e.target.min, 10),
+		    max = parseInt(e.target.max, 10),
+		    step = parseInt(e.target.step, 10),
+		    value = parseInt(e.target.value, 10);
+
+		var newValue = value;
+
+		if (e.type === "wheel") newValue = value + step * Math.max(-1, Math.min(1, e.wheelDelta || -e.deltaY));else if (e.type === "keydown") newValue = value + step * (e.which === 38 ? 1 : -1);
+
+		if (newValue <= min) newValue = max - step;else if (newValue >= max) newValue = min + step;
+
+		if (self.amPM && (value === 11 && newValue === 12 || value === 12 && newValue === 11)) self.amPM.textContent = self.amPM.innerHTML === "PM" ? "AM" : "PM";
+
+		e.target.value = self.pad(newValue);
+	}
+
+	init();
+	return self;
+}
+
+Flatpickr.defaultConfig = {
+
+	mode: "single",
+
+	/* if true, dates will be parsed, formatted, and displayed in UTC.
+ preloading date strings w/ timezones is recommended but not necessary */
+	utc: false,
+
+	// wrap: see https://chmln.github.io/flatpickr/#strap
+	wrap: false,
+
+	// enables week numbers
+	weekNumbers: false,
+
+	// allow manual datetime input
+	allowInput: false,
+
+	/*
+ 	clicking on input opens the date(time)picker.
+ 	disable if you wish to open the calendar manually with .open()
+ */
+	clickOpens: true,
+
+	// display time picker in 24 hour mode
+	time_24hr: false,
+
+	// enables the time picker functionality
+	enableTime: false,
+
+	// noCalendar: true will hide the calendar. use for a time picker along w/ enableTime
+	noCalendar: false,
+
+	// more date format chars at https://chmln.github.io/flatpickr/#dateformat
+	dateFormat: "Y-m-d",
+
+	// altInput - see https://chmln.github.io/flatpickr/#altinput
+	altInput: false,
+
+	// the created altInput element will have this class.
+	altInputClass: "form-control input",
+
+	// same as dateFormat, but for altInput
+	altFormat: "F j, Y", // defaults to e.g. June 10, 2016
+
+	// defaultDate - either a datestring or a date object. used for datetimepicker"s initial value
+	defaultDate: null,
+
+	// the minimum date that user can pick (inclusive)
+	minDate: null,
+
+	// the maximum date that user can pick (inclusive)
+	maxDate: null,
+
+	// dateparser that transforms a given string to a date object
+	parseDate: null,
+
+	getWeek: function getWeek(givenDate) {
+		var date = new Date(givenDate.getTime());
+		date.setHours(0, 0, 0, 0);
+
+		// Thursday in current week decides the year.
+		date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+		// January 4 is always in week 1.
+		var week1 = new Date(date.getFullYear(), 0, 4);
+		// Adjust to Thursday in week 1 and count number of weeks from date to week1.
+		return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+	},
+
+	// see https://chmln.github.io/flatpickr/#disable
+	enable: [],
+
+	// see https://chmln.github.io/flatpickr/#disable
+	disable: [],
+
+	// display the short version of month names - e.g. Sep instead of September
+	shorthandCurrentMonth: false,
+
+	// displays calendar inline. see https://chmln.github.io/flatpickr/#inline-calendar
+	inline: false,
+
+	// position calendar inside wrapper and next to the input element
+	// leave at false unless you know what you"re doing
+	static: false,
+
+	// DOM node to append the calendar to in *static* mode
+	appendTo: null,
+
+	// code for previous/next icons. this is where you put your custom icon code e.g. fontawesome
+	prevArrow: "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 17 17'><g></g><path d='M5.207 8.471l7.146 7.147-0.707 0.707-7.853-7.854 7.854-7.853 0.707 0.707-7.147 7.146z' /></svg>",
+	nextArrow: "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 17 17'><g></g><path d='M13.207 8.472l-7.854 7.854-0.707-0.707 7.146-7.146-7.146-7.148 0.707-0.707 7.854 7.854z' /></svg>",
+
+	// enables seconds in the time picker
+	enableSeconds: false,
+
+	// step size used when scrolling/incrementing the hour element
+	hourIncrement: 1,
+
+	// step size used when scrolling/incrementing the minute element
+	minuteIncrement: 5,
+
+	// initial value in the hour element
+	defaultHour: 12,
+
+	// initial value in the minute element
+	defaultMinute: 0,
+
+	// disable native mobile datetime input support
+	disableMobile: false,
+
+	// default locale
+	locale: "default",
+
+	// onChange callback when user selects a date or time
+	onChange: null, // function (dateObj, dateStr) {}
+
+	// called every time calendar is opened
+	onOpen: null, // function (dateObj, dateStr) {}
+
+	// called every time calendar is closed
+	onClose: null, // function (dateObj, dateStr) {}
+
+	// called after calendar is ready
+	onReady: null, // function (dateObj, dateStr) {}
+
+	onValueUpdate: null,
+
+	onDayCreate: null
+};
+
+Flatpickr.l10ns = {
+	en: {
+		weekdays: {
+			shorthand: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+			longhand: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+		},
+		months: {
+			shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+			longhand: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+		},
+		daysInMonth: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+		firstDayOfWeek: 0,
+		ordinal: function ordinal(nth) {
+			var s = nth % 100;
+			if (s > 3 && s < 21) return "th";
+			switch (s % 10) {
+				case 1:
+					return "st";
+				case 2:
+					return "nd";
+				case 3:
+					return "rd";
+				default:
+					return "th";
+			}
+		},
+		weekAbbreviation: "Wk",
+		scrollTitle: "Scroll to increment",
+		toggleTitle: "Click to toggle"
+	}
+};
+
+Flatpickr.l10ns.default = Flatpickr.l10ns.en;
+
+Flatpickr.localize = function (l10n) {
+	return _extends(Flatpickr.l10ns.default, l10n || {});
+};
+
+Flatpickr.prototype = {
+	pad: function pad(number) {
+		return ("0" + number).slice(-2);
+	}
+};
+
+function _flatpickr(nodeList, config) {
+	var instances = [];
+	for (var i = 0; i < nodeList.length; i++) {
+		try {
+			nodeList[i]._flatpickr = new Flatpickr(nodeList[i], config || {});
+			instances.push(nodeList[i]._flatpickr);
+		} catch (e) {
+			console.warn(e, e.stack);
+		}
+	}
+
+	return instances.length === 1 ? instances[0] : instances;
+}
+if (typeof HTMLElement !== "undefined") {
+	// browser env
+	HTMLCollection.prototype.flatpickr = NodeList.prototype.flatpickr = function (config) {
+		return _flatpickr(this, config);
+	};
+
+	HTMLElement.prototype.flatpickr = function (config) {
+		return _flatpickr([this], config);
+	};
+}
+
+function flatpickr(selector, config) {
+	return _flatpickr(document.querySelectorAll(selector), config);
+}
+
+if (typeof jQuery !== "undefined") {
+	jQuery.fn.flatpickr = function (config) {
+		return _flatpickr(this, config);
+	};
+}
+
+Date.prototype.fp_incr = function (days) {
+	return new Date(this.getFullYear(), this.getMonth(), this.getDate() + parseInt(days, 10));
+};
+
+Date.prototype.fp_isUTC = false;
+Date.prototype.fp_toUTC = function () {
+	var newDate = new Date(this.getUTCFullYear(), this.getUTCMonth(), this.getUTCDate(), this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds());
+
+	newDate.fp_isUTC = true;
+	return newDate;
+};
+
+// IE9 classList polyfill
+if (!("classList" in document.documentElement) && Object.defineProperty && typeof HTMLElement !== "undefined") {
+	Object.defineProperty(HTMLElement.prototype, "classList", {
+		get: function get() {
+			var self = this;
+			function update(fn) {
+				return function (value) {
+					var classes = self.className.split(/\s+/),
+					    index = classes.indexOf(value);
+
+					fn(classes, index, value);
+					self.className = classes.join(" ");
+				};
+			}
+
+			var ret = {
+				add: update(function (classes, index, value) {
+					if (!~index) classes.push(value);
+				}),
+
+				remove: update(function (classes, index) {
+					if (~index) classes.splice(index, 1);
+				}),
+
+				toggle: update(function (classes, index, value) {
+					if (~index) classes.splice(index, 1);else classes.push(value);
+				}),
+
+				contains: function contains(value) {
+					return !!~self.className.split(/\s+/).indexOf(value);
+				},
+
+				item: function item(i) {
+					return self.className.split(/\s+/)[i] || null;
+				}
+			};
+
+			Object.defineProperty(ret, "length", {
+				get: function get() {
+					return self.className.split(/\s+/).length;
+				}
+			});
+
+			return ret;
+		}
+	});
+}
+
+if (typeof module !== "undefined") module.exports = Flatpickr;
+
+},{}],42:[function(require,module,exports){
 (function (global){
 /*!
     localForage -- Offline Storage, Improved
@@ -7860,7 +9381,7 @@ module.exports = localforage_js;
 },{"3":3}]},{},[4])(4)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 //! moment.js
 //! version : 2.16.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -12160,7 +13681,7 @@ return hooks;
 
 })));
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * Specific customUtils for the browser, where we don't have access to the Crypto and Buffer modules
  */
@@ -12240,7 +13761,7 @@ function uid (len) {
 
 module.exports.uid = uid;
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * Way data is stored for this database
  * For a Node.js/Node Webkit database it's the file system
@@ -12337,12 +13858,12 @@ module.exports.mkdirp = mkdirp;
 module.exports.ensureDatafileIntegrity = ensureDatafileIntegrity;
 
 
-},{"localforage":41}],45:[function(require,module,exports){
+},{"localforage":42}],46:[function(require,module,exports){
 var Datastore = require('./lib/datastore');
 
 module.exports = Datastore;
 
-},{"./lib/datastore":47}],46:[function(require,module,exports){
+},{"./lib/datastore":48}],47:[function(require,module,exports){
 /**
  * Manage access to data, be it to find, update or remove it
  */
@@ -12548,7 +14069,7 @@ Cursor.prototype.exec = function () {
 // Interface
 module.exports = Cursor;
 
-},{"./model":50,"underscore":207}],47:[function(require,module,exports){
+},{"./model":51,"underscore":207}],48:[function(require,module,exports){
 var customUtils = require('./customUtils')
   , model = require('./model')
   , async = require('async')
@@ -13254,7 +14775,7 @@ Datastore.prototype.remove = function () {
 
 module.exports = Datastore;
 
-},{"./cursor":46,"./customUtils":43,"./executor":48,"./indexes":49,"./model":50,"./persistence":51,"async":13,"events":208,"underscore":207,"util":213}],48:[function(require,module,exports){
+},{"./cursor":47,"./customUtils":44,"./executor":49,"./indexes":50,"./model":51,"./persistence":52,"async":13,"events":208,"underscore":207,"util":213}],49:[function(require,module,exports){
 (function (process){
 /**
  * Responsible for sequentially executing actions on the database
@@ -13336,7 +14857,7 @@ Executor.prototype.processBuffer = function () {
 module.exports = Executor;
 
 }).call(this,require('_process'))
-},{"_process":210,"async":13}],49:[function(require,module,exports){
+},{"_process":210,"async":13}],50:[function(require,module,exports){
 var BinarySearchTree = require('binary-search-tree').AVLTree
   , model = require('./model')
   , _ = require('underscore')
@@ -13632,7 +15153,7 @@ Index.prototype.getAll = function () {
 // Interface
 module.exports = Index;
 
-},{"./model":50,"binary-search-tree":14,"underscore":207,"util":213}],50:[function(require,module,exports){
+},{"./model":51,"binary-search-tree":14,"underscore":207,"util":213}],51:[function(require,module,exports){
 /**
  * Handle models (i.e. docs)
  * Serialization/deserialization
@@ -14469,7 +15990,7 @@ module.exports.match = match;
 module.exports.areThingsEqual = areThingsEqual;
 module.exports.compareThings = compareThings;
 
-},{"underscore":207,"util":213}],51:[function(require,module,exports){
+},{"underscore":207,"util":213}],52:[function(require,module,exports){
 (function (process){
 /**
  * Handle every persistence-related task
@@ -14787,7 +16308,7 @@ Persistence.prototype.loadDatabase = function (cb) {
 module.exports = Persistence;
 
 }).call(this,require('_process'))
-},{"./customUtils":43,"./indexes":49,"./model":50,"./storage":44,"_process":210,"async":13,"path":209}],52:[function(require,module,exports){
+},{"./customUtils":44,"./indexes":50,"./model":51,"./storage":45,"_process":210,"async":13,"path":209}],53:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -14872,16 +16393,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],53:[function(require,module,exports){
-!function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e(require("moment"),require("react"),require("react-onclickoutside"),require("react-dom")):"function"==typeof define&&define.amd?define(["moment","react","react-onclickoutside","react-dom"],e):"object"==typeof exports?exports.DatePicker=e(require("moment"),require("react"),require("react-onclickoutside"),require("react-dom")):t.DatePicker=e(t.moment,t.React,t.OnClickOutside,t.ReactDOM)}(this,function(t,e,r,n){return function(t){function e(n){if(r[n])return r[n].exports;var o=r[n]={exports:{},id:n,loaded:!1};return t[n].call(o.exports,o,o.exports,e),o.loaded=!0,o.exports}var r={};return e.m=t,e.c=r,e.p="",e(0)}([function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}function o(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}var a=r(1),i=n(a),s=r(5),u=n(s),p=r(3),l=n(p),c=r(133),f=n(c),d=r(143),h=n(d),y=r(122),m=n(y),g=r(4),v=r(2),b=n(v),D="react-datepicker-ignore-onclickoutside",_=l["default"].createClass({displayName:"DatePicker",propTypes:{autoComplete:l["default"].PropTypes.string,autoFocus:l["default"].PropTypes.bool,className:l["default"].PropTypes.string,customInput:l["default"].PropTypes.element,dateFormat:l["default"].PropTypes.oneOfType([l["default"].PropTypes.string,l["default"].PropTypes.array]),dateFormatCalendar:l["default"].PropTypes.string,disabled:l["default"].PropTypes.bool,dropdownMode:l["default"].PropTypes.oneOf(["scroll","select"]).isRequired,endDate:l["default"].PropTypes.object,excludeDates:l["default"].PropTypes.array,filterDate:l["default"].PropTypes.func,fixedHeight:l["default"].PropTypes.bool,highlightDates:l["default"].PropTypes.array,id:l["default"].PropTypes.string,includeDates:l["default"].PropTypes.array,inline:l["default"].PropTypes.bool,isClearable:l["default"].PropTypes.bool,locale:l["default"].PropTypes.string,maxDate:l["default"].PropTypes.object,minDate:l["default"].PropTypes.object,monthsShown:l["default"].PropTypes.number,name:l["default"].PropTypes.string,onBlur:l["default"].PropTypes.func,onChange:l["default"].PropTypes.func.isRequired,onFocus:l["default"].PropTypes.func,openToDate:l["default"].PropTypes.object,peekNextMonth:l["default"].PropTypes.bool,placeholderText:l["default"].PropTypes.string,popoverAttachment:l["default"].PropTypes.string,popoverTargetAttachment:l["default"].PropTypes.string,popoverTargetOffset:l["default"].PropTypes.string,readOnly:l["default"].PropTypes.bool,renderCalendarTo:l["default"].PropTypes.any,required:l["default"].PropTypes.bool,scrollableYearDropdown:l["default"].PropTypes.bool,selected:l["default"].PropTypes.object,selectsEnd:l["default"].PropTypes.bool,selectsStart:l["default"].PropTypes.bool,showMonthDropdown:l["default"].PropTypes.bool,showWeekNumbers:l["default"].PropTypes.bool,showYearDropdown:l["default"].PropTypes.bool,startDate:l["default"].PropTypes.object,tabIndex:l["default"].PropTypes.number,tetherConstraints:l["default"].PropTypes.array,title:l["default"].PropTypes.string,todayButton:l["default"].PropTypes.string,utcOffset:l["default"].PropTypes.number},getDefaultProps:function(){return{dateFormatCalendar:"MMMM YYYY",onChange:function(){},disabled:!1,dropdownMode:"scroll",onFocus:function(){},onBlur:function(){},popoverAttachment:"top left",popoverTargetAttachment:"bottom left",popoverTargetOffset:"10px 0",tetherConstraints:[{to:"window",attachment:"together"}],utcOffset:b["default"].utc().utcOffset(),monthsShown:1}},getInitialState:function(){return{open:!1}},setFocus:function(){this.refs.input.focus()},setOpen:function(t){this.setState({open:t})},handleFocus:function(t){this.props.onFocus(t),this.setOpen(!0)},cancelFocusInput:function(){clearTimeout(this.inputFocusTimeout),this.inputFocusTimeout=null},deferFocusInput:function(){var t=this;this.cancelFocusInput(),this.inputFocusTimeout=(0,f["default"])(function(){return t.setFocus()})},handleDropdownFocus:function(){this.cancelFocusInput()},handleBlur:function(t){this.state.open?this.deferFocusInput():this.props.onBlur(t)},handleCalendarClickOutside:function(t){this.setOpen(!1)},handleSelect:function(t,e){this.setSelected(t,e),this.setOpen(!1)},setSelected:function(t,e){(0,g.isSameDay)(this.props.selected,t)||this.props.onChange(t,e)},onInputClick:function(){this.props.disabled||this.setOpen(!0)},onInputKeyDown:function(t){var e=(0,b["default"])(this.props.selected);"Enter"===t.key||"Escape"===t.key?(t.preventDefault(),this.setOpen(!1)):"Tab"===t.key?this.setOpen(!1):"ArrowLeft"===t.key?(t.preventDefault(),this.setSelected(e.subtract(1,"days"))):"ArrowRight"===t.key?(t.preventDefault(),this.setSelected(e.add(1,"days"))):"ArrowUp"===t.key?(t.preventDefault(),this.setSelected(e.subtract(1,"weeks"))):"ArrowDown"===t.key?(t.preventDefault(),this.setSelected(e.add(1,"weeks"))):"PageUp"===t.key?(t.preventDefault(),this.setSelected(e.subtract(1,"months"))):"PageDown"===t.key?(t.preventDefault(),this.setSelected(e.add(1,"months"))):"Home"===t.key?(t.preventDefault(),this.setSelected(e.subtract(1,"years"))):"End"===t.key&&(t.preventDefault(),this.setSelected(e.add(1,"years")))},onClearClick:function(t){t.preventDefault(),this.props.onChange(null,t)},renderCalendar:function(){return this.props.inline||this.state.open&&!this.props.disabled?l["default"].createElement(u["default"],{ref:"calendar",locale:this.props.locale,dateFormat:this.props.dateFormatCalendar,dropdownMode:this.props.dropdownMode,selected:this.props.selected,onSelect:this.handleSelect,openToDate:this.props.openToDate,minDate:this.props.minDate,maxDate:this.props.maxDate,selectsStart:this.props.selectsStart,selectsEnd:this.props.selectsEnd,startDate:this.props.startDate,endDate:this.props.endDate,excludeDates:this.props.excludeDates,filterDate:this.props.filterDate,onClickOutside:this.handleCalendarClickOutside,highlightDates:this.props.highlightDates,includeDates:this.props.includeDates,peekNextMonth:this.props.peekNextMonth,showMonthDropdown:this.props.showMonthDropdown,showWeekNumbers:this.props.showWeekNumbers,showYearDropdown:this.props.showYearDropdown,scrollableYearDropdown:this.props.scrollableYearDropdown,todayButton:this.props.todayButton,utcOffset:this.props.utcOffset,outsideClickIgnoreClass:D,fixedHeight:this.props.fixedHeight,monthsShown:this.props.monthsShown,onDropdownFocus:this.handleDropdownFocus}):null},renderDateInput:function(){var t=(0,m["default"])(this.props.className,o({},D,this.state.open));return l["default"].createElement(i["default"],{ref:"input",id:this.props.id,name:this.props.name,autoFocus:this.props.autoFocus,date:this.props.selected,locale:this.props.locale,minDate:this.props.minDate,maxDate:this.props.maxDate,excludeDates:this.props.excludeDates,includeDates:this.props.includeDates,filterDate:this.props.filterDate,dateFormat:this.props.dateFormat,onFocus:this.handleFocus,onBlur:this.handleBlur,onClick:this.onInputClick,onKeyDown:this.onInputKeyDown,onChangeDate:this.setSelected,placeholder:this.props.placeholderText,disabled:this.props.disabled,autoComplete:this.props.autoComplete,className:t,title:this.props.title,readOnly:this.props.readOnly,required:this.props.required,tabIndex:this.props.tabIndex,customInput:this.props.customInput})},renderClearButton:function(){return this.props.isClearable&&null!=this.props.selected?l["default"].createElement("a",{className:"react-datepicker__close-icon",href:"#",onClick:this.onClearClick}):null},render:function(){var t=this.renderCalendar();return this.props.inline?t:l["default"].createElement(h["default"],{classPrefix:"react-datepicker__tether",attachment:this.props.popoverAttachment,targetAttachment:this.props.popoverTargetAttachment,targetOffset:this.props.popoverTargetOffset,renderElementTo:this.props.renderCalendarTo,constraints:this.props.tetherConstraints},l["default"].createElement("div",{className:"react-datepicker__input-container"},this.renderDateInput(),this.renderClearButton()),t)}});t.exports=_},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}function o(t,e){var r={};for(var n in t)e.indexOf(n)>=0||Object.prototype.hasOwnProperty.call(t,n)&&(r[n]=t[n]);return r}var a=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var r=arguments[e];for(var n in r)Object.prototype.hasOwnProperty.call(r,n)&&(t[n]=r[n])}return t},i=r(2),s=n(i),u=r(3),p=n(u),l=r(4),c=p["default"].createClass({displayName:"DateInput",propTypes:{customInput:p["default"].PropTypes.element,date:p["default"].PropTypes.object,dateFormat:p["default"].PropTypes.oneOfType([p["default"].PropTypes.string,p["default"].PropTypes.array]),disabled:p["default"].PropTypes.bool,excludeDates:p["default"].PropTypes.array,filterDate:p["default"].PropTypes.func,includeDates:p["default"].PropTypes.array,locale:p["default"].PropTypes.string,maxDate:p["default"].PropTypes.object,minDate:p["default"].PropTypes.object,onBlur:p["default"].PropTypes.func,onChange:p["default"].PropTypes.func,onChangeDate:p["default"].PropTypes.func},getDefaultProps:function(){return{dateFormat:"L"}},getInitialState:function(){return{value:this.safeDateFormat(this.props)}},componentWillReceiveProps:function(t){(0,l.isSameDay)(t.date,this.props.date)&&t.locale===this.props.locale&&t.dateFormat===this.props.dateFormat||this.setState({value:this.safeDateFormat(t)})},handleChange:function(t){this.props.onChange&&this.props.onChange(t),t.defaultPrevented||this.handleChangeDate(t.target.value)},handleChangeDate:function(t){if(this.props.onChangeDate){var e=(0,s["default"])(t,this.props.dateFormat,this.props.locale||s["default"].locale(),!0);e.isValid()&&!(0,l.isDayDisabled)(e,this.props)?this.props.onChangeDate(e):""===t&&this.props.onChangeDate(null)}this.setState({value:t})},safeDateFormat:function(t){return t.date&&t.date.clone().locale(t.locale||s["default"].locale()).format(Array.isArray(t.dateFormat)?t.dateFormat[0]:t.dateFormat)||""},handleBlur:function(t){this.setState({value:this.safeDateFormat(this.props)}),this.props.onBlur&&this.props.onBlur(t)},focus:function(){this.refs.input.focus()},render:function(){var t=this.props,e=t.customInput,r=(t.date,t.locale,t.minDate,t.maxDate,t.excludeDates,t.includeDates,t.filterDate,t.dateFormat,t.onChangeDate,o(t,["customInput","date","locale","minDate","maxDate","excludeDates","includeDates","filterDate","dateFormat","onChangeDate"]));return e?p["default"].cloneElement(e,a({},r,{ref:"input",value:this.state.value,onBlur:this.handleBlur,onChange:this.handleChange})):p["default"].createElement("input",a({ref:"input",type:"text"},r,{value:this.state.value,onBlur:this.handleBlur,onChange:this.handleChange}))}});t.exports=c},function(e,r){e.exports=t},function(t,r){t.exports=e},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}function o(t,e){return t&&e?t.isSame(e,"day"):!t&&!e}function a(t,e,r){var n=e.clone().startOf("day").subtract(1,"seconds"),o=r.clone().startOf("day").add(1,"seconds");return t.clone().startOf("day").isBetween(n,o)}function i(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=e.minDate,n=e.maxDate,a=e.excludeDates,i=e.includeDates,s=e.filterDate;return r&&t.isBefore(r,"day")||n&&t.isAfter(n,"day")||a&&a.some(function(e){return o(t,e)})||i&&!i.some(function(e){return o(t,e)})||s&&!s(t.clone())||!1}function s(t,e){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},n=r.minDate,o=r.includeDates,a=t.clone().subtract(1,e);return n&&a.isBefore(n,e)||o&&o.every(function(t){return a.isBefore(t,e)})||!1}function u(t,e){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},n=r.maxDate,o=r.includeDates,a=t.clone().add(1,e);return n&&a.isAfter(n,e)||o&&o.every(function(t){return a.isAfter(t,e)})||!1}function p(t){var e=t.minDate,r=t.includeDates;return r&&e?f["default"].min(r.filter(function(t){return e.isSameOrBefore(t,"day")})):r?f["default"].min(r):e}function l(t){var e=t.maxDate,r=t.includeDates;return r&&e?f["default"].max(r.filter(function(t){return e.isSameOrAfter(t,"day")})):r?f["default"].max(r):e}Object.defineProperty(e,"__esModule",{value:!0}),e.isSameDay=o,e.isDayInRange=a,e.isDayDisabled=i,e.allDaysDisabledBefore=s,e.allDaysDisabledAfter=u,e.getEffectiveMinDate=p,e.getEffectiveMaxDate=l;var c=r(2),f=n(c)},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(2),a=n(o),i=r(6),s=n(i),u=r(120),p=n(u),l=r(124),c=n(l),f=r(129),d=n(f),h=r(3),y=n(h),m=r(4),g=["react-datepicker__year-select","react-datepicker__month-select"],v=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=(t.className||"").split(/\s+/);return!!(0,s["default"])(g,function(t){return e.indexOf(t)>=0})},b=y["default"].createClass({displayName:"Calendar",propTypes:{dateFormat:y["default"].PropTypes.oneOfType([y["default"].PropTypes.string,y["default"].PropTypes.array]).isRequired,dropdownMode:y["default"].PropTypes.oneOf(["scroll","select"]).isRequired,endDate:y["default"].PropTypes.object,excludeDates:y["default"].PropTypes.array,filterDate:y["default"].PropTypes.func,fixedHeight:y["default"].PropTypes.bool,highlightDates:y["default"].PropTypes.array,includeDates:y["default"].PropTypes.array,locale:y["default"].PropTypes.string,maxDate:y["default"].PropTypes.object,minDate:y["default"].PropTypes.object,monthsShown:y["default"].PropTypes.number,onClickOutside:y["default"].PropTypes.func.isRequired,onDropdownFocus:y["default"].PropTypes.func,onSelect:y["default"].PropTypes.func.isRequired,openToDate:y["default"].PropTypes.object,peekNextMonth:y["default"].PropTypes.bool,scrollableYearDropdown:y["default"].PropTypes.bool,selected:y["default"].PropTypes.object,selectsEnd:y["default"].PropTypes.bool,selectsStart:y["default"].PropTypes.bool,showMonthDropdown:y["default"].PropTypes.bool,showWeekNumbers:y["default"].PropTypes.bool,showYearDropdown:y["default"].PropTypes.bool,startDate:y["default"].PropTypes.object,todayButton:y["default"].PropTypes.string,utcOffset:y["default"].PropTypes.number},mixins:[r(123)],defaultProps:{onDropdownFocus:function(){}},getDefaultProps:function(){return{utcOffset:a["default"].utc().utcOffset(),monthsShown:1}},getInitialState:function(){return{date:this.localizeMoment(this.getDateInView()),selectingDate:null}},componentWillReceiveProps:function(t){t.selected&&!(0,m.isSameDay)(t.selected,this.props.selected)?this.setState({date:this.localizeMoment(t.selected)}):t.openToDate&&!(0,m.isSameDay)(t.openToDate,this.props.openToDate)&&this.setState({date:this.localizeMoment(t.openToDate)})},handleClickOutside:function(t){this.props.onClickOutside(t)},handleDropdownFocus:function(t){v(t.target)&&this.props.onDropdownFocus()},getDateInView:function(){var t=this.props,e=t.selected,r=t.openToDate,n=t.utcOffset,o=(0,m.getEffectiveMinDate)(this.props),i=(0,m.getEffectiveMaxDate)(this.props),s=a["default"].utc().utcOffset(n);return e?e:o&&i&&r&&r.isBetween(o,i)?r:o&&r&&r.isAfter(o)?r:o&&o.isAfter(s)?o:i&&r&&r.isBefore(i)?r:i&&i.isBefore(s)?i:r?r:s},localizeMoment:function(t){return t.clone().locale(this.props.locale||a["default"].locale())},increaseMonth:function(){this.setState({date:this.state.date.clone().add(1,"month")})},decreaseMonth:function(){this.setState({date:this.state.date.clone().subtract(1,"month")})},handleDayClick:function(t,e){this.props.onSelect(t,e)},handleDayMouseEnter:function(t){this.setState({selectingDate:t})},handleMonthMouseLeave:function(){this.setState({selectingDate:null})},changeYear:function(t){this.setState({date:this.state.date.clone().set("year",t)})},changeMonth:function(t){this.setState({date:this.state.date.clone().set("month",t)})},header:function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:this.state.date,e=t.clone().startOf("week"),r=[];return this.props.showWeekNumbers&&r.push(y["default"].createElement("div",{key:"W",className:"react-datepicker__day-name"},"#")),r.concat([0,1,2,3,4,5,6].map(function(t){var r=e.clone().add(t,"days");return y["default"].createElement("div",{key:t,className:"react-datepicker__day-name"},r.localeData().weekdaysMin(r))}))},renderPreviousMonthButton:function(){if(!(0,m.allDaysDisabledBefore)(this.state.date,"month",this.props))return y["default"].createElement("a",{className:"react-datepicker__navigation react-datepicker__navigation--previous",onClick:this.decreaseMonth})},renderNextMonthButton:function(){if(!(0,m.allDaysDisabledAfter)(this.state.date,"month",this.props))return y["default"].createElement("a",{className:"react-datepicker__navigation react-datepicker__navigation--next",onClick:this.increaseMonth})},renderCurrentMonth:function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:this.state.date,e=["react-datepicker__current-month"];return this.props.showYearDropdown&&e.push("react-datepicker__current-month--hasYearDropdown"),y["default"].createElement("div",{className:e.join(" ")},t.format(this.props.dateFormat))},renderYearDropdown:function(){var t=arguments.length>0&&void 0!==arguments[0]&&arguments[0];if(this.props.showYearDropdown&&!t)return y["default"].createElement(p["default"],{dropdownMode:this.props.dropdownMode,onChange:this.changeYear,minDate:this.props.minDate,maxDate:this.props.maxDate,year:this.state.date.year(),scrollableYearDropdown:this.props.scrollableYearDropdown})},renderMonthDropdown:function(){arguments.length>0&&void 0!==arguments[0]&&arguments[0];if(this.props.showMonthDropdown)return y["default"].createElement(c["default"],{dropdownMode:this.props.dropdownMode,locale:this.props.locale,onChange:this.changeMonth,month:this.state.date.month()})},renderTodayButton:function(){var t=this;if(this.props.todayButton)return y["default"].createElement("div",{className:"react-datepicker__today-button",onClick:function(e){return t.props.onSelect(a["default"].utc().utcOffset(t.props.utcOffset).startOf("date"),e)}},this.props.todayButton)},renderMonths:function(){for(var t=[],e=0;e<this.props.monthsShown;++e){var r=this.state.date.clone().add(e,"M"),n="month-"+e;t.push(y["default"].createElement("div",{key:n,className:"react-datepicker__month-container"},y["default"].createElement("div",{className:"react-datepicker__header"},this.renderCurrentMonth(r),y["default"].createElement("div",{className:"react-datepicker__header__dropdown react-datepicker__header__dropdown--"+this.props.dropdownMode,onFocus:this.handleDropdownFocus},this.renderMonthDropdown(0!==e),this.renderYearDropdown(0!==e)),y["default"].createElement("div",{className:"react-datepicker__day-names"},this.header(r))),y["default"].createElement(d["default"],{day:r,onDayClick:this.handleDayClick,onDayMouseEnter:this.handleDayMouseEnter,onMouseLeave:this.handleMonthMouseLeave,minDate:this.props.minDate,maxDate:this.props.maxDate,excludeDates:this.props.excludeDates,highlightDates:this.props.highlightDates,selectingDate:this.state.selectingDate,includeDates:this.props.includeDates,fixedHeight:this.props.fixedHeight,filterDate:this.props.filterDate,selected:this.props.selected,selectsStart:this.props.selectsStart,selectsEnd:this.props.selectsEnd,showWeekNumbers:this.props.showWeekNumbers,startDate:this.props.startDate,endDate:this.props.endDate,peekNextMonth:this.props.peekNextMonth,utcOffset:this.props.utcOffset})))}return t},render:function(){return y["default"].createElement("div",{className:"react-datepicker"},y["default"].createElement("div",{className:"react-datepicker__triangle"}),this.renderPreviousMonthButton(),this.renderNextMonthButton(),this.renderMonths(),this.renderTodayButton())}});t.exports=b},function(t,e,r){var n=r(7),o=r(115),a=n(o);t.exports=a},function(t,e,r){function n(t){return function(e,r,n){var s=Object(e);if(!a(e)){var u=o(r,3);e=i(e),r=function(t){return u(s[t],t,s)}}var p=t(e,r,n);return p>-1?s[u?e[p]:p]:void 0}}var o=r(8),a=r(85),i=r(65);t.exports=n},function(t,e,r){function n(t){return"function"==typeof t?t:null==t?i:"object"==typeof t?s(t)?a(t[0],t[1]):o(t):u(t)}var o=r(9),a=r(95),i=r(111),s=r(71),u=r(112);t.exports=n},function(t,e,r){function n(t){var e=a(t);return 1==e.length&&e[0][2]?i(e[0][0],e[0][1]):function(r){return r===t||o(r,t,e)}}var o=r(10),a=r(92),i=r(94);t.exports=n},function(t,e,r){function n(t,e,r,n){var u=r.length,p=u,l=!n;if(null==t)return!p;for(t=Object(t);u--;){var c=r[u];if(l&&c[2]?c[1]!==t[c[0]]:!(c[0]in t))return!1}for(;++u<p;){c=r[u];var f=c[0],d=t[f],h=c[1];if(l&&c[2]){if(void 0===d&&!(f in t))return!1}else{var y=new o;if(n)var m=n(d,h,f,t,e,y);if(!(void 0===m?a(h,d,n,i|s,y):m))return!1}}return!0}var o=r(11),a=r(51),i=1,s=2;t.exports=n},function(t,e,r){function n(t){var e=this.__data__=new o(t);this.size=e.size}var o=r(12),a=r(20),i=r(21),s=r(22),u=r(23),p=r(24);n.prototype.clear=a,n.prototype["delete"]=i,n.prototype.get=s,n.prototype.has=u,n.prototype.set=p,t.exports=n},function(t,e,r){function n(t){var e=-1,r=t?t.length:0;for(this.clear();++e<r;){var n=t[e];this.set(n[0],n[1])}}var o=r(13),a=r(14),i=r(17),s=r(18),u=r(19);n.prototype.clear=o,n.prototype["delete"]=a,n.prototype.get=i,n.prototype.has=s,n.prototype.set=u,t.exports=n},function(t,e){function r(){this.__data__=[],this.size=0}t.exports=r},function(t,e,r){function n(t){var e=this.__data__,r=o(e,t);if(r<0)return!1;var n=e.length-1;return r==n?e.pop():i.call(e,r,1),--this.size,!0}var o=r(15),a=Array.prototype,i=a.splice;t.exports=n},function(t,e,r){function n(t,e){for(var r=t.length;r--;)if(o(t[r][0],e))return r;return-1}var o=r(16);t.exports=n},function(t,e){function r(t,e){return t===e||t!==t&&e!==e}t.exports=r},function(t,e,r){function n(t){var e=this.__data__,r=o(e,t);return r<0?void 0:e[r][1]}var o=r(15);t.exports=n},function(t,e,r){function n(t){return o(this.__data__,t)>-1}var o=r(15);t.exports=n},function(t,e,r){function n(t,e){var r=this.__data__,n=o(r,t);return n<0?(++this.size,r.push([t,e])):r[n][1]=e,this}var o=r(15);t.exports=n},function(t,e,r){function n(){this.__data__=new o,this.size=0}var o=r(12);t.exports=n},function(t,e){function r(t){var e=this.__data__,r=e["delete"](t);return this.size=e.size,r}t.exports=r},function(t,e){function r(t){return this.__data__.get(t)}t.exports=r},function(t,e){function r(t){return this.__data__.has(t)}t.exports=r},function(t,e,r){function n(t,e){var r=this.__data__;if(r instanceof o){var n=r.__data__;if(!a||n.length<s-1)return n.push([t,e]),this.size=++r.size,this;r=this.__data__=new i(n)}return r.set(t,e),this.size=r.size,this}var o=r(12),a=r(25),i=r(36),s=200;t.exports=n},function(t,e,r){var n=r(26),o=r(32),a=n(o,"Map");t.exports=a},function(t,e,r){function n(t,e){var r=a(t,e);return o(r)?r:void 0}var o=r(27),a=r(35);t.exports=n},function(t,e,r){function n(t){if(!i(t)||a(t))return!1;var e=o(t)?h:p;return e.test(s(t))}var o=r(28),a=r(30),i=r(29),s=r(34),u=/[\\^$.*+?()[\]{}|]/g,p=/^\[object .+?Constructor\]$/,l=Function.prototype,c=Object.prototype,f=l.toString,d=c.hasOwnProperty,h=RegExp("^"+f.call(d).replace(u,"\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g,"$1.*?")+"$");t.exports=n},function(t,e,r){function n(t){var e=o(t)?p.call(t):"";return e==a||e==i||e==s}var o=r(29),a="[object Function]",i="[object GeneratorFunction]",s="[object Proxy]",u=Object.prototype,p=u.toString;t.exports=n},function(t,e){function r(t){var e=typeof t;return null!=t&&("object"==e||"function"==e)}t.exports=r},function(t,e,r){function n(t){return!!a&&a in t}var o=r(31),a=function(){var t=/[^.]+$/.exec(o&&o.keys&&o.keys.IE_PROTO||"");return t?"Symbol(src)_1."+t:""}();t.exports=n},function(t,e,r){var n=r(32),o=n["__core-js_shared__"];t.exports=o},function(t,e,r){var n=r(33),o="object"==typeof self&&self&&self.Object===Object&&self,a=n||o||Function("return this")();t.exports=a},function(t,e){(function(e){var r="object"==typeof e&&e&&e.Object===Object&&e;t.exports=r}).call(e,function(){return this}())},function(t,e){function r(t){if(null!=t){try{return o.call(t)}catch(e){}try{return t+""}catch(e){}}return""}var n=Function.prototype,o=n.toString;t.exports=r},function(t,e){function r(t,e){return null==t?void 0:t[e]}t.exports=r},function(t,e,r){function n(t){var e=-1,r=t?t.length:0;for(this.clear();++e<r;){var n=t[e];this.set(n[0],n[1])}}var o=r(37),a=r(45),i=r(48),s=r(49),u=r(50);n.prototype.clear=o,n.prototype["delete"]=a,n.prototype.get=i,n.prototype.has=s,n.prototype.set=u,t.exports=n},function(t,e,r){function n(){this.size=0,this.__data__={hash:new o,map:new(i||a),string:new o}}var o=r(38),a=r(12),i=r(25);t.exports=n},function(t,e,r){function n(t){var e=-1,r=t?t.length:0;for(this.clear();++e<r;){var n=t[e];this.set(n[0],n[1])}}var o=r(39),a=r(41),i=r(42),s=r(43),u=r(44);n.prototype.clear=o,n.prototype["delete"]=a,n.prototype.get=i,n.prototype.has=s,n.prototype.set=u,t.exports=n},function(t,e,r){function n(){this.__data__=o?o(null):{},this.size=0}var o=r(40);t.exports=n},function(t,e,r){var n=r(26),o=n(Object,"create");t.exports=o},function(t,e){function r(t){var e=this.has(t)&&delete this.__data__[t];return this.size-=e?1:0,e}t.exports=r},function(t,e,r){function n(t){var e=this.__data__;if(o){var r=e[t];return r===a?void 0:r}return s.call(e,t)?e[t]:void 0}var o=r(40),a="__lodash_hash_undefined__",i=Object.prototype,s=i.hasOwnProperty;t.exports=n},function(t,e,r){function n(t){var e=this.__data__;return o?void 0!==e[t]:i.call(e,t)}var o=r(40),a=Object.prototype,i=a.hasOwnProperty;t.exports=n},function(t,e,r){function n(t,e){var r=this.__data__;return this.size+=this.has(t)?0:1,r[t]=o&&void 0===e?a:e,this}var o=r(40),a="__lodash_hash_undefined__";t.exports=n},function(t,e,r){function n(t){var e=o(this,t)["delete"](t);return this.size-=e?1:0,e}var o=r(46);t.exports=n},function(t,e,r){function n(t,e){var r=t.__data__;return o(e)?r["string"==typeof e?"string":"hash"]:r.map}var o=r(47);t.exports=n},function(t,e){function r(t){var e=typeof t;return"string"==e||"number"==e||"symbol"==e||"boolean"==e?"__proto__"!==t:null===t}t.exports=r},function(t,e,r){function n(t){return o(this,t).get(t)}var o=r(46);t.exports=n},function(t,e,r){function n(t){return o(this,t).has(t)}var o=r(46);t.exports=n},function(t,e,r){function n(t,e){var r=o(this,t),n=r.size;return r.set(t,e),this.size+=r.size==n?0:1,this}var o=r(46);t.exports=n},function(t,e,r){function n(t,e,r,s,u){return t===e||(null==t||null==e||!a(t)&&!i(e)?t!==t&&e!==e:o(t,e,n,r,s,u))}var o=r(52),a=r(29),i=r(70);t.exports=n},function(t,e,r){function n(t,e,r,n,m,v){var b=p(t),D=p(e),_=h,w=h;b||(_=u(t),_=_==d?y:_),D||(w=u(e),w=w==d?y:w);var x=_==y,T=w==y,P=_==w;if(P&&l(t)){if(!l(e))return!1;b=!0,x=!1}if(P&&!x)return v||(v=new o),b||c(t)?a(t,e,r,n,m,v):i(t,e,_,r,n,m,v);if(!(m&f)){var O=x&&g.call(t,"__wrapped__"),C=T&&g.call(e,"__wrapped__");if(O||C){var k=O?t.value():t,E=C?e.value():e;return v||(v=new o),r(k,E,n,m,v)}}return!!P&&(v||(v=new o),s(t,e,r,n,m,v))}var o=r(11),a=r(53),i=r(59),s=r(64),u=r(86),p=r(71),l=r(72),c=r(76),f=2,d="[object Arguments]",h="[object Array]",y="[object Object]",m=Object.prototype,g=m.hasOwnProperty;t.exports=n},function(t,e,r){function n(t,e,r,n,p,l){var c=p&u,f=t.length,d=e.length;if(f!=d&&!(c&&d>f))return!1;var h=l.get(t);if(h&&l.get(e))return h==e;var y=-1,m=!0,g=p&s?new o:void 0;for(l.set(t,e),l.set(e,t);++y<f;){var v=t[y],b=e[y];if(n)var D=c?n(b,v,y,e,t,l):n(v,b,y,t,e,l);if(void 0!==D){if(D)continue;m=!1;break}if(g){if(!a(e,function(t,e){if(!i(g,e)&&(v===t||r(v,t,n,p,l)))return g.push(e)})){m=!1;break}}else if(v!==b&&!r(v,b,n,p,l)){m=!1;break}}return l["delete"](t),l["delete"](e),m}var o=r(54),a=r(57),i=r(58),s=1,u=2;t.exports=n},function(t,e,r){function n(t){var e=-1,r=t?t.length:0;for(this.__data__=new o;++e<r;)this.add(t[e])}var o=r(36),a=r(55),i=r(56);n.prototype.add=n.prototype.push=a,n.prototype.has=i,t.exports=n},function(t,e){function r(t){return this.__data__.set(t,n),this}var n="__lodash_hash_undefined__";t.exports=r},function(t,e){function r(t){return this.__data__.has(t)}t.exports=r},function(t,e){function r(t,e){for(var r=-1,n=t?t.length:0;++r<n;)if(e(t[r],r,t))return!0;return!1}t.exports=r},function(t,e){function r(t,e){return t.has(e)}t.exports=r},function(t,e,r){function n(t,e,r,n,o,x,P){switch(r){case w:if(t.byteLength!=e.byteLength||t.byteOffset!=e.byteOffset)return!1;t=t.buffer,e=e.buffer;case _:return!(t.byteLength!=e.byteLength||!n(new a(t),new a(e)));case f:case d:case m:return i(+t,+e);case h:return t.name==e.name&&t.message==e.message;case g:case b:return t==e+"";case y:var O=u;case v:var C=x&c;if(O||(O=p),t.size!=e.size&&!C)return!1;var k=P.get(t);if(k)return k==e;x|=l,P.set(t,e);var E=s(O(t),O(e),n,o,x,P);return P["delete"](t),E;case D:if(T)return T.call(t)==T.call(e)}return!1}var o=r(60),a=r(61),i=r(16),s=r(53),u=r(62),p=r(63),l=1,c=2,f="[object Boolean]",d="[object Date]",h="[object Error]",y="[object Map]",m="[object Number]",g="[object RegExp]",v="[object Set]",b="[object String]",D="[object Symbol]",_="[object ArrayBuffer]",w="[object DataView]",x=o?o.prototype:void 0,T=x?x.valueOf:void 0;t.exports=n},function(t,e,r){var n=r(32),o=n.Symbol;t.exports=o},function(t,e,r){var n=r(32),o=n.Uint8Array;t.exports=o},function(t,e){function r(t){var e=-1,r=Array(t.size);return t.forEach(function(t,n){r[++e]=[n,t]}),r}t.exports=r},function(t,e){function r(t){var e=-1,r=Array(t.size);return t.forEach(function(t){r[++e]=t}),r}t.exports=r},function(t,e,r){function n(t,e,r,n,i,u){var p=i&a,l=o(t),c=l.length,f=o(e),d=f.length;if(c!=d&&!p)return!1;for(var h=c;h--;){var y=l[h];if(!(p?y in e:s.call(e,y)))return!1}var m=u.get(t);if(m&&u.get(e))return m==e;var g=!0;u.set(t,e),u.set(e,t);for(var v=p;++h<c;){y=l[h];var b=t[y],D=e[y];if(n)var _=p?n(D,b,y,e,t,u):n(b,D,y,t,e,u);if(!(void 0===_?b===D||r(b,D,n,i,u):_)){g=!1;break}v||(v="constructor"==y)}if(g&&!v){var w=t.constructor,x=e.constructor;w!=x&&"constructor"in t&&"constructor"in e&&!("function"==typeof w&&w instanceof w&&"function"==typeof x&&x instanceof x)&&(g=!1)}return u["delete"](t),u["delete"](e),g}var o=r(65),a=2,i=Object.prototype,s=i.hasOwnProperty;t.exports=n},function(t,e,r){function n(t){return i(t)?o(t):a(t)}var o=r(66),a=r(81),i=r(85);t.exports=n},function(t,e,r){function n(t,e){var r=i(t),n=!r&&a(t),l=!r&&!n&&s(t),f=!r&&!n&&!l&&p(t),d=r||n||l||f,h=d?o(t.length,String):[],y=h.length;for(var m in t)!e&&!c.call(t,m)||d&&("length"==m||l&&("offset"==m||"parent"==m)||f&&("buffer"==m||"byteLength"==m||"byteOffset"==m)||u(m,y))||h.push(m);return h}var o=r(67),a=r(68),i=r(71),s=r(72),u=r(75),p=r(76),l=Object.prototype,c=l.hasOwnProperty;t.exports=n},function(t,e){function r(t,e){for(var r=-1,n=Array(t);++r<t;)n[r]=e(r);return n}t.exports=r},function(t,e,r){var n=r(69),o=r(70),a=Object.prototype,i=a.hasOwnProperty,s=a.propertyIsEnumerable,u=n(function(){return arguments}())?n:function(t){return o(t)&&i.call(t,"callee")&&!s.call(t,"callee")};t.exports=u},function(t,e,r){function n(t){return o(t)&&s.call(t)==a}var o=r(70),a="[object Arguments]",i=Object.prototype,s=i.toString;t.exports=n},function(t,e){function r(t){return null!=t&&"object"==typeof t}t.exports=r},function(t,e){var r=Array.isArray;t.exports=r},function(t,e,r){(function(t){var n=r(32),o=r(74),a="object"==typeof e&&e&&!e.nodeType&&e,i=a&&"object"==typeof t&&t&&!t.nodeType&&t,s=i&&i.exports===a,u=s?n.Buffer:void 0,p=u?u.isBuffer:void 0,l=p||o;t.exports=l}).call(e,r(73)(t))},function(t,e){t.exports=function(t){return t.webpackPolyfill||(t.deprecate=function(){},t.paths=[],t.children=[],t.webpackPolyfill=1),t}},function(t,e){function r(){return!1}t.exports=r},function(t,e){function r(t,e){return e=null==e?n:e,!!e&&("number"==typeof t||o.test(t))&&t>-1&&t%1==0&&t<e}var n=9007199254740991,o=/^(?:0|[1-9]\d*)$/;t.exports=r},function(t,e,r){var n=r(77),o=r(79),a=r(80),i=a&&a.isTypedArray,s=i?o(i):n;t.exports=s},function(t,e,r){function n(t){return a(t)&&o(t.length)&&!!j[S.call(t)]}var o=r(78),a=r(70),i="[object Arguments]",s="[object Array]",u="[object Boolean]",p="[object Date]",l="[object Error]",c="[object Function]",f="[object Map]",d="[object Number]",h="[object Object]",y="[object RegExp]",m="[object Set]",g="[object String]",v="[object WeakMap]",b="[object ArrayBuffer]",D="[object DataView]",_="[object Float32Array]",w="[object Float64Array]",x="[object Int8Array]",T="[object Int16Array]",P="[object Int32Array]",O="[object Uint8Array]",C="[object Uint8ClampedArray]",k="[object Uint16Array]",E="[object Uint32Array]",j={};
-j[_]=j[w]=j[x]=j[T]=j[P]=j[O]=j[C]=j[k]=j[E]=!0,j[i]=j[s]=j[b]=j[u]=j[D]=j[p]=j[l]=j[c]=j[f]=j[d]=j[h]=j[y]=j[m]=j[g]=j[v]=!1;var M=Object.prototype,S=M.toString;t.exports=n},function(t,e){function r(t){return"number"==typeof t&&t>-1&&t%1==0&&t<=n}var n=9007199254740991;t.exports=r},function(t,e){function r(t){return function(e){return t(e)}}t.exports=r},function(t,e,r){(function(t){var n=r(33),o="object"==typeof e&&e&&!e.nodeType&&e,a=o&&"object"==typeof t&&t&&!t.nodeType&&t,i=a&&a.exports===o,s=i&&n.process,u=function(){try{return s&&s.binding("util")}catch(t){}}();t.exports=u}).call(e,r(73)(t))},function(t,e,r){function n(t){if(!o(t))return a(t);var e=[];for(var r in Object(t))s.call(t,r)&&"constructor"!=r&&e.push(r);return e}var o=r(82),a=r(83),i=Object.prototype,s=i.hasOwnProperty;t.exports=n},function(t,e){function r(t){var e=t&&t.constructor,r="function"==typeof e&&e.prototype||n;return t===r}var n=Object.prototype;t.exports=r},function(t,e,r){var n=r(84),o=n(Object.keys,Object);t.exports=o},function(t,e){function r(t,e){return function(r){return t(e(r))}}t.exports=r},function(t,e,r){function n(t){return null!=t&&a(t.length)&&!o(t)}var o=r(28),a=r(78);t.exports=n},function(t,e,r){var n=r(87),o=r(25),a=r(88),i=r(89),s=r(90),u=r(91),p=r(34),l="[object Map]",c="[object Object]",f="[object Promise]",d="[object Set]",h="[object WeakMap]",y="[object DataView]",m=Object.prototype,g=m.toString,v=p(n),b=p(o),D=p(a),_=p(i),w=p(s),x=u;(n&&x(new n(new ArrayBuffer(1)))!=y||o&&x(new o)!=l||a&&x(a.resolve())!=f||i&&x(new i)!=d||s&&x(new s)!=h)&&(x=function(t){var e=g.call(t),r=e==c?t.constructor:void 0,n=r?p(r):void 0;if(n)switch(n){case v:return y;case b:return l;case D:return f;case _:return d;case w:return h}return e}),t.exports=x},function(t,e,r){var n=r(26),o=r(32),a=n(o,"DataView");t.exports=a},function(t,e,r){var n=r(26),o=r(32),a=n(o,"Promise");t.exports=a},function(t,e,r){var n=r(26),o=r(32),a=n(o,"Set");t.exports=a},function(t,e,r){var n=r(26),o=r(32),a=n(o,"WeakMap");t.exports=a},function(t,e){function r(t){return o.call(t)}var n=Object.prototype,o=n.toString;t.exports=r},function(t,e,r){function n(t){for(var e=a(t),r=e.length;r--;){var n=e[r],i=t[n];e[r]=[n,i,o(i)]}return e}var o=r(93),a=r(65);t.exports=n},function(t,e,r){function n(t){return t===t&&!o(t)}var o=r(29);t.exports=n},function(t,e){function r(t,e){return function(r){return null!=r&&(r[t]===e&&(void 0!==e||t in Object(r)))}}t.exports=r},function(t,e,r){function n(t,e){return s(t)&&u(e)?p(l(t),e):function(r){var n=a(r,t);return void 0===n&&n===e?i(r,t):o(e,n,void 0,c|f)}}var o=r(51),a=r(96),i=r(108),s=r(106),u=r(93),p=r(94),l=r(107),c=1,f=2;t.exports=n},function(t,e,r){function n(t,e,r){var n=null==t?void 0:o(t,e);return void 0===n?r:n}var o=r(97);t.exports=n},function(t,e,r){function n(t,e){e=a(e,t)?[e]:o(e);for(var r=0,n=e.length;null!=t&&r<n;)t=t[i(e[r++])];return r&&r==n?t:void 0}var o=r(98),a=r(106),i=r(107);t.exports=n},function(t,e,r){function n(t){return o(t)?t:a(t)}var o=r(71),a=r(99);t.exports=n},function(t,e,r){var n=r(100),o=r(102),a=/^\./,i=/[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g,s=/\\(\\)?/g,u=n(function(t){t=o(t);var e=[];return a.test(t)&&e.push(""),t.replace(i,function(t,r,n,o){e.push(n?o.replace(s,"$1"):r||t)}),e});t.exports=u},function(t,e,r){function n(t){var e=o(t,function(t){return r.size===a&&r.clear(),t}),r=e.cache;return e}var o=r(101),a=500;t.exports=n},function(t,e,r){function n(t,e){if("function"!=typeof t||e&&"function"!=typeof e)throw new TypeError(a);var r=function(){var n=arguments,o=e?e.apply(this,n):n[0],a=r.cache;if(a.has(o))return a.get(o);var i=t.apply(this,n);return r.cache=a.set(o,i)||a,i};return r.cache=new(n.Cache||o),r}var o=r(36),a="Expected a function";n.Cache=o,t.exports=n},function(t,e,r){function n(t){return null==t?"":o(t)}var o=r(103);t.exports=n},function(t,e,r){function n(t){if("string"==typeof t)return t;if(i(t))return a(t,n)+"";if(s(t))return l?l.call(t):"";var e=t+"";return"0"==e&&1/t==-u?"-0":e}var o=r(60),a=r(104),i=r(71),s=r(105),u=1/0,p=o?o.prototype:void 0,l=p?p.toString:void 0;t.exports=n},function(t,e){function r(t,e){for(var r=-1,n=t?t.length:0,o=Array(n);++r<n;)o[r]=e(t[r],r,t);return o}t.exports=r},function(t,e,r){function n(t){return"symbol"==typeof t||o(t)&&s.call(t)==a}var o=r(70),a="[object Symbol]",i=Object.prototype,s=i.toString;t.exports=n},function(t,e,r){function n(t,e){if(o(t))return!1;var r=typeof t;return!("number"!=r&&"symbol"!=r&&"boolean"!=r&&null!=t&&!a(t))||(s.test(t)||!i.test(t)||null!=e&&t in Object(e))}var o=r(71),a=r(105),i=/\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,s=/^\w*$/;t.exports=n},function(t,e,r){function n(t){if("string"==typeof t||o(t))return t;var e=t+"";return"0"==e&&1/t==-a?"-0":e}var o=r(105),a=1/0;t.exports=n},function(t,e,r){function n(t,e){return null!=t&&a(t,e,o)}var o=r(109),a=r(110);t.exports=n},function(t,e){function r(t,e){return null!=t&&e in Object(t)}t.exports=r},function(t,e,r){function n(t,e,r){e=u(e,t)?[e]:o(e);for(var n=-1,c=e.length,f=!1;++n<c;){var d=l(e[n]);if(!(f=null!=t&&r(t,d)))break;t=t[d]}return f||++n!=c?f:(c=t?t.length:0,!!c&&p(c)&&s(d,c)&&(i(t)||a(t)))}var o=r(98),a=r(68),i=r(71),s=r(75),u=r(106),p=r(78),l=r(107);t.exports=n},function(t,e){function r(t){return t}t.exports=r},function(t,e,r){function n(t){return i(t)?o(s(t)):a(t)}var o=r(113),a=r(114),i=r(106),s=r(107);t.exports=n},function(t,e){function r(t){return function(e){return null==e?void 0:e[t]}}t.exports=r},function(t,e,r){function n(t){return function(e){return o(e,t)}}var o=r(97);t.exports=n},function(t,e,r){function n(t,e,r){var n=t?t.length:0;if(!n)return-1;var u=null==r?0:i(r);return u<0&&(u=s(n+u,0)),o(t,a(e,3),u)}var o=r(116),a=r(8),i=r(117),s=Math.max;t.exports=n},function(t,e){function r(t,e,r,n){for(var o=t.length,a=r+(n?1:-1);n?a--:++a<o;)if(e(t[a],a,t))return a;return-1}t.exports=r},function(t,e,r){function n(t){var e=o(t),r=e%1;return e===e?r?e-r:e:0}var o=r(118);t.exports=n},function(t,e,r){function n(t){if(!t)return 0===t?t:0;if(t=o(t),t===a||t===-a){var e=t<0?-1:1;return e*i}return t===t?t:0}var o=r(119),a=1/0,i=1.7976931348623157e308;t.exports=n},function(t,e,r){function n(t){if("number"==typeof t)return t;if(a(t))return i;if(o(t)){var e="function"==typeof t.valueOf?t.valueOf():t;t=o(e)?e+"":e}if("string"!=typeof t)return 0===t?t:+t;t=t.replace(s,"");var r=p.test(t);return r||l.test(t)?c(t.slice(2),r?2:8):u.test(t)?i:+t}var o=r(29),a=r(105),i=NaN,s=/^\s+|\s+$/g,u=/^[-+]0x[0-9a-f]+$/i,p=/^0b[01]+$/i,l=/^0o[0-7]+$/i,c=parseInt;t.exports=n},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(3),a=n(o),i=r(121),s=n(i),u=a["default"].createClass({displayName:"YearDropdown",propTypes:{dropdownMode:a["default"].PropTypes.oneOf(["scroll","select"]).isRequired,maxDate:a["default"].PropTypes.object,minDate:a["default"].PropTypes.object,onChange:a["default"].PropTypes.func.isRequired,scrollableYearDropdown:a["default"].PropTypes.bool,year:a["default"].PropTypes.number.isRequired},getInitialState:function(){return{dropdownVisible:!1}},renderSelectOptions:function(){for(var t=this.props.minDate?this.props.minDate.year():1900,e=this.props.maxDate?this.props.maxDate.year():2100,r=[],n=t;n<=e;n++)r.push(a["default"].createElement("option",{key:n,value:n},n));return r},onSelectChange:function(t){this.onChange(t.target.value)},renderSelectMode:function(){return a["default"].createElement("select",{value:this.props.year,className:"react-datepicker__year-select",onChange:this.onSelectChange},this.renderSelectOptions())},renderReadView:function(){return a["default"].createElement("div",{className:"react-datepicker__year-read-view",onClick:this.toggleDropdown},a["default"].createElement("span",{className:"react-datepicker__year-read-view--selected-year"},this.props.year),a["default"].createElement("span",{className:"react-datepicker__year-read-view--down-arrow"}))},renderDropdown:function(){return a["default"].createElement(s["default"],{ref:"options",year:this.props.year,onChange:this.onChange,onCancel:this.toggleDropdown,scrollableYearDropdown:this.props.scrollableYearDropdown})},renderScrollMode:function(){return this.state.dropdownVisible?this.renderDropdown():this.renderReadView()},onChange:function(t){this.toggleDropdown(),t!==this.props.year&&this.props.onChange(t)},toggleDropdown:function(){this.setState({dropdownVisible:!this.state.dropdownVisible})},render:function(){var t=void 0;switch(this.props.dropdownMode){case"scroll":t=this.renderScrollMode();break;case"select":t=this.renderSelectMode()}return a["default"].createElement("div",{className:"react-datepicker__year-dropdown-container react-datepicker__year-dropdown-container--"+this.props.dropdownMode},t)}});t.exports=u},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}function o(t,e){for(var r=[],n=0;n<e;n++)r.push(t-n);return r}var a=r(3),i=n(a),s=r(122),u=n(s),p=i["default"].createClass({displayName:"YearDropdownOptions",propTypes:{onCancel:i["default"].PropTypes.func.isRequired,onChange:i["default"].PropTypes.func.isRequired,scrollableYearDropdown:i["default"].PropTypes.bool,year:i["default"].PropTypes.number.isRequired},mixins:[r(123)],getInitialState:function(){return{yearsList:this.props.scrollableYearDropdown?o(this.props.year,50):o(this.props.year,5)}},renderOptions:function(){var t=this,e=this.props.year,r=this.state.yearsList.map(function(r){return i["default"].createElement("div",{className:"react-datepicker__year-option",key:r,ref:r,onClick:t.onChange.bind(t,r)},e===r?i["default"].createElement("span",{className:"react-datepicker__year-option--selected"},"✓"):"",r)});return r.unshift(i["default"].createElement("div",{className:"react-datepicker__year-option",ref:"upcoming",key:"upcoming",onClick:this.incrementYears},i["default"].createElement("a",{className:"react-datepicker__navigation react-datepicker__navigation--years react-datepicker__navigation--years-upcoming"}))),r.push(i["default"].createElement("div",{className:"react-datepicker__year-option",ref:"previous",key:"previous",onClick:this.decrementYears},i["default"].createElement("a",{className:"react-datepicker__navigation react-datepicker__navigation--years react-datepicker__navigation--years-previous"}))),r},onChange:function(t){this.props.onChange(t)},handleClickOutside:function(){this.props.onCancel()},shiftYears:function(t){var e=this.state.yearsList.map(function(e){return e+t});this.setState({yearsList:e})},incrementYears:function(){return this.shiftYears(1)},decrementYears:function(){return this.shiftYears(-1)},render:function(){var t=(0,u["default"])({"react-datepicker__year-dropdown":!0,"react-datepicker__year-dropdown--scrollable":this.props.scrollableYearDropdown});return i["default"].createElement("div",{className:t},this.renderOptions())}});t.exports=p},function(t,e,r){var n,o;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-!function(){"use strict";function r(){for(var t=[],e=0;e<arguments.length;e++){var n=arguments[e];if(n){var o=typeof n;if("string"===o||"number"===o)t.push(n);else if(Array.isArray(n))t.push(r.apply(null,n));else if("object"===o)for(var i in n)a.call(n,i)&&n[i]&&t.push(i)}}return t.join(" ")}var a={}.hasOwnProperty;"undefined"!=typeof t&&t.exports?t.exports=r:(n=[],o=function(){return r}.apply(e,n),!(void 0!==o&&(t.exports=o)))}()},function(t,e){t.exports=r},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(3),a=n(o),i=r(2),s=n(i),u=r(125),p=n(u),l=a["default"].createClass({displayName:"MonthDropdown",propTypes:{dropdownMode:a["default"].PropTypes.oneOf(["scroll","select"]).isRequired,locale:a["default"].PropTypes.string,month:a["default"].PropTypes.number.isRequired,onChange:a["default"].PropTypes.func.isRequired},getInitialState:function(){return{dropdownVisible:!1}},renderSelectOptions:function(){var t=s["default"].localeData(this.props.locale);return(0,p["default"])(0,12).map(function(e,r){return a["default"].createElement("option",{key:r,value:r},t.months((0,s["default"])({M:e})))})},renderSelectMode:function(){var t=this;return a["default"].createElement("select",{value:this.props.month,className:"react-datepicker__month-select",onChange:function(e){return t.onChange(e.target.value)}},this.renderSelectOptions())},onChange:function(t){t!==this.props.month&&this.props.onChange(t)},render:function(){var t=void 0;switch(this.props.dropdownMode){case"select":t=this.renderSelectMode()}return a["default"].createElement("div",{className:"react-datepicker__month-dropdown-container react-datepicker__month-dropdown-container--"+this.props.dropdownMode},t)}});t.exports=l},function(t,e,r){var n=r(126),o=n();t.exports=o},function(t,e,r){function n(t){return function(e,r,n){return n&&"number"!=typeof n&&a(e,r,n)&&(r=n=void 0),e=i(e),void 0===r?(r=e,e=0):r=i(r),n=void 0===n?e<r?1:-1:i(n),o(e,r,n,t)}}var o=r(127),a=r(128),i=r(118);t.exports=n},function(t,e){function r(t,e,r,a){for(var i=-1,s=o(n((e-t)/(r||1)),0),u=Array(s);s--;)u[a?s:++i]=t,t+=r;return u}var n=Math.ceil,o=Math.max;t.exports=r},function(t,e,r){function n(t,e,r){if(!s(r))return!1;var n=typeof e;return!!("number"==n?a(r)&&i(e,r.length):"string"==n&&e in r)&&o(r[e],t)}var o=r(16),a=r(85),i=r(75),s=r(29);t.exports=n},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(3),a=n(o),i=r(122),s=n(i),u=r(130),p=n(u),l=6,c=a["default"].createClass({displayName:"Month",propTypes:{day:a["default"].PropTypes.object.isRequired,endDate:a["default"].PropTypes.object,excludeDates:a["default"].PropTypes.array,filterDate:a["default"].PropTypes.func,fixedHeight:a["default"].PropTypes.bool,highlightDates:a["default"].PropTypes.array,includeDates:a["default"].PropTypes.array,maxDate:a["default"].PropTypes.object,minDate:a["default"].PropTypes.object,onDayClick:a["default"].PropTypes.func,onDayMouseEnter:a["default"].PropTypes.func,onMouseLeave:a["default"].PropTypes.func,peekNextMonth:a["default"].PropTypes.bool,selected:a["default"].PropTypes.object,selectingDate:a["default"].PropTypes.object,selectsEnd:a["default"].PropTypes.bool,selectsStart:a["default"].PropTypes.bool,showWeekNumbers:a["default"].PropTypes.bool,startDate:a["default"].PropTypes.object,utcOffset:a["default"].PropTypes.number},handleDayClick:function(t,e){this.props.onDayClick&&this.props.onDayClick(t,e)},handleDayMouseEnter:function(t){this.props.onDayMouseEnter&&this.props.onDayMouseEnter(t)},handleMouseLeave:function(){this.props.onMouseLeave&&this.props.onMouseLeave()},isWeekInMonth:function(t){var e=this.props.day,r=t.clone().add(6,"days");return t.isSame(e,"month")||r.isSame(e,"month")},renderWeeks:function(){for(var t=[],e=this.props.fixedHeight,r=this.props.day.clone().startOf("month").startOf("week"),n=0,o=!1;;){if(t.push(a["default"].createElement(p["default"],{key:n,day:r,month:this.props.day.month(),onDayClick:this.handleDayClick,onDayMouseEnter:this.handleDayMouseEnter,minDate:this.props.minDate,maxDate:this.props.maxDate,excludeDates:this.props.excludeDates,includeDates:this.props.includeDates,highlightDates:this.props.highlightDates,selectingDate:this.props.selectingDate,filterDate:this.props.filterDate,selected:this.props.selected,selectsStart:this.props.selectsStart,selectsEnd:this.props.selectsEnd,showWeekNumber:this.props.showWeekNumbers,startDate:this.props.startDate,endDate:this.props.endDate,utcOffset:this.props.utcOffset})),o)break;n++,r=r.clone().add(1,"weeks");var i=e&&n>=l,s=!e&&!this.isWeekInMonth(r);if(i||s){if(!this.props.peekNextMonth)break;o=!0}}return t},getClassNames:function(){var t=this.props,e=t.selectingDate,r=t.selectsStart,n=t.selectsEnd;return(0,s["default"])("react-datepicker__month",{"react-datepicker__month--selecting-range":e&&(r||n)})},render:function(){return a["default"].createElement("div",{className:this.getClassNames(),onMouseLeave:this.handleMouseLeave,role:"listbox"},this.renderWeeks())}});t.exports=c},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(3),a=n(o),i=r(131),s=n(i),u=r(132),p=n(u),l=a["default"].createClass({displayName:"Week",propTypes:{day:a["default"].PropTypes.object.isRequired,endDate:a["default"].PropTypes.object,excludeDates:a["default"].PropTypes.array,filterDate:a["default"].PropTypes.func,highlightDates:a["default"].PropTypes.array,includeDates:a["default"].PropTypes.array,maxDate:a["default"].PropTypes.object,minDate:a["default"].PropTypes.object,month:a["default"].PropTypes.number,onDayClick:a["default"].PropTypes.func,onDayMouseEnter:a["default"].PropTypes.func,selected:a["default"].PropTypes.object,selectingDate:a["default"].PropTypes.object,selectsEnd:a["default"].PropTypes.bool,selectsStart:a["default"].PropTypes.bool,showWeekNumber:a["default"].PropTypes.bool,startDate:a["default"].PropTypes.object,utcOffset:a["default"].PropTypes.number},handleDayClick:function(t,e){this.props.onDayClick&&this.props.onDayClick(t,e)},handleDayMouseEnter:function(t){this.props.onDayMouseEnter&&this.props.onDayMouseEnter(t)},renderDays:function(){var t=this,e=this.props.day.clone().startOf("week"),r=[];return this.props.showWeekNumber&&r.push(a["default"].createElement(p["default"],{key:"W",weekNumber:parseInt(e.format("w"),10)})),r.concat([0,1,2,3,4,5,6].map(function(r){var n=e.clone().add(r,"days");return a["default"].createElement(s["default"],{key:r,day:n,month:t.props.month,onClick:t.handleDayClick.bind(t,n),onMouseEnter:t.handleDayMouseEnter.bind(t,n),minDate:t.props.minDate,maxDate:t.props.maxDate,excludeDates:t.props.excludeDates,includeDates:t.props.includeDates,highlightDates:t.props.highlightDates,selectingDate:t.props.selectingDate,filterDate:t.props.filterDate,selected:t.props.selected,selectsStart:t.props.selectsStart,selectsEnd:t.props.selectsEnd,startDate:t.props.startDate,endDate:t.props.endDate,utcOffset:t.props.utcOffset})}))},render:function(){return a["default"].createElement("div",{className:"react-datepicker__week"},this.renderDays())}});t.exports=l},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(2),a=n(o),i=r(3),s=n(i),u=r(122),p=n(u),l=r(4),c=s["default"].createClass({displayName:"Day",propTypes:{day:s["default"].PropTypes.object.isRequired,endDate:s["default"].PropTypes.object,excludeDates:s["default"].PropTypes.array,filterDate:s["default"].PropTypes.func,highlightDates:s["default"].PropTypes.array,includeDates:s["default"].PropTypes.array,maxDate:s["default"].PropTypes.object,minDate:s["default"].PropTypes.object,month:s["default"].PropTypes.number,onClick:s["default"].PropTypes.func,onMouseEnter:s["default"].PropTypes.func,selected:s["default"].PropTypes.object,selectingDate:s["default"].PropTypes.object,selectsEnd:s["default"].PropTypes.bool,selectsStart:s["default"].PropTypes.bool,startDate:s["default"].PropTypes.object,utcOffset:s["default"].PropTypes.number},getDefaultProps:function(){return{utcOffset:a["default"].utc().utcOffset()}},handleClick:function(t){!this.isDisabled()&&this.props.onClick&&this.props.onClick(t)},handleMouseEnter:function(t){!this.isDisabled()&&this.props.onMouseEnter&&this.props.onMouseEnter(t)},isSameDay:function(t){return(0,l.isSameDay)(this.props.day,t)},isDisabled:function(){return(0,l.isDayDisabled)(this.props.day,this.props)},isHighlighted:function(){var t=this.props,e=t.day,r=t.highlightDates;return!!r&&r.some(function(t){return(0,l.isSameDay)(e,t)})},isInRange:function(){var t=this.props,e=t.day,r=t.startDate,n=t.endDate;return!(!r||!n)&&(0,l.isDayInRange)(e,r,n)},isInSelectingRange:function(){var t=this.props,e=t.day,r=t.selectsStart,n=t.selectsEnd,o=t.selectingDate,a=t.startDate,i=t.endDate;return!(!r&&!n||!o||this.isDisabled())&&(r&&i&&o.isSameOrBefore(i)?(0,l.isDayInRange)(e,o,i):!!(n&&a&&o.isSameOrAfter(a))&&(0,l.isDayInRange)(e,a,o))},isSelectingRangeStart:function(){if(!this.isInSelectingRange())return!1;var t=this.props,e=t.day,r=t.selectingDate,n=t.startDate,o=t.selectsStart;return o?(0,l.isSameDay)(e,r):(0,l.isSameDay)(e,n)},isSelectingRangeEnd:function(){if(!this.isInSelectingRange())return!1;var t=this.props,e=t.day,r=t.selectingDate,n=t.endDate,o=t.selectsEnd;return o?(0,l.isSameDay)(e,r):(0,l.isSameDay)(e,n)},isRangeStart:function(){var t=this.props,e=t.day,r=t.startDate,n=t.endDate;return!(!r||!n)&&(0,l.isSameDay)(r,e)},isRangeEnd:function(){var t=this.props,e=t.day,r=t.startDate,n=t.endDate;return!(!r||!n)&&(0,l.isSameDay)(n,e)},isWeekend:function(){var t=this.props.day.day();return 0===t||6===t},isOutsideMonth:function(){return void 0!==this.props.month&&this.props.month!==this.props.day.month()},getClassNames:function(){return(0,p["default"])("react-datepicker__day",{"react-datepicker__day--disabled":this.isDisabled(),"react-datepicker__day--selected":this.isSameDay(this.props.selected),"react-datepicker__day--highlighted":this.isHighlighted(),"react-datepicker__day--range-start":this.isRangeStart(),"react-datepicker__day--range-end":this.isRangeEnd(),"react-datepicker__day--in-range":this.isInRange(),"react-datepicker__day--in-selecting-range":this.isInSelectingRange(),"react-datepicker__day--selecting-range-start":this.isSelectingRangeStart(),"react-datepicker__day--selecting-range-end":this.isSelectingRangeEnd(),"react-datepicker__day--today":this.isSameDay(a["default"].utc().utcOffset(this.props.utcOffset)),"react-datepicker__day--weekend":this.isWeekend(),"react-datepicker__day--outside-month":this.isOutsideMonth()})},render:function(){return s["default"].createElement("div",{className:this.getClassNames(),onClick:this.handleClick,onMouseEnter:this.handleMouseEnter,"aria-label":"day-"+this.props.day.date(),role:"option"},this.props.day.date())}});t.exports=c},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}var o=r(3),a=n(o),i=a["default"].createClass({displayName:"WeekNumber",propTypes:{weekNumber:a["default"].PropTypes.number.isRequired},render:function(){return a["default"].createElement("div",{className:"react-datepicker__week-number","aria-label":"week-"+this.props.weekNumber},this.props.weekNumber)}});t.exports=i},function(t,e,r){var n=r(134),o=r(135),a=o(function(t,e){return n(t,1,e)});t.exports=a},function(t,e){function r(t,e,r){if("function"!=typeof t)throw new TypeError(n);return setTimeout(function(){t.apply(void 0,r)},e)}var n="Expected a function";t.exports=r},function(t,e,r){function n(t,e){return i(a(t,e,o),t+"")}var o=r(111),a=r(136),i=r(138);t.exports=n},function(t,e,r){function n(t,e,r){return e=a(void 0===e?t.length-1:e,0),function(){for(var n=arguments,i=-1,s=a(n.length-e,0),u=Array(s);++i<s;)u[i]=n[e+i];i=-1;for(var p=Array(e+1);++i<e;)p[i]=n[i];return p[e]=r(u),o(t,this,p)}}var o=r(137),a=Math.max;t.exports=n},function(t,e){function r(t,e,r){switch(r.length){case 0:return t.call(e);case 1:return t.call(e,r[0]);case 2:return t.call(e,r[0],r[1]);case 3:return t.call(e,r[0],r[1],r[2])}return t.apply(e,r)}t.exports=r},function(t,e,r){var n=r(139),o=r(142),a=o(n);t.exports=a},function(t,e,r){var n=r(140),o=r(141),a=r(111),i=o?function(t,e){return o(t,"toString",{configurable:!0,enumerable:!1,value:n(e),writable:!0})}:a;t.exports=i},function(t,e){function r(t){return function(){return t}}t.exports=r},function(t,e,r){var n=r(26),o=function(){try{var t=n(Object,"defineProperty");return t({},"",{}),t}catch(e){}}();t.exports=o},function(t,e){function r(t){var e=0,r=0;return function(){var i=a(),s=o-(i-r);if(r=i,s>0){if(++e>=n)return arguments[0]}else e=0;return t.apply(void 0,arguments)}}var n=500,o=16,a=Date.now;t.exports=r},function(t,e,r){"use strict";function n(t){return t&&t.__esModule?t:{"default":t}}function o(t,e){var r={};for(var n in t)e.indexOf(n)>=0||Object.prototype.hasOwnProperty.call(t,n)&&(r[n]=t[n]);return r}function a(t,e,r){var n=t.children,o=s.Children.count(n);return o<=0?new Error(r+" expects at least one child to use as the target element."):o>2?new Error("Only a max of two children allowed in "+r+"."):void 0}var i=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var r=arguments[e];for(var n in r)Object.prototype.hasOwnProperty.call(r,n)&&(t[n]=r[n])}return t},s=r(3),u=n(s),p=r(144),l=n(p),c=r(145),f=n(c),d=["top left","top center","top right","middle left","middle center","middle right","bottom left","bottom center","bottom right"],h=u["default"].createClass({displayName:"TetherComponent",propTypes:{attachment:s.PropTypes.oneOf(d).isRequired,children:a,className:s.PropTypes.string,classPrefix:s.PropTypes.string,classes:s.PropTypes.object,constraints:s.PropTypes.array,enabled:s.PropTypes.bool,id:s.PropTypes.string,offset:s.PropTypes.string,optimizations:s.PropTypes.object,renderElementTag:s.PropTypes.string,renderElementTo:s.PropTypes.any,style:s.PropTypes.object,targetAttachment:s.PropTypes.oneOf(d),targetModifier:s.PropTypes.string,targetOffset:s.PropTypes.string},getDefaultProps:function(){return{renderElementTag:"div",renderElementTo:null}},componentDidMount:function(){this._targetNode=l["default"].findDOMNode(this),this._update()},componentDidUpdate:function(){this._update()},componentWillUnmount:function(){this._destroy()},disable:function(){this._tether.disable()},enable:function(){this._tether.enable()},position:function(){this._tether.position()},_destroy:function(){this._elementParentNode&&(l["default"].unmountComponentAtNode(this._elementParentNode),this._elementParentNode.parentNode.removeChild(this._elementParentNode)),this._tether&&this._tether.destroy(),this._elementParentNode=null,this._tether=null},_update:function(){var t=this,e=this.props,r=e.children,n=e.renderElementTag,o=e.renderElementTo,a=r[1];if(!a)return void(this._tether&&this._destroy());if(!this._elementParentNode){this._elementParentNode=document.createElement(n);var i=o||document.body;i.appendChild(this._elementParentNode)}l["default"].unstable_renderSubtreeIntoContainer(this,a,this._elementParentNode,function(){t._updateTether()})},_updateTether:function(){var t=this.props,e=(t.renderElementTag,t.renderElementTo,o(t,["renderElementTag","renderElementTo"])),r=i({target:this._targetNode,element:this._elementParentNode},e);this._tether?this._tether.setOptions(r):this._tether=new f["default"](r),this._tether.position()},render:function(){var t=this.props.children,e=null;return s.Children.forEach(t,function(t,r){if(0===r)return void(e=t)}),e}});t.exports=h},function(t,e){t.exports=n},function(t,e,r){var n,o;/*! tether 1.3.7 */
-!function(a,i){n=i,o="function"==typeof n?n.call(e,r,e,t):n,!(void 0!==o&&(t.exports=o))}(this,function(t,e,r){"use strict";function n(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function o(t){var e=t.getBoundingClientRect(),r={};for(var n in e)r[n]=e[n];if(t.ownerDocument!==document){var a=t.ownerDocument.defaultView.frameElement;if(a){var i=o(a);r.top+=i.top,r.bottom+=i.top,r.left+=i.left,r.right+=i.left}}return r}function a(t){var e=getComputedStyle(t)||{},r=e.position,n=[];if("fixed"===r)return[t];for(var o=t;(o=o.parentNode)&&o&&1===o.nodeType;){var a=void 0;try{a=getComputedStyle(o)}catch(i){}if("undefined"==typeof a||null===a)return n.push(o),n;var s=a,u=s.overflow,p=s.overflowX,l=s.overflowY;/(auto|scroll)/.test(u+l+p)&&("absolute"!==r||["relative","absolute","fixed"].indexOf(a.position)>=0)&&n.push(o)}return n.push(t.ownerDocument.body),t.ownerDocument!==document&&n.push(t.ownerDocument.defaultView),n}function i(){P&&document.body.removeChild(P),P=null}function s(t){var e=void 0;t===document?(e=document,t=document.documentElement):e=t.ownerDocument;var r=e.documentElement,n=o(t),a=k();return n.top-=a.top,n.left-=a.left,"undefined"==typeof n.width&&(n.width=document.body.scrollWidth-n.left-n.right),"undefined"==typeof n.height&&(n.height=document.body.scrollHeight-n.top-n.bottom),n.top=n.top-r.clientTop,n.left=n.left-r.clientLeft,n.right=e.body.clientWidth-n.width-n.left,n.bottom=e.body.clientHeight-n.height-n.top,n}function u(t){return t.offsetParent||document.documentElement}function p(){if(E)return E;var t=document.createElement("div");t.style.width="100%",t.style.height="200px";var e=document.createElement("div");l(e.style,{position:"absolute",top:0,left:0,pointerEvents:"none",visibility:"hidden",width:"200px",height:"150px",overflow:"hidden"}),e.appendChild(t),document.body.appendChild(e);var r=t.offsetWidth;e.style.overflow="scroll";var n=t.offsetWidth;r===n&&(n=e.clientWidth),document.body.removeChild(e);var o=r-n;return E={width:o,height:o}}function l(){var t=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],e=[];return Array.prototype.push.apply(e,arguments),e.slice(1).forEach(function(e){if(e)for(var r in e)({}).hasOwnProperty.call(e,r)&&(t[r]=e[r])}),t}function c(t,e){if("undefined"!=typeof t.classList)e.split(" ").forEach(function(e){e.trim()&&t.classList.remove(e)});else{var r=new RegExp("(^| )"+e.split(" ").join("|")+"( |$)","gi"),n=h(t).replace(r," ");y(t,n)}}function f(t,e){if("undefined"!=typeof t.classList)e.split(" ").forEach(function(e){e.trim()&&t.classList.add(e)});else{c(t,e);var r=h(t)+(" "+e);y(t,r)}}function d(t,e){if("undefined"!=typeof t.classList)return t.classList.contains(e);var r=h(t);return new RegExp("(^| )"+e+"( |$)","gi").test(r)}function h(t){return t.className instanceof t.ownerDocument.defaultView.SVGAnimatedString?t.className.baseVal:t.className}function y(t,e){t.setAttribute("class",e)}function m(t,e,r){r.forEach(function(r){e.indexOf(r)===-1&&d(t,r)&&c(t,r)}),e.forEach(function(e){d(t,e)||f(t,e)})}function n(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function g(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)}function v(t,e){var r=arguments.length<=2||void 0===arguments[2]?1:arguments[2];return t+r>=e&&e>=t-r}function b(){return"undefined"!=typeof performance&&"undefined"!=typeof performance.now?performance.now():+new Date}function D(){for(var t={top:0,left:0},e=arguments.length,r=Array(e),n=0;n<e;n++)r[n]=arguments[n];return r.forEach(function(e){var r=e.top,n=e.left;"string"==typeof r&&(r=parseFloat(r,10)),"string"==typeof n&&(n=parseFloat(n,10)),t.top+=r,t.left+=n}),t}function _(t,e){return"string"==typeof t.left&&t.left.indexOf("%")!==-1&&(t.left=parseFloat(t.left,10)/100*e.width),"string"==typeof t.top&&t.top.indexOf("%")!==-1&&(t.top=parseFloat(t.top,10)/100*e.height),t}function w(t,e){return"scrollParent"===e?e=t.scrollParents[0]:"window"===e&&(e=[pageXOffset,pageYOffset,innerWidth+pageXOffset,innerHeight+pageYOffset]),e===document&&(e=e.documentElement),"undefined"!=typeof e.nodeType&&!function(){var t=e,r=s(e),n=r,o=getComputedStyle(e);if(e=[n.left,n.top,r.width+n.left,r.height+n.top],t.ownerDocument!==document){var a=t.ownerDocument.defaultView;e[0]+=a.pageXOffset,e[1]+=a.pageYOffset,e[2]+=a.pageXOffset,e[3]+=a.pageYOffset}K.forEach(function(t,r){t=t[0].toUpperCase()+t.substr(1),"Top"===t||"Left"===t?e[r]+=parseFloat(o["border"+t+"Width"]):e[r]-=parseFloat(o["border"+t+"Width"])})}(),e}var x=function(){function t(t,e){for(var r=0;r<e.length;r++){var n=e[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}return function(e,r,n){return r&&t(e.prototype,r),n&&t(e,n),e}}(),T=void 0;"undefined"==typeof T&&(T={modules:[]});var P=null,O=function(){var t=0;return function(){return++t}}(),C={},k=function(){var t=P;t||(t=document.createElement("div"),t.setAttribute("data-tether-id",O()),l(t.style,{top:0,left:0,position:"absolute"}),document.body.appendChild(t),P=t);var e=t.getAttribute("data-tether-id");return"undefined"==typeof C[e]&&(C[e]=o(t),M(function(){delete C[e]})),C[e]},E=null,j=[],M=function(t){j.push(t)},S=function(){for(var t=void 0;t=j.pop();)t()},N=function(){function t(){n(this,t)}return x(t,[{key:"on",value:function(t,e,r){var n=!(arguments.length<=3||void 0===arguments[3])&&arguments[3];"undefined"==typeof this.bindings&&(this.bindings={}),"undefined"==typeof this.bindings[t]&&(this.bindings[t]=[]),this.bindings[t].push({handler:e,ctx:r,once:n})}},{key:"once",value:function(t,e,r){this.on(t,e,r,!0)}},{key:"off",value:function(t,e){if("undefined"!=typeof this.bindings&&"undefined"!=typeof this.bindings[t])if("undefined"==typeof e)delete this.bindings[t];else for(var r=0;r<this.bindings[t].length;)this.bindings[t][r].handler===e?this.bindings[t].splice(r,1):++r}},{key:"trigger",value:function(t){if("undefined"!=typeof this.bindings&&this.bindings[t]){for(var e=0,r=arguments.length,n=Array(r>1?r-1:0),o=1;o<r;o++)n[o-1]=arguments[o];for(;e<this.bindings[t].length;){var a=this.bindings[t][e],i=a.handler,s=a.ctx,u=a.once,p=s;"undefined"==typeof p&&(p=this),i.apply(p,n),u?this.bindings[t].splice(e,1):++e}}}}]),t}();T.Utils={getActualBoundingClientRect:o,getScrollParents:a,getBounds:s,getOffsetParent:u,extend:l,addClass:f,removeClass:c,hasClass:d,updateClasses:m,defer:M,flush:S,uniqueId:O,Evented:N,getScrollBarSize:p,removeUtilElements:i};var A=function(){function t(t,e){var r=[],n=!0,o=!1,a=void 0;try{for(var i,s=t[Symbol.iterator]();!(n=(i=s.next()).done)&&(r.push(i.value),!e||r.length!==e);n=!0);}catch(u){o=!0,a=u}finally{try{!n&&s["return"]&&s["return"]()}finally{if(o)throw a}}return r}return function(e,r){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,r);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),x=function(){function t(t,e){for(var r=0;r<e.length;r++){var n=e[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}return function(e,r,n){return r&&t(e.prototype,r),n&&t(e,n),e}}(),F=function(t,e,r){for(var n=!0;n;){var o=t,a=e,i=r;n=!1,null===o&&(o=Function.prototype);var s=Object.getOwnPropertyDescriptor(o,a);if(void 0!==s){if("value"in s)return s.value;var u=s.get;if(void 0===u)return;return u.call(i)}var p=Object.getPrototypeOf(o);if(null===p)return;t=p,e=a,r=i,n=!0,s=p=void 0}};if("undefined"==typeof T)throw new Error("You must include the utils.js file before tether.js");var B=T.Utils,a=B.getScrollParents,s=B.getBounds,u=B.getOffsetParent,l=B.extend,f=B.addClass,c=B.removeClass,m=B.updateClasses,M=B.defer,S=B.flush,p=B.getScrollBarSize,i=B.removeUtilElements,I=function(){if("undefined"==typeof document)return"";for(var t=document.createElement("div"),e=["transform","WebkitTransform","OTransform","MozTransform","msTransform"],r=0;r<e.length;++r){var n=e[r];if(void 0!==t.style[n])return n}}(),R=[],W=function(){R.forEach(function(t){t.position(!1)}),S()};!function(){var t=null,e=null,r=null,n=function o(){return"undefined"!=typeof e&&e>16?(e=Math.min(e-16,250),void(r=setTimeout(o,250))):void("undefined"!=typeof t&&b()-t<10||(null!=r&&(clearTimeout(r),r=null),t=b(),W(),e=b()-t))};"undefined"!=typeof window&&"undefined"!=typeof window.addEventListener&&["resize","scroll","touchmove"].forEach(function(t){window.addEventListener(t,n)})}();var Y={center:"center",left:"right",right:"left"},z={middle:"middle",top:"bottom",bottom:"top"},L={top:0,left:0,middle:"50%",center:"50%",bottom:"100%",right:"100%"},q=function(t,e){var r=t.left,n=t.top;return"auto"===r&&(r=Y[e.left]),"auto"===n&&(n=z[e.top]),{left:r,top:n}},H=function(t){var e=t.left,r=t.top;return"undefined"!=typeof L[t.left]&&(e=L[t.left]),"undefined"!=typeof L[t.top]&&(r=L[t.top]),{left:e,top:r}},V=function(t){var e=t.split(" "),r=A(e,2),n=r[0],o=r[1];return{top:n,left:o}},U=V,$=function(t){function e(t){var r=this;n(this,e),F(Object.getPrototypeOf(e.prototype),"constructor",this).call(this),this.position=this.position.bind(this),R.push(this),this.history=[],this.setOptions(t,!1),T.modules.forEach(function(t){"undefined"!=typeof t.initialize&&t.initialize.call(r)}),this.position()}return g(e,t),x(e,[{key:"getClass",value:function(){var t=arguments.length<=0||void 0===arguments[0]?"":arguments[0],e=this.options.classes;return"undefined"!=typeof e&&e[t]?this.options.classes[t]:this.options.classPrefix?this.options.classPrefix+"-"+t:t}},{key:"setOptions",value:function(t){var e=this,r=arguments.length<=1||void 0===arguments[1]||arguments[1],n={offset:"0 0",targetOffset:"0 0",targetAttachment:"auto auto",classPrefix:"tether"};this.options=l(n,t);var o=this.options,i=o.element,s=o.target,u=o.targetModifier;if(this.element=i,this.target=s,this.targetModifier=u,"viewport"===this.target?(this.target=document.body,this.targetModifier="visible"):"scroll-handle"===this.target&&(this.target=document.body,this.targetModifier="scroll-handle"),["element","target"].forEach(function(t){if("undefined"==typeof e[t])throw new Error("Tether Error: Both element and target must be defined");"undefined"!=typeof e[t].jquery?e[t]=e[t][0]:"string"==typeof e[t]&&(e[t]=document.querySelector(e[t]))}),f(this.element,this.getClass("element")),this.options.addTargetClasses!==!1&&f(this.target,this.getClass("target")),!this.options.attachment)throw new Error("Tether Error: You must provide an attachment");this.targetAttachment=U(this.options.targetAttachment),this.attachment=U(this.options.attachment),this.offset=V(this.options.offset),this.targetOffset=V(this.options.targetOffset),"undefined"!=typeof this.scrollParents&&this.disable(),"scroll-handle"===this.targetModifier?this.scrollParents=[this.target]:this.scrollParents=a(this.target),this.options.enabled!==!1&&this.enable(r)}},{key:"getTargetBounds",value:function(){if("undefined"==typeof this.targetModifier)return s(this.target);if("visible"===this.targetModifier){if(this.target===document.body)return{top:pageYOffset,left:pageXOffset,height:innerHeight,width:innerWidth};var t=s(this.target),e={height:t.height,width:t.width,top:t.top,left:t.left};return e.height=Math.min(e.height,t.height-(pageYOffset-t.top)),e.height=Math.min(e.height,t.height-(t.top+t.height-(pageYOffset+innerHeight))),e.height=Math.min(innerHeight,e.height),e.height-=2,e.width=Math.min(e.width,t.width-(pageXOffset-t.left)),e.width=Math.min(e.width,t.width-(t.left+t.width-(pageXOffset+innerWidth))),e.width=Math.min(innerWidth,e.width),e.width-=2,e.top<pageYOffset&&(e.top=pageYOffset),e.left<pageXOffset&&(e.left=pageXOffset),e}if("scroll-handle"===this.targetModifier){var t=void 0,r=this.target;r===document.body?(r=document.documentElement,t={left:pageXOffset,top:pageYOffset,height:innerHeight,width:innerWidth}):t=s(r);var n=getComputedStyle(r),o=r.scrollWidth>r.clientWidth||[n.overflow,n.overflowX].indexOf("scroll")>=0||this.target!==document.body,a=0;o&&(a=15);var i=t.height-parseFloat(n.borderTopWidth)-parseFloat(n.borderBottomWidth)-a,e={width:15,height:.975*i*(i/r.scrollHeight),left:t.left+t.width-parseFloat(n.borderLeftWidth)-15},u=0;i<408&&this.target===document.body&&(u=-11e-5*Math.pow(i,2)-.00727*i+22.58),this.target!==document.body&&(e.height=Math.max(e.height,24));var p=this.target.scrollTop/(r.scrollHeight-i);return e.top=p*(i-e.height-u)+t.top+parseFloat(n.borderTopWidth),this.target===document.body&&(e.height=Math.max(e.height,24)),e}}},{key:"clearCache",value:function(){this._cache={}}},{key:"cache",value:function(t,e){return"undefined"==typeof this._cache&&(this._cache={}),"undefined"==typeof this._cache[t]&&(this._cache[t]=e.call(this)),this._cache[t]}},{key:"enable",value:function(){var t=this,e=arguments.length<=0||void 0===arguments[0]||arguments[0];this.options.addTargetClasses!==!1&&f(this.target,this.getClass("enabled")),f(this.element,this.getClass("enabled")),this.enabled=!0,this.scrollParents.forEach(function(e){e!==t.target.ownerDocument&&e.addEventListener("scroll",t.position)}),e&&this.position()}},{key:"disable",value:function(){var t=this;c(this.target,this.getClass("enabled")),c(this.element,this.getClass("enabled")),this.enabled=!1,"undefined"!=typeof this.scrollParents&&this.scrollParents.forEach(function(e){e.removeEventListener("scroll",t.position)})}},{key:"destroy",value:function(){var t=this;this.disable(),R.forEach(function(e,r){e===t&&R.splice(r,1)}),0===R.length&&i()}},{key:"updateAttachClasses",value:function(t,e){var r=this;t=t||this.attachment,e=e||this.targetAttachment;var n=["left","top","bottom","right","middle","center"];"undefined"!=typeof this._addAttachClasses&&this._addAttachClasses.length&&this._addAttachClasses.splice(0,this._addAttachClasses.length),"undefined"==typeof this._addAttachClasses&&(this._addAttachClasses=[]);var o=this._addAttachClasses;t.top&&o.push(this.getClass("element-attached")+"-"+t.top),t.left&&o.push(this.getClass("element-attached")+"-"+t.left),e.top&&o.push(this.getClass("target-attached")+"-"+e.top),e.left&&o.push(this.getClass("target-attached")+"-"+e.left);var a=[];n.forEach(function(t){a.push(r.getClass("element-attached")+"-"+t),a.push(r.getClass("target-attached")+"-"+t)}),M(function(){"undefined"!=typeof r._addAttachClasses&&(m(r.element,r._addAttachClasses,a),r.options.addTargetClasses!==!1&&m(r.target,r._addAttachClasses,a),delete r._addAttachClasses)})}},{key:"position",value:function(){var t=this,e=arguments.length<=0||void 0===arguments[0]||arguments[0];if(this.enabled){this.clearCache();var r=q(this.targetAttachment,this.attachment);this.updateAttachClasses(this.attachment,r);var n=this.cache("element-bounds",function(){return s(t.element)}),o=n.width,a=n.height;if(0===o&&0===a&&"undefined"!=typeof this.lastSize){var i=this.lastSize;o=i.width,a=i.height}else this.lastSize={width:o,height:a};var l=this.cache("target-bounds",function(){return t.getTargetBounds()}),c=l,f=_(H(this.attachment),{width:o,height:a}),d=_(H(r),c),h=_(this.offset,{width:o,height:a}),y=_(this.targetOffset,c);f=D(f,h),d=D(d,y);for(var m=l.left+d.left-f.left,g=l.top+d.top-f.top,v=0;v<T.modules.length;++v){var b=T.modules[v],w=b.position.call(this,{left:m,top:g,targetAttachment:r,targetPos:l,elementPos:n,offset:f,targetOffset:d,manualOffset:h,manualTargetOffset:y,scrollbarSize:C,attachment:this.attachment});if(w===!1)return!1;"undefined"!=typeof w&&"object"==typeof w&&(g=w.top,m=w.left)}var x={page:{top:g,left:m},viewport:{top:g-pageYOffset,bottom:pageYOffset-g-a+innerHeight,left:m-pageXOffset,right:pageXOffset-m-o+innerWidth}},P=this.target.ownerDocument,O=P.defaultView,C=void 0;return O.innerHeight>P.documentElement.clientHeight&&(C=this.cache("scrollbar-size",p),x.viewport.bottom-=C.height),O.innerWidth>P.documentElement.clientWidth&&(C=this.cache("scrollbar-size",p),x.viewport.right-=C.width),["","static"].indexOf(P.body.style.position)!==-1&&["","static"].indexOf(P.body.parentElement.style.position)!==-1||(x.page.bottom=P.body.scrollHeight-g-a,x.page.right=P.body.scrollWidth-m-o),"undefined"!=typeof this.options.optimizations&&this.options.optimizations.moveElement!==!1&&"undefined"==typeof this.targetModifier&&!function(){var e=t.cache("target-offsetparent",function(){return u(t.target)}),r=t.cache("target-offsetparent-bounds",function(){return s(e)}),n=getComputedStyle(e),o=r,a={};if(["Top","Left","Bottom","Right"].forEach(function(t){a[t.toLowerCase()]=parseFloat(n["border"+t+"Width"])}),r.right=P.body.scrollWidth-r.left-o.width+a.right,r.bottom=P.body.scrollHeight-r.top-o.height+a.bottom,x.page.top>=r.top+a.top&&x.page.bottom>=r.bottom&&x.page.left>=r.left+a.left&&x.page.right>=r.right){var i=e.scrollTop,p=e.scrollLeft;x.offset={top:x.page.top-r.top+i-a.top,left:x.page.left-r.left+p-a.left}}}(),this.move(x),this.history.unshift(x),this.history.length>3&&this.history.pop(),e&&S(),!0}}},{key:"move",value:function(t){var e=this;if("undefined"!=typeof this.element.parentNode){var r={};for(var n in t){r[n]={};for(var o in t[n]){for(var a=!1,i=0;i<this.history.length;++i){var s=this.history[i];if("undefined"!=typeof s[n]&&!v(s[n][o],t[n][o])){a=!0;break}}a||(r[n][o]=!0)}}var p={top:"",left:"",right:"",bottom:""},c=function(t,r){var n="undefined"!=typeof e.options.optimizations,o=n?e.options.optimizations.gpu:null;if(o!==!1){var a=void 0,i=void 0;if(t.top?(p.top=0,a=r.top):(p.bottom=0,a=-r.bottom),t.left?(p.left=0,i=r.left):(p.right=0,i=-r.right),window.matchMedia){var s=window.matchMedia("only screen and (min-resolution: 1.3dppx)").matches||window.matchMedia("only screen and (-webkit-min-device-pixel-ratio: 1.3)").matches;s||(i=Math.round(i),a=Math.round(a))}p[I]="translateX("+i+"px) translateY("+a+"px)","msTransform"!==I&&(p[I]+=" translateZ(0)")}else t.top?p.top=r.top+"px":p.bottom=r.bottom+"px",t.left?p.left=r.left+"px":p.right=r.right+"px"},f=!1;if((r.page.top||r.page.bottom)&&(r.page.left||r.page.right)?(p.position="absolute",c(r.page,t.page)):(r.viewport.top||r.viewport.bottom)&&(r.viewport.left||r.viewport.right)?(p.position="fixed",c(r.viewport,t.viewport)):"undefined"!=typeof r.offset&&r.offset.top&&r.offset.left?!function(){p.position="absolute";var n=e.cache("target-offsetparent",function(){return u(e.target)});u(e.element)!==n&&M(function(){e.element.parentNode.removeChild(e.element),n.appendChild(e.element)}),c(r.offset,t.offset),f=!0}():(p.position="absolute",c({top:!0,left:!0},t.page)),!f){for(var d=!0,h=this.element.parentNode;h&&1===h.nodeType&&"BODY"!==h.tagName;){if("static"!==getComputedStyle(h).position){d=!1;break}h=h.parentNode}d||(this.element.parentNode.removeChild(this.element),this.element.ownerDocument.body.appendChild(this.element))}var y={},m=!1;for(var o in p){var g=p[o],b=this.element.style[o];b!==g&&(m=!0,y[o]=g)}m&&M(function(){l(e.element.style,y),e.trigger("repositioned")})}}}]),e}(N);$.modules=[],T.position=W;var X=l($,T),A=function(){function t(t,e){var r=[],n=!0,o=!1,a=void 0;try{for(var i,s=t[Symbol.iterator]();!(n=(i=s.next()).done)&&(r.push(i.value),!e||r.length!==e);n=!0);}catch(u){o=!0,a=u}finally{try{!n&&s["return"]&&s["return"]()}finally{if(o)throw a}}return r}return function(e,r){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,r);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),B=T.Utils,s=B.getBounds,l=B.extend,m=B.updateClasses,M=B.defer,K=["left","top","right","bottom"];T.modules.push({position:function(t){var e=this,r=t.top,n=t.left,o=t.targetAttachment;if(!this.options.constraints)return!0;var a=this.cache("element-bounds",function(){return s(e.element)}),i=a.height,u=a.width;if(0===u&&0===i&&"undefined"!=typeof this.lastSize){var p=this.lastSize;u=p.width,i=p.height}var c=this.cache("target-bounds",function(){return e.getTargetBounds()}),f=c.height,d=c.width,h=[this.getClass("pinned"),this.getClass("out-of-bounds")];this.options.constraints.forEach(function(t){var e=t.outOfBoundsClass,r=t.pinnedClass;e&&h.push(e),r&&h.push(r)}),h.forEach(function(t){["left","top","right","bottom"].forEach(function(e){h.push(t+"-"+e)})});var y=[],g=l({},o),v=l({},this.attachment);return this.options.constraints.forEach(function(t){var a=t.to,s=t.attachment,p=t.pin;"undefined"==typeof s&&(s="");var l=void 0,c=void 0;if(s.indexOf(" ")>=0){var h=s.split(" "),m=A(h,2);c=m[0],l=m[1]}else l=c=s;var b=w(e,a);"target"!==c&&"both"!==c||(r<b[1]&&"top"===g.top&&(r+=f,g.top="bottom"),r+i>b[3]&&"bottom"===g.top&&(r-=f,g.top="top")),"together"===c&&("top"===g.top&&("bottom"===v.top&&r<b[1]?(r+=f,g.top="bottom",r+=i,v.top="top"):"top"===v.top&&r+i>b[3]&&r-(i-f)>=b[1]&&(r-=i-f,g.top="bottom",v.top="bottom")),"bottom"===g.top&&("top"===v.top&&r+i>b[3]?(r-=f,g.top="top",r-=i,v.top="bottom"):"bottom"===v.top&&r<b[1]&&r+(2*i-f)<=b[3]&&(r+=i-f,g.top="top",v.top="top")),"middle"===g.top&&(r+i>b[3]&&"top"===v.top?(r-=i,v.top="bottom"):r<b[1]&&"bottom"===v.top&&(r+=i,v.top="top"))),"target"!==l&&"both"!==l||(n<b[0]&&"left"===g.left&&(n+=d,g.left="right"),n+u>b[2]&&"right"===g.left&&(n-=d,g.left="left")),"together"===l&&(n<b[0]&&"left"===g.left?"right"===v.left?(n+=d,g.left="right",n+=u,v.left="left"):"left"===v.left&&(n+=d,g.left="right",n-=u,v.left="right"):n+u>b[2]&&"right"===g.left?"left"===v.left?(n-=d,g.left="left",n-=u,v.left="right"):"right"===v.left&&(n-=d,g.left="left",n+=u,v.left="left"):"center"===g.left&&(n+u>b[2]&&"left"===v.left?(n-=u,v.left="right"):n<b[0]&&"right"===v.left&&(n+=u,v.left="left"))),"element"!==c&&"both"!==c||(r<b[1]&&"bottom"===v.top&&(r+=i,v.top="top"),r+i>b[3]&&"top"===v.top&&(r-=i,v.top="bottom")),"element"!==l&&"both"!==l||(n<b[0]&&("right"===v.left?(n+=u,v.left="left"):"center"===v.left&&(n+=u/2,v.left="left")),n+u>b[2]&&("left"===v.left?(n-=u,v.left="right"):"center"===v.left&&(n-=u/2,v.left="right"))),"string"==typeof p?p=p.split(",").map(function(t){return t.trim()}):p===!0&&(p=["top","left","right","bottom"]),p=p||[];var D=[],_=[];r<b[1]&&(p.indexOf("top")>=0?(r=b[1],D.push("top")):_.push("top")),r+i>b[3]&&(p.indexOf("bottom")>=0?(r=b[3]-i,D.push("bottom")):_.push("bottom")),n<b[0]&&(p.indexOf("left")>=0?(n=b[0],D.push("left")):_.push("left")),n+u>b[2]&&(p.indexOf("right")>=0?(n=b[2]-u,D.push("right")):_.push("right")),D.length&&!function(){var t=void 0;t="undefined"!=typeof e.options.pinnedClass?e.options.pinnedClass:e.getClass("pinned"),y.push(t),D.forEach(function(e){y.push(t+"-"+e)})}(),_.length&&!function(){var t=void 0;t="undefined"!=typeof e.options.outOfBoundsClass?e.options.outOfBoundsClass:e.getClass("out-of-bounds"),y.push(t),_.forEach(function(e){y.push(t+"-"+e)})}(),(D.indexOf("left")>=0||D.indexOf("right")>=0)&&(v.left=g.left=!1),(D.indexOf("top")>=0||D.indexOf("bottom")>=0)&&(v.top=g.top=!1),g.top===o.top&&g.left===o.left&&v.top===e.attachment.top&&v.left===e.attachment.left||(e.updateAttachClasses(v,g),e.trigger("update",{attachment:v,targetAttachment:g}))}),M(function(){e.options.addTargetClasses!==!1&&m(e.target,y,h),m(e.element,y,h)}),{top:r,left:n}}});var B=T.Utils,s=B.getBounds,m=B.updateClasses,M=B.defer;T.modules.push({position:function(t){var e=this,r=t.top,n=t.left,o=this.cache("element-bounds",function(){return s(e.element)}),a=o.height,i=o.width,u=this.getTargetBounds(),p=r+a,l=n+i,c=[];r<=u.bottom&&p>=u.top&&["left","right"].forEach(function(t){var e=u[t];e!==n&&e!==l||c.push(t)}),n<=u.right&&l>=u.left&&["top","bottom"].forEach(function(t){var e=u[t];e!==r&&e!==p||c.push(t)});var f=[],d=[],h=["left","top","right","bottom"];return f.push(this.getClass("abutted")),h.forEach(function(t){f.push(e.getClass("abutted")+"-"+t)}),c.length&&d.push(this.getClass("abutted")),c.forEach(function(t){d.push(e.getClass("abutted")+"-"+t)}),M(function(){e.options.addTargetClasses!==!1&&m(e.target,d,f),m(e.element,d,f)}),!0}});var A=function(){function t(t,e){var r=[],n=!0,o=!1,a=void 0;try{for(var i,s=t[Symbol.iterator]();!(n=(i=s.next()).done)&&(r.push(i.value),!e||r.length!==e);n=!0);}catch(u){o=!0,a=u}finally{try{!n&&s["return"]&&s["return"]()}finally{if(o)throw a}}return r}return function(e,r){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,r);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}();return T.modules.push({position:function(t){var e=t.top,r=t.left;if(this.options.shift){var n=this.options.shift;"function"==typeof this.options.shift&&(n=this.options.shift.call(this,{top:e,left:r}));var o=void 0,a=void 0;if("string"==typeof n){n=n.split(" "),n[1]=n[1]||n[0];var i=n,s=A(i,2);o=s[0],a=s[1],o=parseFloat(o,10),a=parseFloat(a,10)}else o=n.top,a=n.left;return e+=o,r+=a,{top:e,left:r}}}}),X})}])});
-},{"moment":42,"react":206,"react-dom":54,"react-onclickoutside":181}],54:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/ReactDOM');
@@ -18131,7 +19643,7 @@ _assign(FallbackCompositionState.prototype, {
 PooledClass.addPoolingTo(FallbackCompositionState);
 
 module.exports = FallbackCompositionState;
-},{"./PooledClass":78,"./getTextContentAccessor":168,"object-assign":52}],75:[function(require,module,exports){
+},{"./PooledClass":78,"./getTextContentAccessor":168,"object-assign":53}],75:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -18993,7 +20505,7 @@ var ReactBrowserEventEmitter = _assign({}, ReactEventEmitterMixin, {
 });
 
 module.exports = ReactBrowserEventEmitter;
-},{"./EventPluginRegistry":71,"./ReactEventEmitterMixin":108,"./ViewportMetrics":150,"./getVendorPrefixedEventName":169,"./isEventSupported":171,"object-assign":52}],80:[function(require,module,exports){
+},{"./EventPluginRegistry":71,"./ReactEventEmitterMixin":108,"./ViewportMetrics":150,"./getVendorPrefixedEventName":169,"./isEventSupported":171,"object-assign":53}],80:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -20131,7 +21643,7 @@ var ReactCompositeComponent = {
 
 module.exports = ReactCompositeComponent;
 }).call(this,require('_process'))
-},{"./ReactComponentEnvironment":82,"./ReactErrorUtils":107,"./ReactInstanceMap":115,"./ReactInstrumentation":116,"./ReactNodeTypes":121,"./ReactReconciler":126,"./checkReactTypeSpec":153,"./reactProdInvariant":174,"./shouldUpdateReactComponent":178,"_process":210,"fbjs/lib/emptyObject":26,"fbjs/lib/invariant":33,"fbjs/lib/shallowEqual":39,"fbjs/lib/warning":40,"object-assign":52,"react/lib/React":184,"react/lib/ReactCurrentOwner":189}],84:[function(require,module,exports){
+},{"./ReactComponentEnvironment":82,"./ReactErrorUtils":107,"./ReactInstanceMap":115,"./ReactInstrumentation":116,"./ReactNodeTypes":121,"./ReactReconciler":126,"./checkReactTypeSpec":153,"./reactProdInvariant":174,"./shouldUpdateReactComponent":178,"_process":210,"fbjs/lib/emptyObject":26,"fbjs/lib/invariant":33,"fbjs/lib/shallowEqual":39,"fbjs/lib/warning":40,"object-assign":53,"react/lib/React":184,"react/lib/ReactCurrentOwner":189}],84:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -21241,7 +22753,7 @@ _assign(ReactDOMComponent.prototype, ReactDOMComponent.Mixin, ReactMultiChild.Mi
 
 module.exports = ReactDOMComponent;
 }).call(this,require('_process'))
-},{"./AutoFocusUtils":56,"./CSSPropertyOperations":59,"./DOMLazyTree":63,"./DOMNamespaces":64,"./DOMProperty":65,"./DOMPropertyOperations":66,"./EventPluginHub":70,"./EventPluginRegistry":71,"./ReactBrowserEventEmitter":79,"./ReactDOMComponentFlags":86,"./ReactDOMComponentTree":87,"./ReactDOMInput":92,"./ReactDOMOption":95,"./ReactDOMSelect":96,"./ReactDOMTextarea":99,"./ReactInstrumentation":116,"./ReactMultiChild":120,"./ReactServerRenderingTransaction":128,"./escapeTextContentForBrowser":156,"./isEventSupported":171,"./reactProdInvariant":174,"./validateDOMNesting":180,"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/invariant":33,"fbjs/lib/shallowEqual":39,"fbjs/lib/warning":40,"object-assign":52}],86:[function(require,module,exports){
+},{"./AutoFocusUtils":56,"./CSSPropertyOperations":59,"./DOMLazyTree":63,"./DOMNamespaces":64,"./DOMProperty":65,"./DOMPropertyOperations":66,"./EventPluginHub":70,"./EventPluginRegistry":71,"./ReactBrowserEventEmitter":79,"./ReactDOMComponentFlags":86,"./ReactDOMComponentTree":87,"./ReactDOMInput":92,"./ReactDOMOption":95,"./ReactDOMSelect":96,"./ReactDOMTextarea":99,"./ReactInstrumentation":116,"./ReactMultiChild":120,"./ReactServerRenderingTransaction":128,"./escapeTextContentForBrowser":156,"./isEventSupported":171,"./reactProdInvariant":174,"./validateDOMNesting":180,"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/invariant":33,"fbjs/lib/shallowEqual":39,"fbjs/lib/warning":40,"object-assign":53}],86:[function(require,module,exports){
 /**
  * Copyright 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -21544,7 +23056,7 @@ _assign(ReactDOMEmptyComponent.prototype, {
 });
 
 module.exports = ReactDOMEmptyComponent;
-},{"./DOMLazyTree":63,"./ReactDOMComponentTree":87,"object-assign":52}],90:[function(require,module,exports){
+},{"./DOMLazyTree":63,"./ReactDOMComponentTree":87,"object-assign":53}],90:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -21867,7 +23379,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMInput;
 }).call(this,require('_process'))
-},{"./DOMPropertyOperations":66,"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":52}],93:[function(require,module,exports){
+},{"./DOMPropertyOperations":66,"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":53}],93:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22132,7 +23644,7 @@ var ReactDOMOption = {
 
 module.exports = ReactDOMOption;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":87,"./ReactDOMSelect":96,"_process":210,"fbjs/lib/warning":40,"object-assign":52,"react/lib/React":184}],96:[function(require,module,exports){
+},{"./ReactDOMComponentTree":87,"./ReactDOMSelect":96,"_process":210,"fbjs/lib/warning":40,"object-assign":53,"react/lib/React":184}],96:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22334,7 +23846,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMSelect;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"_process":210,"fbjs/lib/warning":40,"object-assign":52}],97:[function(require,module,exports){
+},{"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"_process":210,"fbjs/lib/warning":40,"object-assign":53}],97:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -22712,7 +24224,7 @@ _assign(ReactDOMTextComponent.prototype, {
 
 module.exports = ReactDOMTextComponent;
 }).call(this,require('_process'))
-},{"./DOMChildrenOperations":62,"./DOMLazyTree":63,"./ReactDOMComponentTree":87,"./escapeTextContentForBrowser":156,"./reactProdInvariant":174,"./validateDOMNesting":180,"_process":210,"fbjs/lib/invariant":33,"object-assign":52}],99:[function(require,module,exports){
+},{"./DOMChildrenOperations":62,"./DOMLazyTree":63,"./ReactDOMComponentTree":87,"./escapeTextContentForBrowser":156,"./reactProdInvariant":174,"./validateDOMNesting":180,"_process":210,"fbjs/lib/invariant":33,"object-assign":53}],99:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22868,7 +24380,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMTextarea;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":52}],100:[function(require,module,exports){
+},{"./LinkedValueUtils":77,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":53}],100:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -23551,7 +25063,7 @@ var ReactDefaultBatchingStrategy = {
 };
 
 module.exports = ReactDefaultBatchingStrategy;
-},{"./ReactUpdates":131,"./Transaction":149,"fbjs/lib/emptyFunction":25,"object-assign":52}],104:[function(require,module,exports){
+},{"./ReactUpdates":131,"./Transaction":149,"fbjs/lib/emptyFunction":25,"object-assign":53}],104:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -23954,7 +25466,7 @@ var ReactEventListener = {
 };
 
 module.exports = ReactEventListener;
-},{"./PooledClass":78,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./getEventTarget":163,"fbjs/lib/EventListener":18,"fbjs/lib/ExecutionEnvironment":19,"fbjs/lib/getUnboundedScrollPosition":30,"object-assign":52}],110:[function(require,module,exports){
+},{"./PooledClass":78,"./ReactDOMComponentTree":87,"./ReactUpdates":131,"./getEventTarget":163,"fbjs/lib/EventListener":18,"fbjs/lib/ExecutionEnvironment":19,"fbjs/lib/getUnboundedScrollPosition":30,"object-assign":53}],110:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -24054,7 +25566,7 @@ var ReactHostComponent = {
 
 module.exports = ReactHostComponent;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"object-assign":52}],112:[function(require,module,exports){
+},{"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"object-assign":53}],112:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -25763,7 +27275,7 @@ PooledClass.addPoolingTo(ReactReconcileTransaction);
 
 module.exports = ReactReconcileTransaction;
 }).call(this,require('_process'))
-},{"./CallbackQueue":60,"./PooledClass":78,"./ReactBrowserEventEmitter":79,"./ReactInputSelection":114,"./ReactInstrumentation":116,"./ReactUpdateQueue":130,"./Transaction":149,"_process":210,"object-assign":52}],126:[function(require,module,exports){
+},{"./CallbackQueue":60,"./PooledClass":78,"./ReactBrowserEventEmitter":79,"./ReactInputSelection":114,"./ReactInstrumentation":116,"./ReactUpdateQueue":130,"./Transaction":149,"_process":210,"object-assign":53}],126:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26114,7 +27626,7 @@ PooledClass.addPoolingTo(ReactServerRenderingTransaction);
 
 module.exports = ReactServerRenderingTransaction;
 }).call(this,require('_process'))
-},{"./PooledClass":78,"./ReactInstrumentation":116,"./ReactServerUpdateQueue":129,"./Transaction":149,"_process":210,"object-assign":52}],129:[function(require,module,exports){
+},{"./PooledClass":78,"./ReactInstrumentation":116,"./ReactServerUpdateQueue":129,"./Transaction":149,"_process":210,"object-assign":53}],129:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -26736,7 +28248,7 @@ var ReactUpdates = {
 
 module.exports = ReactUpdates;
 }).call(this,require('_process'))
-},{"./CallbackQueue":60,"./PooledClass":78,"./ReactFeatureFlags":110,"./ReactReconciler":126,"./Transaction":149,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"object-assign":52}],132:[function(require,module,exports){
+},{"./CallbackQueue":60,"./PooledClass":78,"./ReactFeatureFlags":110,"./ReactReconciler":126,"./Transaction":149,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"object-assign":53}],132:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -27907,7 +29419,7 @@ function getPooledWarningPropertyDefinition(propName, getVal) {
   }
 }
 }).call(this,require('_process'))
-},{"./PooledClass":78,"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/warning":40,"object-assign":52}],141:[function(require,module,exports){
+},{"./PooledClass":78,"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/warning":40,"object-assign":53}],141:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29837,7 +31349,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
 
 module.exports = instantiateReactComponent;
 }).call(this,require('_process'))
-},{"./ReactCompositeComponent":83,"./ReactEmptyComponent":106,"./ReactHostComponent":111,"./getNextDebugID":166,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":52}],171:[function(require,module,exports){
+},{"./ReactCompositeComponent":83,"./ReactEmptyComponent":106,"./ReactHostComponent":111,"./getNextDebugID":166,"./reactProdInvariant":174,"_process":210,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":53}],171:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30783,141 +32295,124 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = validateDOMNesting;
 }).call(this,require('_process'))
-},{"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/warning":40,"object-assign":52}],181:[function(require,module,exports){
-/**
- * A mixin for handling (effectively) onClickOutside for React components.
- * Note that we're not intercepting any events in this approach, and we're
- * not using double events for capturing and discarding in layers or wrappers.
- *
- * The idea is that components define function
- *
- *   handleClickOutside: function() { ... }
- *
- * If no such function is defined, an error will be thrown, as this means
- * either it still needs to be written, or the component should not be using
- * this mixing since it will not exhibit onClickOutside behaviour.
- *
- */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
-    define(['react-dom'], function(reactDom) {
-      return factory(root, reactDom);
-    });
-  } else if (typeof exports === 'object') {
-    // Node. Note that this does not work with strict
-    // CommonJS, but only CommonJS-like environments
-    // that support module.exports
-    module.exports = factory(root, require('react-dom'));
-  } else {
-    // Browser globals (root is window)
-    root.OnClickOutside = factory(root, ReactDOM);
+},{"_process":210,"fbjs/lib/emptyFunction":25,"fbjs/lib/warning":40,"object-assign":53}],181:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _flatpickr = require('flatpickr');
+
+var _flatpickr2 = _interopRequireDefault(_flatpickr);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var DateTimePicker = function (_Component) {
+  _inherits(DateTimePicker, _Component);
+
+  function DateTimePicker() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, DateTimePicker);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = DateTimePicker.__proto__ || Object.getPrototypeOf(DateTimePicker)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+      id: ''
+    }, _temp), _possibleConstructorReturn(_this, _ret);
   }
-}(this, function (root, ReactDOM) {
-  "use strict";
 
-  // Use a parallel array because we can't use
-  // objects as keys, they get toString-coerced
-  var registeredComponents = [];
-  var handlers = [];
-
-  var IGNORE_CLASS = 'ignore-react-onclickoutside';
-
-  var isSourceFound = function(source, localNode, ignoreClass) {
-    if (source === localNode) {
-      return true;
+  _createClass(DateTimePicker, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      setDefaultId.call(this);
     }
-    // SVG <use/> elements do not technically reside in the rendered DOM, so
-    // they do not have classList directly, but they offer a link to their
-    // corresponding element, which can have classList. This extra check is for
-    // that case.
-    // See: http://www.w3.org/TR/SVG11/struct.html#InterfaceSVGUseElement
-    // Discussion: https://github.com/Pomax/react-onclickoutside/pull/17
-    if (source.correspondingElement) {
-      return source.correspondingElement.classList.contains(ignoreClass);
-    }
-    return source.classList.contains(ignoreClass);
-  };
-
-  return {
-    componentDidMount: function() {
-      if(typeof this.handleClickOutside !== "function")
-        throw new Error("Component lacks a handleClickOutside(event) function for processing outside click events.");
-
-      var fn = this.__outsideClickHandler = (function(localNode, eventHandler, ignoreClass) {
-        return function(evt) {
-          evt.stopPropagation();
-          var source = evt.target;
-          var found = false;
-          // If source=local then this event came from "somewhere"
-          // inside and should be ignored. We could handle this with
-          // a layered approach, too, but that requires going back to
-          // thinking in terms of Dom node nesting, running counter
-          // to React's "you shouldn't care about the DOM" philosophy.
-          while(source.parentNode) {
-            found = isSourceFound(source, localNode, ignoreClass);
-            if(found) return;
-            source = source.parentNode;
-          }
-          // If element is in detached DOM, consider it not clicked
-          // outside as it can't be known whether it was outside.
-          if(source !== document) return;
-          eventHandler(evt);
-        }
-      }(ReactDOM.findDOMNode(this), this.handleClickOutside, this.props.outsideClickIgnoreClass || IGNORE_CLASS));
-
-      var pos = registeredComponents.length;
-      registeredComponents.push(this);
-      handlers[pos] = fn;
-
-      // If there is a truthy disableOnClickOutside property for this
-      // component, don't immediately start listening for outside events.
-      if (!this.props.disableOnClickOutside) {
-        this.enableOnClickOutside();
-      }
-    },
-
-    componentWillUnmount: function() {
-      this.disableOnClickOutside();
-      this.__outsideClickHandler = false;
-      var pos = registeredComponents.indexOf(this);
-      if( pos>-1) {
-        if (handlers[pos]) {
-          // clean up so we don't leak memory
-          handlers.splice(pos, 1);
-          registeredComponents.splice(pos, 1);
-        }
-      }
-    },
-
-    /**
-     * Can be called to explicitly enable event listening
-     * for clicks and touches outside of this element.
-     */
-    enableOnClickOutside: function() {
-      var fn = this.__outsideClickHandler;
-      if (typeof document !== "undefined") {
-        document.addEventListener("mousedown", fn);
-        document.addEventListener("touchstart", fn);
-      }
-    },
-
-    /**
-     * Can be called to explicitly disable event listening
-     * for clicks and touches outside of this element.
-     */
-    disableOnClickOutside: function() {
-      var fn = this.__outsideClickHandler;
-      if (typeof document !== "undefined") {
-        document.removeEventListener("mousedown", fn);
-        document.removeEventListener("touchstart", fn);
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(props) {
+      if (props.value) {
+        this.flatpickr.setDate(props.value);
       }
     }
-  };
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var id = this.state.id;
 
-}));
 
-},{"react-dom":54}],182:[function(require,module,exports){
+      var node = document.getElementById(id);
+
+      this.flatpickr = new _flatpickr2.default(node, this.props);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          onChange = _props.onChange,
+          props = _objectWithoutProperties(_props, ['onChange']);
+
+      var id = this.state.id;
+      // ignore onChange
+
+      return _react2.default.createElement('input', _extends({}, props, { id: id }));
+    }
+  }]);
+
+  return DateTimePicker;
+}(_react.Component);
+
+DateTimePicker.propTypes = {
+  id: _react.PropTypes.string
+};
+exports.default = DateTimePicker;
+
+/**
+ * private
+ */
+
+function randomId() {
+  var length = 16;
+  var hexDigits = '0123456789abcdef';
+  var s = parseInt(String(Math.random()).slice(2)).toString('16').split('').slice(0, length);
+
+  s[length - 3] = hexDigits.substr(s[length - 3] & 0x3 | 0x8, 1);
+
+  return s.join('');
+}
+
+function setDefaultId() {
+  var pid = this.props.id;
+
+  if (!this.state.id) {
+    if (pid) {
+      this.setState({ id: pid });
+    } else {
+      this.setState({ id: randomId() });
+    }
+  }
+}
+},{"flatpickr":41,"react":206}],182:[function(require,module,exports){
 arguments[4][76][0].apply(exports,arguments)
 },{"dup":76}],183:[function(require,module,exports){
 arguments[4][78][0].apply(exports,arguments)
@@ -31012,7 +32507,7 @@ var React = {
 
 module.exports = React;
 }).call(this,require('_process'))
-},{"./ReactChildren":185,"./ReactClass":186,"./ReactComponent":187,"./ReactDOMFactories":190,"./ReactElement":191,"./ReactElementValidator":193,"./ReactPropTypes":196,"./ReactPureComponent":198,"./ReactVersion":199,"./onlyChild":203,"_process":210,"fbjs/lib/warning":40,"object-assign":52}],185:[function(require,module,exports){
+},{"./ReactChildren":185,"./ReactClass":186,"./ReactComponent":187,"./ReactDOMFactories":190,"./ReactElement":191,"./ReactElementValidator":193,"./ReactPropTypes":196,"./ReactPureComponent":198,"./ReactVersion":199,"./onlyChild":203,"_process":210,"fbjs/lib/warning":40,"object-assign":53}],185:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31922,7 +33417,7 @@ var ReactClass = {
 
 module.exports = ReactClass;
 }).call(this,require('_process'))
-},{"./ReactComponent":187,"./ReactElement":191,"./ReactNoopUpdateQueue":194,"./ReactPropTypeLocationNames":195,"./reactProdInvariant":204,"_process":210,"fbjs/lib/emptyObject":26,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":52}],187:[function(require,module,exports){
+},{"./ReactComponent":187,"./ReactElement":191,"./ReactNoopUpdateQueue":194,"./ReactPropTypeLocationNames":195,"./reactProdInvariant":204,"_process":210,"fbjs/lib/emptyObject":26,"fbjs/lib/invariant":33,"fbjs/lib/warning":40,"object-assign":53}],187:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -32916,7 +34411,7 @@ ReactElement.isValidElement = function (object) {
 
 module.exports = ReactElement;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":189,"./ReactElementSymbol":192,"./canDefineProperty":200,"_process":210,"fbjs/lib/warning":40,"object-assign":52}],192:[function(require,module,exports){
+},{"./ReactCurrentOwner":189,"./ReactElementSymbol":192,"./canDefineProperty":200,"_process":210,"fbjs/lib/warning":40,"object-assign":53}],192:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
 },{"dup":105}],193:[function(require,module,exports){
 (function (process){
@@ -33727,7 +35222,7 @@ _assign(ReactPureComponent.prototype, ReactComponent.prototype);
 ReactPureComponent.prototype.isPureReactComponent = true;
 
 module.exports = ReactPureComponent;
-},{"./ReactComponent":187,"./ReactNoopUpdateQueue":194,"fbjs/lib/emptyObject":26,"object-assign":52}],199:[function(require,module,exports){
+},{"./ReactComponent":187,"./ReactNoopUpdateQueue":194,"fbjs/lib/emptyObject":26,"object-assign":53}],199:[function(require,module,exports){
 arguments[4][132][0].apply(exports,arguments)
 },{"dup":132}],200:[function(require,module,exports){
 (function (process){

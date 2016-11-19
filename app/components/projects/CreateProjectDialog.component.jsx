@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DatePicker from 'react-datepicker';
+import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 
 
@@ -8,7 +8,7 @@ export default class CreateProjectDialog extends Component {
     constructor(props){
         super();
         this.state={
-            startDate: moment(),
+            startDate: null,
             isActive: false
         }
     }
@@ -43,11 +43,11 @@ export default class CreateProjectDialog extends Component {
 
     /**
     * Saves the currently selected date to the satet
+    + @param {moment} date - date to set
     */
     handleDateChange(date){
-        console.log(date);
         this.setState({
-            startDate: date
+            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
         });
     }
 
@@ -55,11 +55,10 @@ export default class CreateProjectDialog extends Component {
     * Generating tags from the value of the tagsInput
     */
     generateTags() {
-        return this.refs.projectTagsInput.value.split(" ").filter(function(str) {
+        return this.refs.projectTagsInput.value.replace(/\s/g,'').split(",").filter(function(str) {
             return /\S/.test(str);
         });
     }
-
 
     /**
     * Adds a project to the projectsDb.
@@ -74,7 +73,7 @@ export default class CreateProjectDialog extends Component {
             notes: this.refs.projectNotesTextarea.value,
             tags: this.generateTags(),
             tasks: new Array(),
-            dueDate: new Date(),
+            dueDate: this.state.dueDate,
             open: true,
             starred: false,
             deleted: false,
@@ -85,25 +84,7 @@ export default class CreateProjectDialog extends Component {
             if (err) {
                 console.log(err);
             } else {
-                //When project list is not visible it will throw an error
-                try {
-                    this.props.parent.refs.projectsList.refreshProjects()//app-> ProjectsList
-                } catch(e) {
-
-                }
-
-                try {
-                    this.props.parent.refs.taskList.refreshTasks()//app-> ProjectsList
-                } catch(e) {
-                    console.log(e);
-
-                }
-
-                this.props.parent.refs.navbar.refreshTags();//app-->Navbar
-                this.props.parent.refs.createTaskDialog.refreshProjects(); //app--> CreateTaskDialog
-                 //app-->Tasklist
-
-
+                this.props.parent.refreshAll();
             }
         });
 
@@ -129,11 +110,7 @@ export default class CreateProjectDialog extends Component {
                         <textarea className="textarea" placeholder="Notes" ref="projectNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
-                    <DatePicker  selected={this.state.startDate} onChange={this.handleDateChange.bind(this)} />
-                    {/*<InputMoment
-                        moment={this.state.startDate}
-                        onChange={this.handleDateChange.bind(this)}
-                    />*/}
+                    <Flatpickr data-enable-time   onChange={(_, str) => this.handleDateChange(str)} />
                     <label className="label">Task</label>
                     <p className="control">
                         <input className="input" type="text" placeholder="Tags" ref="projectTagsInput"/>

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DatePicker from 'react-datepicker';
+import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 
 import Tag from '../navigation/Tag.component.jsx';
@@ -22,7 +22,6 @@ export default class Task extends Component {
     componentDidMount(){
         console.log("Mounted task");
         console.log(this.props.task);
-
     }
 
 
@@ -36,11 +35,9 @@ export default class Task extends Component {
 
 
         this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
-            this.refreshTasks(); //Refresh tasklist after task is deleted
-            this.refreshTags(); //Refresh taglist after task is deleted
+            this.props.parent.props.parent.refreshAll();
             if(!err){
                 console.log("Task successfully deleted.");
-
             }
 
             if (this.props.task.project){
@@ -83,10 +80,10 @@ export default class Task extends Component {
     /**
     * Generating tags from the value of the tagsInput
     */
-    generateTags(){
-        return this.refs.taskTagsInput.value.split(",").filter(function(str) {
+    generateTags() {
+        return this.refs.taskTagsInput.value.replace(/\s/g,'').split(",").filter(function(str) {
             return /\S/.test(str);
-        });
+        });;
     }
 
     /**
@@ -103,8 +100,6 @@ export default class Task extends Component {
     */
     saveEdit(){
         console.log("Updating task");
-
-
         this.props.tasksDb.update({ _id: this.props.task._id }, { $set: {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
@@ -123,7 +118,15 @@ export default class Task extends Component {
                    this.refreshTags(); //Refresh navbar tags after task is edited
                }
         });
+    }
 
+    /**
+    * Leave edit mode
+    */
+    cancelEdit(){
+        this.setState({
+            edit:false,
+        });
     }
 
     /**
@@ -142,10 +145,11 @@ export default class Task extends Component {
 
     /**
     * Saves the currently selected date to the satet
+    + @param {moment} date - date to set
     */
     handleDateChange(date){
         this.setState({
-            dueDate: date
+            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
         });
     }
 
@@ -166,33 +170,32 @@ export default class Task extends Component {
         })
     }
 
-        /**
-        * Creates the project selection input
-        */
-        projectInput(){
-            if(this.state.projects){
-                return(
-                    <p className="control">
-                        <span className="select">
-                            <select ref="projectSelect">
-                                <option></option>
-                                {this.state.projects.map((project)=>{
-                                    if(project.title === this.props.task.project){
-                                        return <option key={project._id} selected>{project.title}</option>
-                                    }else{
-                                        return <option key={project._id}>{project.title}</option>
-                                    }
+    /**
+    * Creates the project selection input
+    */
+    projectInput(){
+        if(this.state.projects){
+            return(
+                <p className="control">
+                    <span className="select">
+                        <select ref="projectSelect">
+                            <option></option>
+                            {this.state.projects.map((project)=>{
+                                if(project.title === this.props.task.project){
+                                    return <option key={project._id} selected>{project.title}</option>
+                                }else{
+                                    return <option key={project._id}>{project.title}</option>
+                                }
 
-                                })}
-                            </select>
-                        </span>
-                    </p>
-                )
-            }else{
-                return <p>No open projects</p>;
-            }
+                            })}
+                        </select>
+                    </span>
+                </p>
+            )
+        }else{
+            return <p>No open projects</p>;
         }
-
+    }
 
     render(){
         if (!this.state.edit) {
@@ -207,7 +210,7 @@ export default class Task extends Component {
                         <div className="media-content">
                             <div className="content">
 
-                                    <strong>{this.props.task.title}</strong> <small>Due to: </small> <small>{this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY') : null}</small>
+                                    <h3>{this.props.task.title}</h3> <small>Due to: </small> <small>{this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null}</small>
                                     <br />
                                     {this.props.task.notes}<br />
                                     <span>In project: {this.props.task.project}</span>
@@ -246,8 +249,6 @@ export default class Task extends Component {
                 </div>
             )
         } else {
-            console.log(this.state.dueDate);
-
             return (
                 <div className="box task is-edit">
                     <article className="media">
@@ -261,7 +262,8 @@ export default class Task extends Component {
                                 <p>
                                     <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
                                     <br />
-                                    Due to: <DatePicker  selected={this.state.dueDate ? this.state.dueDate : moment()} onChange={this.handleDateChange.bind(this)} />
+                                    Due to:
+                                    <Flatpickr data-enable-time defaultValue={this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') :null} onChange={(_, str) => this.handleDateChange(str)} />
                                     <br />
                                     <textarea className="textarea" ref="taskNotesTextarea" defaultValue={this.props.task.notes} />
                                     <br />
@@ -280,9 +282,12 @@ export default class Task extends Component {
                         </div>
                         <div className="media-right">
                             <div className="media-right">
-                                <button className="btn-round btn-warning" onClick={()=>this.saveEdit()}>
+                                <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
                                     <i className="fa fa-floppy-o" />
                                 </button>
+                            </div>
+                            <div className="media-right">
+                                <button className="delete" onClick={()=>this.cancelEdit()} />
                             </div>
                         </div>
                     </article>

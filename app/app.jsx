@@ -32,6 +32,16 @@ class Main extends Component {
         }
     }
 
+    refreshAll(){
+        this.refs.createTaskDialog.refreshProjects(); //Refreshes the project selection
+        this.refs.navbar.refreshTags();
+        if (this.state.activeItem === "tasks") {
+            this.refs.taskList.refreshTasks();
+        } else if (this.state.activeItem === "projects") {
+            this.refs.projectsList.refreshProjects();
+        }
+    }
+
     /**
     * Create a desktop notification
     * @param {String} title - notification title
