@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 
 export default class Project extends Component{
 
@@ -6,6 +7,8 @@ export default class Project extends Component{
         super(props);
         this.state ={
             tasks: new Array(),
+            dueDate: this.props.project.dueDate ? moment(this.props.task.dueDate) : moment(), //needed for react-datepicker
+            projects: null,
         }
     }
 
@@ -13,8 +16,24 @@ export default class Project extends Component{
     componentDidMount(){
         console.log("Mount project");
         console.log(this.props.project);
+    }
 
+    /**
+    * Makes this task editable
+    */
+    edit(){
+        this.setState({
+            edit:true,
+        });
+    }
 
+    /**
+    * Leave edit mode
+    */
+    cancelEdit(){
+        this.setState({
+            edit:false,
+        });
     }
 
     /**
@@ -25,7 +44,7 @@ export default class Project extends Component{
     */
     deleteProject(){
         console.log("deleting project");
-        this.props.projectsDb.remove({ _id: this.props.project._id}, {}, (err, numRemoved) => {
+        this.props.db.projectCollection.remove({ _id: this.props.project._id}, {}, (err, numRemoved) => {
 
 
             if(!err){
@@ -36,7 +55,7 @@ export default class Project extends Component{
                 this.props.project.tasks.map((taskId)=>{
                     console.log("Removing project field from : " + taskId);
 
-                    this.props.tasksDb.update({ _id: taskId }, { $set: { project: '' }},  (err, numReplaced)=>{
+                    this.props.db.taskCollection.update({ _id: taskId }, { $set: { project: '' }},  (err, numReplaced)=>{
                         if (!err) {
                             console.log("Reference from project to task was successfully deleted");
                         }
@@ -68,7 +87,7 @@ export default class Project extends Component{
     * Refresh this.state.tasks with all tasks associated with this.props.project._id
     */
     refreshTasks(){
-        this.props.tasksDb.find({project: this.props.project.title}).sort({ createdAt: 1 }).exec((err,docs)=>{
+        this.props.db.taskCollection.find({project: this.props.project.title}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if (docs.length==0) {
                 //doNothing
             } else {
@@ -91,7 +110,7 @@ export default class Project extends Component{
     }
 
     render(){
-        if (this.state.tasks.length > 0) {
+        if (!this.state.edit) {
             return(
                 <div className="tile is-child box project">
                     <p className="title">{this.props.project.title}</p>
@@ -100,19 +119,31 @@ export default class Project extends Component{
                             return <p key={task._id}>{task.title}</p>
                         })}
                      <button className="delete" onClick={()=>this.deleteProject()}></button>
+                     <button className="btn-round btn-warning" onClick={()=>this.edit()}>
+                         <i className="fa fa-edit" />
+                     </button>
                 </div>
             )
         } else {
             return(
-                <div className="tile is-child box project">
+                <div className="tile is-child box project is-edit">
                     <p className="title">{this.props.project.title}</p>
-                    <ul>
-                        <li>No Tasks in this project</li>
-                    </ul>
-                     <button className="delete" onClick={()=>this.deleteProject()}></button>
+
+                        {this.state.tasks.map((task)=>{
+                            return <p key={task._id}>{task.title}</p>
+                        })}
+                        <button className="delete" onClick={()=>this.cancelEdit()} />
+                        <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
+                            <i className="fa fa-floppy-o" />
+                        </button>
                 </div>
             )
         }
 
     }
 }
+
+Project.propTypes = {
+    parent: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
+};

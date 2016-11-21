@@ -47,7 +47,7 @@ export default class CreateTaskDialog extends Component {
     * Refreshes the projects available in the selection
     */
     refreshProjects(){
-        this.props.projectsDb.find({open:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
+        this.props.db.projectCollection.find({open:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if(docs.length==0){
                 this.setState({
                     projects: null
@@ -126,7 +126,7 @@ export default class CreateTaskDialog extends Component {
         };
 
         //Insert doc
-        this.props.tasksDb.insert(doc,(err, newDoc) => {   // Callback is optional
+        this.props.db.taskCollection.insert(doc,(err, newDoc) => {   // Callback is optional
             if(err){
                 console.log(err);
             }else{
@@ -134,7 +134,7 @@ export default class CreateTaskDialog extends Component {
                 if (this.refs.projectSelect && this.refs.projectSelect.value != ''){
                     console.log("Adding task: " + newDoc._id + "to Project: " + this.refs.projectSelect.value);
 
-                    this.props.projectsDb.update({ title: this.refs.projectSelect.value }, { $push: { tasks: newDoc._id} }, { multi: true },(err, numReplaced) => {
+                    this.props.db.projectCollection.update({ title: this.refs.projectSelect.value }, { $push: { tasks: newDoc._id} }, { multi: true },(err, numReplaced) => {
                         if (err) {
                             console.log(err);
 
@@ -199,6 +199,5 @@ export default class CreateTaskDialog extends Component {
 
 CreateTaskDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    tasksDb: React.PropTypes.object.isRequired,
-    projectsDb: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
 };

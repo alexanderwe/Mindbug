@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import tasksDb from './data/TasksDatastore.jsx';
-import projectsDb from './data/ProjectsDatastore.jsx';
+import Database from './data/Database.js'
 
 import ToolbarHeader from './components/navigation/ToolbarHeader.component.jsx';
 import Navbar from './components/navigation/Navbar.component.jsx';
@@ -56,18 +55,18 @@ class Main extends Component {
     render(){
         return (
             <div className="window">
-                <CreateTaskDialog ref="createTaskDialog" parent={this} tasksDb={tasksDb} projectsDb={projectsDb}/>
-                <CreateProjectDialog ref="createProjectDialog" parent={this} projectsDb={projectsDb}/>
+                <CreateTaskDialog ref="createTaskDialog" parent={this} db={Database} />
+                <CreateProjectDialog ref="createProjectDialog" parent={this} db={Database}/>
                 <div className="window-content">
                     <div className="pane-group">
                         <div className="pane-sm sidebar draggable">
-                            <Navbar ref="navbar" parent={this} tasksDb={tasksDb}/>
+                            <Navbar ref="navbar" parent={this} db={Database}/>
                         </div>
                         <div className="pane main-content" id="mainPane">
                             {this.state.activeItem === 'tasks' ? (
-                                <TaskList ref="taskList" parent={this} tasksDb={tasksDb} projectsDb={projectsDb} dbFilter={this.state.dbFilter} />
+                                <TaskList ref="taskList" parent={this} db={Database} dbFilter={this.state.dbFilter} />
                             ) : this.state.activeItem === 'projects' ? (
-                                <ProjectList ref="projectsList" parent={this} tasksDb={tasksDb} projectsDb={projectsDb} dbFilter={this.state.dbFilter}/>
+                                <ProjectList ref="projectsList" parent={this} db={Database} dbFilter={this.state.dbFilter}/>
                             ) : null}
                         </div>
                     </div>

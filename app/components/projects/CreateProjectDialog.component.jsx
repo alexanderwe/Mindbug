@@ -80,7 +80,7 @@ export default class CreateProjectDialog extends Component {
         };
 
         //Insert doc
-        this.props.projectsDb.insert(doc,(err, newDoc) => {   // Callback is optional
+        this.props.db.projectCollection.insert(doc,(err, newDoc) => {   // Callback is optional
             if (err) {
                 console.log(err);
             } else {
@@ -129,5 +129,5 @@ export default class CreateProjectDialog extends Component {
 
 CreateProjectDialog.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    projectsDb: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
 };

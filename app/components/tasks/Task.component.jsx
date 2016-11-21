@@ -34,7 +34,7 @@ export default class Task extends Component {
         console.log("Deleting task");
 
 
-        this.props.tasksDb.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
+        this.props.db.taskCollection.remove({ _id: this.props.task._id}, {}, (err, numRemoved) => {
             this.props.parent.props.parent.refreshAll();
             if(!err){
                 console.log("Task successfully deleted.");
@@ -44,7 +44,7 @@ export default class Task extends Component {
                 console.log("Task had a project, delete the reference in the project aswell");
 
                 //Remove task reference in project
-                this.props.projectsDb.update({ title: this.props.task.project }, { $pull: { tasks: this.props.task._id} }, {}, (err, numReplaced)=>{
+                this.props.db.projectCollection.update({ title: this.props.task.project }, { $pull: { tasks: this.props.task._id} }, {}, (err, numReplaced)=>{
                     if (!err) {
                         console.log("Reference in project: " + this.props.task.project + " was deleted");
                     }
@@ -57,7 +57,7 @@ export default class Task extends Component {
     * Sets task.done = true
     */
     finishTask(){
-        this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { done: true } },(err, numReplaced) => {
+        this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { done: true } },(err, numReplaced) => {
             this.refreshTasks(); //Refresh tasklist after task is deleted
         });
     }
@@ -67,11 +67,11 @@ export default class Task extends Component {
     */
     starTask(){
         if (!this.props.task.starred) {
-            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
+            this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { starred: true } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
         } else {
-            this.props.tasksDb.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
+            this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { starred: false } },(err, numReplaced) => {
                 this.refreshTasks(); //Refresh tasklist after task is deleted
             });
         }
@@ -89,7 +89,7 @@ export default class Task extends Component {
     /**
     * Makes this task editable
     */
-    editTask(){
+    edit(){
         this.setState({
             edit:true,
         });
@@ -100,7 +100,7 @@ export default class Task extends Component {
     */
     saveEdit(){
         console.log("Updating task");
-        this.props.tasksDb.update({ _id: this.props.task._id }, { $set: {
+        this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
             tags: this.generateTags(),
@@ -109,7 +109,7 @@ export default class Task extends Component {
            }},(err, numReplaced) => {
                if (this.refs.projectSelect && this.refs.projectSelect.value != ''){
                    console.log("Adding task: " + this.props.task._id + "to Project: " + this.refs.projectSelect.value);
-                   this.props.projectsDb.update({ title: this.refs.projectSelect.value }, { $push: { tasks: this.props.task._id} }, { multi: true },(err, numReplaced) => {
+                   this.props.db.projectCollection.update({ title: this.refs.projectSelect.value }, { $push: { tasks: this.props.task._id} }, { multi: true },(err, numReplaced) => {
                         this.refreshTasks(); //Refresh tasklist after task is edited
                         this.refreshTags(); //Refresh navbar tags after task is edited
                    });
@@ -157,7 +157,7 @@ export default class Task extends Component {
     * Refreshes the projects available in the selection
     */
     refreshProjects(){
-        this.props.projectsDb.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
+        this.props.db.projectCollection.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if (docs.length==0) {
                 this.setState({
                     projects: null
@@ -237,7 +237,7 @@ export default class Task extends Component {
                                  </div>
                             ) }
                             <div className="media-right">
-                                <button className="btn-round btn-warning" onClick={()=>this.editTask()}>
+                                <button className="btn-round btn-warning" onClick={()=>this.edit()}>
                                     <i className="fa fa-edit" />
                                 </button>
                             </div>
@@ -300,8 +300,7 @@ export default class Task extends Component {
 
 Task.propTypes = {
     task: React.PropTypes.object.isRequired,
-    tasksDb: React.PropTypes.object.isRequired,
-    projectsDb: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
     parent: React.PropTypes.object.isRequired,
     edit: React.PropTypes.bool,
 };
