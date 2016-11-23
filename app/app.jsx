@@ -18,28 +18,28 @@ class Main extends Component {
         super();
         this.state={
             activeItem: "tasks",
-            dbFilter: "all",
+            dbFilter: {done:false},
         }
     }
 
-    //TODO problem with tag search, is that when we switch page we update app.jsx and this will override our dbFilter and already upadted Task list
+    componentWillMount(){
+        this.refreshDatabase();
+    }
+
     componentDidUpdate(){
+        this.refreshDatabase();
+    }
+
+    refreshDatabase(){
         if (this.state.activeItem === "tasks") {
-            this.refs.taskList.refreshTasks();
+            Database.setDbFilter(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter);
         } else if (this.state.activeItem === "projects") {
-            this.refs.projectsList.refreshProjects();
+            Database.setDbFilter(this.state.dbFilter);
+            Database.findProjects(this.state.dbFilter);
         }
     }
 
-    refreshAll(){
-        this.refs.createTaskDialog.refreshProjects(); //Refreshes the project selection
-        this.refs.navbar.refreshTags();
-        if (this.state.activeItem === "tasks") {
-            this.refs.taskList.refreshTasks();
-        } else if (this.state.activeItem === "projects") {
-            this.refs.projectsList.refreshProjects();
-        }
-    }
 
     /**
     * Create a desktop notification
@@ -53,6 +53,8 @@ class Main extends Component {
     }
 
     render(){
+        console.log(Database);
+
         return (
             <div className="window">
                 <CreateTaskDialog ref="createTaskDialog" parent={this} db={Database} />

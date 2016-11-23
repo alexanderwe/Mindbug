@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
+import { observer } from 'mobx-react';
 
-
+@observer
 export default class CreateTaskDialog extends Component {
 
     constructor(props){
@@ -44,33 +45,16 @@ export default class CreateTaskDialog extends Component {
     }
 
     /**
-    * Refreshes the projects available in the selection
-    */
-    refreshProjects(){
-        this.props.db.projectCollection.find({open:true}).sort({ createdAt: 1 }).exec((err,docs)=>{
-            if(docs.length==0){
-                this.setState({
-                    projects: null
-                });
-            } else{
-                this.setState({
-                    projects: docs
-                });
-            }
-        })
-    }
-
-    /**
     * Creates the project selection input
     */
     projectInput(){
-        if(this.state.projects){
+        if(this.props.db.projects){
             return(
                 <p className="control">
                     <span className="select">
                         <select ref="projectSelect">
                             <option></option>
-                            {this.state.projects.map((project)=>{
+                            {this.props.db.projects.map((project)=>{
                                 return <option key={project._id}>{project.title}</option>
                             })}
                         </select>
@@ -126,26 +110,7 @@ export default class CreateTaskDialog extends Component {
         };
 
         //Insert doc
-        this.props.db.taskCollection.insert(doc,(err, newDoc) => {   // Callback is optional
-            if(err){
-                console.log(err);
-            }else{
-                //If task is associated with a project, add the task to the project
-                if (this.refs.projectSelect && this.refs.projectSelect.value != ''){
-                    console.log("Adding task: " + newDoc._id + "to Project: " + this.refs.projectSelect.value);
-
-                    this.props.db.projectCollection.update({ title: this.refs.projectSelect.value }, { $push: { tasks: newDoc._id} }, { multi: true },(err, numReplaced) => {
-                        if (err) {
-                            console.log(err);
-
-                        } else {
-                            console.log(numReplaced);
-                        }
-                    });
-                }
-                this.props.parent.refreshAll();
-            }
-        });
+        this.props.db.insertTask(doc);
 
         //Clean inputs
         this.clearForm();
@@ -154,9 +119,6 @@ export default class CreateTaskDialog extends Component {
         this.closeModal();
     }
 
-    componentWillMount(){
-        this.refreshProjects();
-    }
 
     render(){
         return(

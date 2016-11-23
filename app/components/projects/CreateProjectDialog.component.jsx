@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
+import {observer} from 'mobx-react';
 import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 
-
+@observer
 export default class CreateProjectDialog extends Component {
 
     constructor(props){
@@ -80,13 +81,7 @@ export default class CreateProjectDialog extends Component {
         };
 
         //Insert doc
-        this.props.db.projectCollection.insert(doc,(err, newDoc) => {   // Callback is optional
-            if (err) {
-                console.log(err);
-            } else {
-                this.props.parent.refreshAll();
-            }
-        });
+        this.props.db.insertProject(doc);
 
         //Clean inputs
         this.clearForm();

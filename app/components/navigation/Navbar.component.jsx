@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
+import {observer} from 'mobx-react';
 
 import Tag from './Tag.component.jsx';
 
+@observer
 export default class Navbar extends Component {
 
     constructor(props){
@@ -9,7 +11,6 @@ export default class Navbar extends Component {
         this.state ={
             activeItem: "tasks",
             activeChildItem: "all",
-            tags: null
         }
     }
 
@@ -25,10 +26,21 @@ export default class Navbar extends Component {
             activeChildItem: dbFilter
         });
 
+        var filterToSet;
+        if(dbFilter === 'all'){
+            filterToSet = {done:false};
+        } else if(dbFilter === 'done'){
+            filterToSet = {done:true};
+        } else if(dbFilter === 'starred') {
+            filterToSet = {starred:true};
+        } else if(dbFilter === 'deleted') {
+            filterToSet = {deleted:true};
+        }
+
         //Set active item in the main component
         this.props.parent.setState({ //app
             activeItem: pageName,
-            dbFilter: dbFilter
+            dbFilter: filterToSet,
         });
     }
 
@@ -46,37 +58,6 @@ export default class Navbar extends Component {
         this.props.parent.refs.createProjectDialog.showModal();
     }
 
-
-    /**
-    *Refreshes the tags list in the navbar
-    */
-    refreshTags(){
-        var tagsArray = [];
-        this.props.db.taskCollection.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
-            if(docs.length==0){
-            } else{
-                docs.map((task)=>{
-                    task.tags.map((tag)=>{
-
-                        //Check if tag is in array. If so do not add it.
-                        var flag = 0;
-                        for(let uniqueTag of tagsArray){
-                            if(uniqueTag === tag){
-                                flag = 1;
-                            }
-                        }
-                        if(flag != 1){
-                            tagsArray.push(tag);
-                        }
-                    })
-                });
-            }
-            this.setState({
-                tags: tagsArray
-            });
-        });
-    }
-
     /**
     * Checks if a item and a child item is activeItem
     * @param {String} activeItem - active item name to check
@@ -87,13 +68,9 @@ export default class Navbar extends Component {
         return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
     }
 
-    componentWillMount(){
-        this.refreshTags();
-    }
-
     //TODO fix bug, that displays same content on navbar in the background while scrolling
     render(){
-        if(this.state.tags){
+        if(this.props.db.tags){
             return(
                 <aside className="menu noSelect">
                     <p className="menu-label ">
@@ -124,7 +101,7 @@ export default class Navbar extends Component {
                         Tags
                     </p>
                     <ul className="menu-list tag-list">
-                         {this.state.tags.map((tag)=>{
+                         {this.props.db.tags.map((tag)=>{
                             return <li key={tag}><Tag name={tag} parent={this}/></li>
                         })}
                     </ul>

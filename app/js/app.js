@@ -57,32 +57,30 @@ var Main = function (_Component) {
 
         _this.state = {
             activeItem: "tasks",
-            dbFilter: "all"
+            dbFilter: { done: false }
         };
         return _this;
     }
 
-    //TODO problem with tag search, is that when we switch page we update app.jsx and this will override our dbFilter and already upadted Task list
-
-
     _createClass(Main, [{
-        key: 'componentDidUpdate',
-        value: function componentDidUpdate() {
-            if (this.state.activeItem === "tasks") {
-                this.refs.taskList.refreshTasks();
-            } else if (this.state.activeItem === "projects") {
-                this.refs.projectsList.refreshProjects();
-            }
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            this.refreshDatabase();
         }
     }, {
-        key: 'refreshAll',
-        value: function refreshAll() {
-            this.refs.createTaskDialog.refreshProjects(); //Refreshes the project selection
-            this.refs.navbar.refreshTags();
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            this.refreshDatabase();
+        }
+    }, {
+        key: 'refreshDatabase',
+        value: function refreshDatabase() {
             if (this.state.activeItem === "tasks") {
-                this.refs.taskList.refreshTasks();
+                _Database2.default.setDbFilter(this.state.dbFilter);
+                _Database2.default.findTasks(this.state.dbFilter);
             } else if (this.state.activeItem === "projects") {
-                this.refs.projectsList.refreshProjects();
+                _Database2.default.setDbFilter(this.state.dbFilter);
+                _Database2.default.findProjects(this.state.dbFilter);
             }
         }
 
@@ -102,6 +100,8 @@ var Main = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
+            console.log(_Database2.default);
+
             return _react2.default.createElement(
                 'div',
                 { className: 'window' },
@@ -135,18 +135,23 @@ var Main = function (_Component) {
 var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(Main, null), main);
 
-},{"./components/navigation/Navbar.component.jsx":2,"./components/navigation/ToolbarHeader.component.jsx":4,"./components/projects/CreateProjectDialog.component.jsx":5,"./components/projects/ProjectList.component.jsx":7,"./components/tasks/CreateTaskDialog.component.jsx":8,"./components/tasks/TaskList.component.jsx":10,"./data/Database.js":11,"react":205,"react-dom":53}],2:[function(require,module,exports){
+},{"./components/navigation/Navbar.component.jsx":2,"./components/navigation/ToolbarHeader.component.jsx":4,"./components/projects/CreateProjectDialog.component.jsx":5,"./components/projects/ProjectList.component.jsx":7,"./components/tasks/CreateTaskDialog.component.jsx":8,"./components/tasks/TaskList.component.jsx":10,"./data/Database.js":11,"react":207,"react-dom":55}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _mobxReact = require('mobx-react');
 
 var _TagComponent = require('./Tag.component.jsx');
 
@@ -160,7 +165,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Navbar = function (_Component) {
+var Navbar = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(Navbar, _Component);
 
     function Navbar(props) {
@@ -170,8 +175,7 @@ var Navbar = function (_Component) {
 
         _this.state = {
             activeItem: "tasks",
-            activeChildItem: "all",
-            tags: null
+            activeChildItem: "all"
         };
         return _this;
     }
@@ -194,10 +198,21 @@ var Navbar = function (_Component) {
                 activeChildItem: dbFilter
             });
 
+            var filterToSet;
+            if (dbFilter === 'all') {
+                filterToSet = { done: false };
+            } else if (dbFilter === 'done') {
+                filterToSet = { done: true };
+            } else if (dbFilter === 'starred') {
+                filterToSet = { starred: true };
+            } else if (dbFilter === 'deleted') {
+                filterToSet = { deleted: true };
+            }
+
             //Set active item in the main component
             this.props.parent.setState({ //app
                 activeItem: pageName,
-                dbFilter: dbFilter
+                dbFilter: filterToSet
             });
         }
 
@@ -222,62 +237,6 @@ var Navbar = function (_Component) {
         }
 
         /**
-        *Refreshes the tags list in the navbar
-        */
-
-    }, {
-        key: 'refreshTags',
-        value: function refreshTags() {
-            var _this2 = this;
-
-            var tagsArray = [];
-            this.props.db.taskCollection.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {} else {
-                    docs.map(function (task) {
-                        task.tags.map(function (tag) {
-
-                            //Check if tag is in array. If so do not add it.
-                            var flag = 0;
-                            var _iteratorNormalCompletion = true;
-                            var _didIteratorError = false;
-                            var _iteratorError = undefined;
-
-                            try {
-                                for (var _iterator = tagsArray[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                    var uniqueTag = _step.value;
-
-                                    if (uniqueTag === tag) {
-                                        flag = 1;
-                                    }
-                                }
-                            } catch (err) {
-                                _didIteratorError = true;
-                                _iteratorError = err;
-                            } finally {
-                                try {
-                                    if (!_iteratorNormalCompletion && _iterator.return) {
-                                        _iterator.return();
-                                    }
-                                } finally {
-                                    if (_didIteratorError) {
-                                        throw _iteratorError;
-                                    }
-                                }
-                            }
-
-                            if (flag != 1) {
-                                tagsArray.push(tag);
-                            }
-                        });
-                    });
-                }
-                _this2.setState({
-                    tags: tagsArray
-                });
-            });
-        }
-
-        /**
         * Checks if a item and a child item is activeItem
         * @param {String} activeItem - active item name to check
         * @param {String} activeChildItem - active child item name to check
@@ -289,20 +248,15 @@ var Navbar = function (_Component) {
         value: function isActiveState(activeItem, activeChildItem) {
             return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
         }
-    }, {
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            this.refreshTags();
-        }
 
         //TODO fix bug, that displays same content on navbar in the background while scrolling
 
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
 
-            if (this.state.tags) {
+            if (this.props.db.tags) {
                 return _react2.default.createElement(
                     'aside',
                     { className: 'menu noSelect' },
@@ -320,7 +274,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('general', 'overview');
+                                        return _this2.goTo('general', 'overview');
                                     }, className: this.isActiveState('general', 'overview') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
                                 'Overview'
@@ -332,7 +286,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('general', 'today');
+                                        return _this2.goTo('general', 'today');
                                     }, className: this.isActiveState('general', 'today') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
                                 'Today'
@@ -346,7 +300,7 @@ var Navbar = function (_Component) {
                         _react2.default.createElement(
                             'a',
                             { className: 'pull-right add-btn', onClick: function onClick() {
-                                    return _this3.openTaskDialog();
+                                    return _this2.openTaskDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
                         )
@@ -360,7 +314,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'all');
+                                        return _this2.goTo('tasks', 'all');
                                     }, className: this.isActiveState('tasks', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
                                 'All'
@@ -372,7 +326,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'done');
+                                        return _this2.goTo('tasks', 'done');
                                     }, className: this.isActiveState('tasks', 'done') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
                                 'Done'
@@ -384,7 +338,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'starred');
+                                        return _this2.goTo('tasks', 'starred');
                                     }, className: this.isActiveState('tasks', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
@@ -396,7 +350,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'deleted');
+                                        return _this2.goTo('tasks', 'deleted');
                                     }, className: this.isActiveState('tasks', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
@@ -410,7 +364,7 @@ var Navbar = function (_Component) {
                         _react2.default.createElement(
                             'a',
                             { className: 'pull-right add-btn', onClick: function onClick() {
-                                    return _this3.openProjectDialog();
+                                    return _this2.openProjectDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
                         )
@@ -424,7 +378,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'all');
+                                        return _this2.goTo('projects', 'all');
                                     }, className: this.isActiveState('projects', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
                                 'All'
@@ -436,7 +390,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'starred');
+                                        return _this2.goTo('projects', 'starred');
                                     }, className: this.isActiveState('projects', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
@@ -448,7 +402,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'deleted');
+                                        return _this2.goTo('projects', 'deleted');
                                     }, className: this.isActiveState('projects', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
@@ -463,11 +417,11 @@ var Navbar = function (_Component) {
                     _react2.default.createElement(
                         'ul',
                         { className: 'menu-list tag-list' },
-                        this.state.tags.map(function (tag) {
+                        this.props.db.tags.map(function (tag) {
                             return _react2.default.createElement(
                                 'li',
                                 { key: tag },
-                                _react2.default.createElement(_TagComponent2.default, { name: tag, parent: _this3 })
+                                _react2.default.createElement(_TagComponent2.default, { name: tag, parent: _this2 })
                             );
                         })
                     )
@@ -490,7 +444,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('general', 'overview');
+                                        return _this2.goTo('general', 'overview');
                                     }, className: this.isActiveState('general', 'overview') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tachometer', 'aria-hidden': 'true' }),
                                 'Overview'
@@ -502,7 +456,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('general', 'today');
+                                        return _this2.goTo('general', 'today');
                                     }, className: this.isActiveState('general', 'today') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' }),
                                 'Today'
@@ -516,7 +470,7 @@ var Navbar = function (_Component) {
                         _react2.default.createElement(
                             'a',
                             { className: 'pull-right add-btn', onClick: function onClick() {
-                                    return _this3.openTaskDialog();
+                                    return _this2.openTaskDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
                         )
@@ -530,7 +484,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'all');
+                                        return _this2.goTo('tasks', 'all');
                                     }, className: this.isActiveState('tasks', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-tasks', 'aria-hidden': 'true' }),
                                 'All'
@@ -542,7 +496,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'done');
+                                        return _this2.goTo('tasks', 'done');
                                     }, className: this.isActiveState('tasks', 'done') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' }),
                                 'Done'
@@ -554,7 +508,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'starred');
+                                        return _this2.goTo('tasks', 'starred');
                                     }, className: this.isActiveState('tasks', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
@@ -566,7 +520,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('tasks', 'deleted');
+                                        return _this2.goTo('tasks', 'deleted');
                                     }, className: this.isActiveState('tasks', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
@@ -580,7 +534,7 @@ var Navbar = function (_Component) {
                         _react2.default.createElement(
                             'a',
                             { className: 'pull-right add-btn', onClick: function onClick() {
-                                    return _this3.openProjectDialog();
+                                    return _this2.openProjectDialog();
                                 } },
                             _react2.default.createElement('i', { className: 'fa fa-plus', 'aria-hidden': 'true' })
                         )
@@ -594,7 +548,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'all');
+                                        return _this2.goTo('projects', 'all');
                                     }, className: this.isActiveState('projects', 'all') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' }),
                                 'All'
@@ -606,7 +560,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'starred');
+                                        return _this2.goTo('projects', 'starred');
                                     }, className: this.isActiveState('projects', 'starred') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-star', 'aria-hidden': 'true' }),
                                 'Starred'
@@ -618,7 +572,7 @@ var Navbar = function (_Component) {
                             _react2.default.createElement(
                                 'a',
                                 { href: '#', onClick: function onClick() {
-                                        return _this3.goTo('projects', 'deleted');
+                                        return _this2.goTo('projects', 'deleted');
                                     }, className: this.isActiveState('projects', 'deleted') ? 'is-active' : null },
                                 _react2.default.createElement('i', { className: 'fa fa-trash', 'aria-hidden': 'true' }),
                                 'Deleted'
@@ -650,7 +604,7 @@ var Navbar = function (_Component) {
     }]);
 
     return Navbar;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = Navbar;
 
@@ -660,12 +614,13 @@ Navbar.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Tag.component.jsx":3,"react":205}],3:[function(require,module,exports){
+},{"./Tag.component.jsx":3,"mobx-react":42,"react":207}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -725,12 +680,13 @@ var Tag = function (_Component) {
 
 exports.default = Tag;
 
-},{"react":205}],4:[function(require,module,exports){
+},{"react":207}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -842,18 +798,23 @@ ToolbarHeader.propTypes = {
     tasksDb: _react2.default.PropTypes.object.isRequired
 };
 
-},{"react":205}],5:[function(require,module,exports){
+},{"react":207}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _mobxReact = require('mobx-react');
 
 var _reactFlatpickr = require('react-flatpickr');
 
@@ -871,7 +832,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var CreateProjectDialog = function (_Component) {
+var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(CreateProjectDialog, _Component);
 
     function CreateProjectDialog(props) {
@@ -961,8 +922,6 @@ var CreateProjectDialog = function (_Component) {
     }, {
         key: 'addProject',
         value: function addProject() {
-            var _this2 = this;
-
             var doc = {
                 title: this.refs.projectTitleInput.value,
                 notes: this.refs.projectNotesTextarea.value,
@@ -975,14 +934,7 @@ var CreateProjectDialog = function (_Component) {
             };
 
             //Insert doc
-            this.props.db.projectCollection.insert(doc, function (err, newDoc) {
-                // Callback is optional
-                if (err) {
-                    console.log(err);
-                } else {
-                    _this2.props.parent.refreshAll();
-                }
-            });
+            this.props.db.insertProject(doc);
 
             //Clean inputs
             this.clearForm();
@@ -993,7 +945,7 @@ var CreateProjectDialog = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
 
             return _react2.default.createElement(
                 'div',
@@ -1028,7 +980,7 @@ var CreateProjectDialog = function (_Component) {
                         'Due to'
                     ),
                     _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, onChange: function onChange(_, str) {
-                            return _this3.handleDateChange(str);
+                            return _this2.handleDateChange(str);
                         } }),
                     _react2.default.createElement(
                         'label',
@@ -1046,28 +998,28 @@ var CreateProjectDialog = function (_Component) {
                         _react2.default.createElement(
                             'button',
                             { className: 'button is-primary', onClick: function onClick() {
-                                    return _this3.addProject();
+                                    return _this2.addProject();
                                 } },
                             'Submit'
                         ),
                         _react2.default.createElement(
                             'button',
                             { className: 'button is-link', onClick: function onClick() {
-                                    return _this3.closeModal();
+                                    return _this2.closeModal();
                                 } },
                             'Cancel'
                         )
                     )
                 ),
                 _react2.default.createElement('button', { className: 'modal-close', onClick: function onClick() {
-                        return _this3.closeModal();
+                        return _this2.closeModal();
                     } })
             );
         }
     }]);
 
     return CreateProjectDialog;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = CreateProjectDialog;
 
@@ -1077,18 +1029,23 @@ CreateProjectDialog.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"moment":42,"react":205,"react-flatpickr":180}],6:[function(require,module,exports){
+},{"mobx-react":42,"moment":44,"react":207,"react-flatpickr":182}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _mobxReact = require('mobx-react');
 
 var _moment = require('moment');
 
@@ -1102,7 +1059,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Project = function (_Component) {
+var Project = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(Project, _Component);
 
     function Project(props) {
@@ -1162,68 +1119,13 @@ var Project = function (_Component) {
             var _this2 = this;
 
             console.log("deleting project");
-            this.props.db.projectCollection.remove({ _id: this.props.project._id }, {}, function (err, numRemoved) {
-
-                if (!err) {
-                    console.log("Project was successfully deleted");
-                }
-
-                if (_this2.props.project.tasks.length > 0) {
-                    _this2.props.project.tasks.map(function (taskId) {
-                        console.log("Removing project field from : " + taskId);
-
-                        _this2.props.db.taskCollection.update({ _id: taskId }, { $set: { project: '' } }, function (err, numReplaced) {
-                            if (!err) {
-                                console.log("Reference from project to task was successfully deleted");
-                            }
-                            _this2.props.parent.props.parent.refreshAll();
-                        });
-                    });
-                } else {
-                    _this2.props.parent.props.parent.refreshAll();
-                }
-            });
-        }
-
-        /**
-        * Refresh the ProjectList and the project selection in the createTaskDialog
-        */
-
-    }, {
-        key: 'refreshProjects',
-        value: function refreshProjects() {
-            this.props.parent.refreshProjects(); //ProjectList.refreshProjects()
-            this.props.parent.props.parent.refs.createTaskDialog.refreshProjects();
-        }
-
-        /**
-        * Refresh the TaskList
-        */
-
-    }, {
-        key: 'refreshTaskList',
-        value: function refreshTaskList() {
-            this.props.parent.props.parent.refs.taskList.refreshTasks();
-        }
-
-        /**
-        * Refresh this.state.tasks with all tasks associated with this.props.project._id
-        */
-
-    }, {
-        key: 'refreshTasks',
-        value: function refreshTasks() {
-            var _this3 = this;
-
-            this.props.db.taskCollection.find({ project: this.props.project.title }).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    //doNothing
-                } else {
-                    _this3.setState({
-                        tasks: docs
-                    });
-                }
-            });
+            this.props.db.deleteProject({ _id: this.props.project._id });
+            if (this.props.project.tasks.length > 0) {
+                this.props.project.tasks.map(function (taskId) {
+                    console.log("Removing project field from : " + taskId);
+                    _this2.props.db.updateTask({ _id: taskId }, { $set: { project: '' } });
+                });
+            }
         }
 
         /**
@@ -1236,14 +1138,9 @@ var Project = function (_Component) {
             this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
         }
     }, {
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            this.refreshTasks();
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this3 = this;
 
             if (!this.state.edit) {
                 return _react2.default.createElement(
@@ -1254,20 +1151,20 @@ var Project = function (_Component) {
                         { className: 'title' },
                         this.props.project.title
                     ),
-                    this.state.tasks.map(function (task) {
+                    this.props.project.tasks.map(function (task) {
                         return _react2.default.createElement(
                             'p',
-                            { key: task._id },
-                            task.title
+                            { key: task },
+                            task
                         );
                     }),
                     _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                            return _this4.deleteProject();
+                            return _this3.deleteProject();
                         } }),
                     _react2.default.createElement(
                         'button',
                         { className: 'btn-round btn-warning', onClick: function onClick() {
-                                return _this4.edit();
+                                return _this3.edit();
                             } },
                         _react2.default.createElement('i', { className: 'fa fa-edit' })
                     )
@@ -1281,20 +1178,20 @@ var Project = function (_Component) {
                         { className: 'title' },
                         this.props.project.title
                     ),
-                    this.state.tasks.map(function (task) {
+                    this.props.project.tasks.map(function (task) {
                         return _react2.default.createElement(
                             'p',
-                            { key: task._id },
-                            task.title
+                            { key: task },
+                            task
                         );
                     }),
                     _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                            return _this4.cancelEdit();
+                            return _this3.cancelEdit();
                         } }),
                     _react2.default.createElement(
                         'button',
                         { className: 'btn-round btn-success', onClick: function onClick() {
-                                return _this4.saveEdit();
+                                return _this3.saveEdit();
                             } },
                         _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
                     )
@@ -1304,7 +1201,7 @@ var Project = function (_Component) {
     }]);
 
     return Project;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = Project;
 
@@ -1314,18 +1211,23 @@ Project.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"moment":42,"react":205}],7:[function(require,module,exports){
+},{"mobx-react":42,"moment":44,"react":207}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _mobxReact = require('mobx-react');
 
 var _ProjectComponent = require('./Project.component.jsx');
 
@@ -1339,64 +1241,29 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ProjectList = function (_Component) {
+var ProjectList = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(ProjectList, _Component);
 
     function ProjectList(props) {
         _classCallCheck(this, ProjectList);
 
-        var _this = _possibleConstructorReturn(this, (ProjectList.__proto__ || Object.getPrototypeOf(ProjectList)).call(this, props));
-
-        _this.state = {
-            projects: null
-        };
-        return _this;
+        return _possibleConstructorReturn(this, (ProjectList.__proto__ || Object.getPrototypeOf(ProjectList)).call(this, props));
     }
 
-    /**
-    * Refresh the projects in this list. First set this.state.projects = null, then pull projects
-    */
-
-
     _createClass(ProjectList, [{
-        key: 'refreshProjects',
-        value: function refreshProjects() {
-            var _this2 = this;
-
-            this.setState({
-                projects: null
-            });
-            this.props.db.projectCollection.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    _this2.setState({
-                        projects: null
-                    });
-                } else {
-                    _this2.setState({
-                        projects: docs
-                    });
-                }
-            });
-        }
-    }, {
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            this.refreshProjects();
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
 
-            if (this.state.projects) {
+            if (this.props.db.projects) {
                 return _react2.default.createElement(
                     'div',
                     { className: 'tile is-ancestor' },
                     _react2.default.createElement(
                         'div',
                         { className: 'tile is-vertical is-parent' },
-                        this.state.projects.map(function (project) {
-                            return _react2.default.createElement(_ProjectComponent2.default, { project: project, db: _this3.props.db, id: project._id, parent: _this3, key: project._id });
+                        this.props.db.projects.map(function (project) {
+                            return _react2.default.createElement(_ProjectComponent2.default, { project: project, db: _this2.props.db, id: project._id, parent: _this2, key: project._id });
                         })
                     )
                 );
@@ -1419,7 +1286,7 @@ var ProjectList = function (_Component) {
     }]);
 
     return ProjectList;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = ProjectList;
 
@@ -1429,14 +1296,17 @@ ProjectList.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Project.component.jsx":6,"react":205}],8:[function(require,module,exports){
+},{"./Project.component.jsx":6,"mobx-react":42,"react":207}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
@@ -1450,6 +1320,8 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _mobxReact = require('mobx-react');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1458,7 +1330,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var CreateTaskDialog = function (_Component) {
+var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(CreateTaskDialog, _Component);
 
     function CreateTaskDialog(props) {
@@ -1514,35 +1386,13 @@ var CreateTaskDialog = function (_Component) {
         }
 
         /**
-        * Refreshes the projects available in the selection
-        */
-
-    }, {
-        key: 'refreshProjects',
-        value: function refreshProjects() {
-            var _this2 = this;
-
-            this.props.db.projectCollection.find({ open: true }).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    _this2.setState({
-                        projects: null
-                    });
-                } else {
-                    _this2.setState({
-                        projects: docs
-                    });
-                }
-            });
-        }
-
-        /**
         * Creates the project selection input
         */
 
     }, {
         key: 'projectInput',
         value: function projectInput() {
-            if (this.state.projects) {
+            if (this.props.db.projects) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -1553,7 +1403,7 @@ var CreateTaskDialog = function (_Component) {
                             'select',
                             { ref: 'projectSelect' },
                             _react2.default.createElement('option', null),
-                            this.state.projects.map(function (project) {
+                            this.props.db.projects.map(function (project) {
                                 return _react2.default.createElement(
                                     'option',
                                     { key: project._id },
@@ -1608,8 +1458,6 @@ var CreateTaskDialog = function (_Component) {
     }, {
         key: 'addTask',
         value: function addTask() {
-            var _this3 = this;
-
             console.log("current dueDate");
             console.log(this.state.dueDate);
 
@@ -1626,26 +1474,7 @@ var CreateTaskDialog = function (_Component) {
             };
 
             //Insert doc
-            this.props.db.taskCollection.insert(doc, function (err, newDoc) {
-                // Callback is optional
-                if (err) {
-                    console.log(err);
-                } else {
-                    //If task is associated with a project, add the task to the project
-                    if (_this3.refs.projectSelect && _this3.refs.projectSelect.value != '') {
-                        console.log("Adding task: " + newDoc._id + "to Project: " + _this3.refs.projectSelect.value);
-
-                        _this3.props.db.projectCollection.update({ title: _this3.refs.projectSelect.value }, { $push: { tasks: newDoc._id } }, { multi: true }, function (err, numReplaced) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log(numReplaced);
-                            }
-                        });
-                    }
-                    _this3.props.parent.refreshAll();
-                }
-            });
+            this.props.db.insertTask(doc);
 
             //Clean inputs
             this.clearForm();
@@ -1654,14 +1483,9 @@ var CreateTaskDialog = function (_Component) {
             this.closeModal();
         }
     }, {
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            this.refreshProjects();
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this2 = this;
 
             return _react2.default.createElement(
                 'div',
@@ -1696,7 +1520,7 @@ var CreateTaskDialog = function (_Component) {
                         'Due to'
                     ),
                     _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, onChange: function onChange(_, str) {
-                            return _this4.handleDateChange(str);
+                            return _this2.handleDateChange(str);
                         } }),
                     _react2.default.createElement(
                         'label',
@@ -1730,28 +1554,28 @@ var CreateTaskDialog = function (_Component) {
                         _react2.default.createElement(
                             'button',
                             { className: 'button is-primary', onClick: function onClick() {
-                                    return _this4.addTask();
+                                    return _this2.addTask();
                                 } },
                             'Submit'
                         ),
                         _react2.default.createElement(
                             'button',
                             { className: 'button is-link', onClick: function onClick() {
-                                    return _this4.closeModal();
+                                    return _this2.closeModal();
                                 } },
                             'Cancel'
                         )
                     )
                 ),
                 _react2.default.createElement('button', { className: 'modal-close', onClick: function onClick() {
-                        return _this4.closeModal();
+                        return _this2.closeModal();
                     } })
             );
         }
     }]);
 
     return CreateTaskDialog;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = CreateTaskDialog;
 
@@ -1761,18 +1585,21 @@ CreateTaskDialog.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"moment":42,"react":205,"react-flatpickr":180}],9:[function(require,module,exports){
+},{"mobx-react":42,"moment":44,"react":207,"react-flatpickr":182}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _mobxReact = require('mobx-react');
 
 var _reactFlatpickr = require('react-flatpickr');
 
@@ -1804,18 +1631,11 @@ var Task = function (_Component) {
 
         _this.state = {
             edit: false,
-            dueDate: _this.props.task.dueDate ? (0, _moment2.default)(_this.props.task.dueDate) : (0, _moment2.default)(), //needed for react-datepicker
-            projects: null
-        };
+            dueDate: _this.props.task.dueDate ? (0, _moment2.default)(_this.props.task.dueDate) : null };
         return _this;
     }
 
     _createClass(Task, [{
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            this.refreshProjects();
-        }
-    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
             console.log("Mounted task");
@@ -1829,27 +1649,12 @@ var Task = function (_Component) {
     }, {
         key: 'deleteTask',
         value: function deleteTask() {
-            var _this2 = this;
-
             console.log("Deleting task");
-
-            this.props.db.taskCollection.remove({ _id: this.props.task._id }, {}, function (err, numRemoved) {
-                _this2.props.parent.props.parent.refreshAll();
-                if (!err) {
-                    console.log("Task successfully deleted.");
-                }
-
-                if (_this2.props.task.project) {
-                    console.log("Task had a project, delete the reference in the project aswell");
-
-                    //Remove task reference in project
-                    _this2.props.db.projectCollection.update({ title: _this2.props.task.project }, { $pull: { tasks: _this2.props.task._id } }, {}, function (err, numReplaced) {
-                        if (!err) {
-                            console.log("Reference in project: " + _this2.props.task.project + " was deleted");
-                        }
-                    });
-                }
-            });
+            this.props.db.deleteTask({ _id: this.props.task._id });
+            if (this.props.task.project) {
+                console.log("Task had a project, delete the reference in the project aswell");
+                this.props.db.updateProject({ title: this.props.task.project }, { $pull: { tasks: this.props.task._id } });
+            }
         }
 
         /**
@@ -1859,11 +1664,7 @@ var Task = function (_Component) {
     }, {
         key: 'finishTask',
         value: function finishTask() {
-            var _this3 = this;
-
-            this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { done: true } }, function (err, numReplaced) {
-                _this3.refreshTasks(); //Refresh tasklist after task is deleted
-            });
+            this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
         }
 
         /**
@@ -1873,16 +1674,10 @@ var Task = function (_Component) {
     }, {
         key: 'starTask',
         value: function starTask() {
-            var _this4 = this;
-
             if (!this.props.task.starred) {
-                this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { starred: true } }, function (err, numReplaced) {
-                    _this4.refreshTasks(); //Refresh tasklist after task is deleted
-                });
+                this.props.db.updateTask({ _id: this.props.task._id }, { $set: { starred: true } });
             } else {
-                this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: { starred: false } }, function (err, numReplaced) {
-                    _this4.refreshTasks(); //Refresh tasklist after task is deleted
-                });
+                this.props.db.updateTask({ _id: this.props.task._id }, { $set: { starred: false } });
             }
         }
 
@@ -1918,27 +1713,14 @@ var Task = function (_Component) {
     }, {
         key: 'saveEdit',
         value: function saveEdit() {
-            var _this5 = this;
-
-            console.log("Updating task");
-            this.props.db.taskCollection.update({ _id: this.props.task._id }, { $set: {
+            this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
                     title: this.refs.taskTitleInput.value,
                     notes: this.refs.taskNotesTextarea.value,
                     tags: this.generateTags(),
                     dueDate: this.state.dueDate,
                     project: this.refs.projectSelect ? this.refs.projectSelect.value : null
-                } }, function (err, numReplaced) {
-                if (_this5.refs.projectSelect && _this5.refs.projectSelect.value != '') {
-                    console.log("Adding task: " + _this5.props.task._id + "to Project: " + _this5.refs.projectSelect.value);
-                    _this5.props.db.projectCollection.update({ title: _this5.refs.projectSelect.value }, { $push: { tasks: _this5.props.task._id } }, { multi: true }, function (err, numReplaced) {
-                        _this5.refreshTasks(); //Refresh tasklist after task is edited
-                        _this5.refreshTags(); //Refresh navbar tags after task is edited
-                    });
-                } else {
-                    _this5.refreshTasks(); //Refresh tasklist after task is edited
-                    _this5.refreshTags(); //Refresh navbar tags after task is edited
-                }
-            });
+                } }, this.props.task.project);
+            this.cancelEdit();
         }
 
         /**
@@ -1954,16 +1736,6 @@ var Task = function (_Component) {
         }
 
         /**
-        * Refreshes the tasks in the TaskList
-        */
-
-    }, {
-        key: 'refreshTasks',
-        value: function refreshTasks() {
-            this.props.parent.refreshTasks(); //TaskList.refreshTasks()
-        }
-
-        /**
         * Refreshes the tags in the Navbar
         */
 
@@ -1971,6 +1743,15 @@ var Task = function (_Component) {
         key: 'refreshTags',
         value: function refreshTags() {
             this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
+        }
+    }, {
+        key: 'getTagsString',
+        value: function getTagsString() {
+            var tagsString = "";
+            this.props.task.tags.map(function (tag) {
+                tagsString = tagsString.concat("," + tag);
+            });
+            return tagsString.substr(1);
         }
 
         /**
@@ -1987,37 +1768,15 @@ var Task = function (_Component) {
         }
 
         /**
-        * Refreshes the projects available in the selection
-        */
-
-    }, {
-        key: 'refreshProjects',
-        value: function refreshProjects() {
-            var _this6 = this;
-
-            this.props.db.projectCollection.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    _this6.setState({
-                        projects: null
-                    });
-                } else {
-                    _this6.setState({
-                        projects: docs
-                    });
-                }
-            });
-        }
-
-        /**
         * Creates the project selection input
         */
 
     }, {
         key: 'projectInput',
         value: function projectInput() {
-            var _this7 = this;
+            var _this2 = this;
 
-            if (this.state.projects) {
+            if (this.props.db.projects) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -2028,8 +1787,8 @@ var Task = function (_Component) {
                             'select',
                             { ref: 'projectSelect' },
                             _react2.default.createElement('option', null),
-                            this.state.projects.map(function (project) {
-                                if (project.title === _this7.props.task.project) {
+                            this.props.db.projects.map(function (project) {
+                                if (project.title === _this2.props.task.project) {
                                     return _react2.default.createElement(
                                         'option',
                                         { key: project._id, selected: true },
@@ -2057,7 +1816,7 @@ var Task = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this8 = this;
+            var _this3 = this;
 
             if (!this.state.edit) {
                 return _react2.default.createElement(
@@ -2109,7 +1868,7 @@ var Task = function (_Component) {
                                 ),
                                 _react2.default.createElement('br', null),
                                 this.props.task.tags.map(function (tag) {
-                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this8 });
+                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
                                 })
                             ),
                             _react2.default.createElement(
@@ -2121,7 +1880,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'a',
                                         { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
-                                                return _this8.starTask();
+                                                return _this3.starTask();
                                             } },
                                         _react2.default.createElement(
                                             'span',
@@ -2141,7 +1900,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this8.finishTask();
+                                            return _this3.finishTask();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-check' })
                                 )
@@ -2152,7 +1911,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-warning', onClick: function onClick() {
-                                            return _this8.edit();
+                                            return _this3.edit();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-edit' })
                                 )
@@ -2161,7 +1920,7 @@ var Task = function (_Component) {
                                 'div',
                                 { className: 'media-right' },
                                 _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this8.deleteTask();
+                                        return _this3.deleteTask();
                                     } })
                             )
                         )
@@ -2196,7 +1955,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement('br', null),
                                     'Due to:',
                                     _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null, onChange: function onChange(_, str) {
-                                            return _this8.handleDateChange(str);
+                                            return _this3.handleDateChange(str);
                                         } }),
                                     _react2.default.createElement('br', null),
                                     _react2.default.createElement('textarea', { className: 'textarea', ref: 'taskNotesTextarea', defaultValue: this.props.task.notes }),
@@ -2204,7 +1963,7 @@ var Task = function (_Component) {
                                     'In project: ',
                                     this.projectInput(),
                                     _react2.default.createElement('br', null),
-                                    _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'taskTagsInput', defaultValue: this.props.task.tags })
+                                    _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'taskTagsInput', defaultValue: this.getTagsString() })
                                 )
                             ),
                             _react2.default.createElement(
@@ -2216,7 +1975,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'a',
                                         { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
-                                                return _this8.starTask();
+                                                return _this3.starTask();
                                             } },
                                         _react2.default.createElement(
                                             'span',
@@ -2236,7 +1995,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this8.saveEdit();
+                                            return _this3.saveEdit();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
                                 )
@@ -2245,7 +2004,7 @@ var Task = function (_Component) {
                                 'div',
                                 { className: 'media-right' },
                                 _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this8.cancelEdit();
+                                        return _this3.cancelEdit();
                                     } })
                             )
                         )
@@ -2268,14 +2027,17 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"../navigation/Tag.component.jsx":3,"moment":42,"react":205,"react-flatpickr":180}],10:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":3,"mobx-react":42,"moment":44,"react":207,"react-flatpickr":182}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _class;
 
 var _react = require('react');
 
@@ -2285,6 +2047,8 @@ var _TaskComponent = require('./Task.component.jsx');
 
 var _TaskComponent2 = _interopRequireDefault(_TaskComponent);
 
+var _mobxReact = require('mobx-react');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2293,127 +2057,26 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var TaskList = function (_Component) {
+var TaskList = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(TaskList, _Component);
 
     function TaskList(props) {
         _classCallCheck(this, TaskList);
 
-        var _this = _possibleConstructorReturn(this, (TaskList.__proto__ || Object.getPrototypeOf(TaskList)).call(this));
-
-        _this.state = {
-            tasks: null
-        };
-        return _this;
+        return _possibleConstructorReturn(this, (TaskList.__proto__ || Object.getPrototypeOf(TaskList)).call(this));
     }
 
     _createClass(TaskList, [{
-        key: 'componentWillMount',
-        value: function componentWillMount() {
-            this.refreshTasks();
-        }
-
-        /**
-        * Search tasks with tag
-        */
-
-    }, {
-        key: 'refreshTasksWithTag',
-        value: function refreshTasksWithTag(tag) {
-            var _this2 = this;
-
-            if (tag) {
-                this.props.db.taskCollection.find({ $and: [{ done: false }, { tags: { $in: [tag] } }] }).sort({ dueDate: 1 }).exec(function (err, docs) {
-                    if (docs.length == 0) {
-                        _this2.setState({
-                            tasks: null
-                        });
-                    } else {
-                        _this2.setState({
-                            tasks: docs
-                        });
-                    }
-                });
-            }
-        }
-
-        /**
-        * Refreshes the tasks depending on a filter set in the props
-        */
-
-    }, {
-        key: 'refreshTasks',
-        value: function refreshTasks() {
-            var _this3 = this;
-
-            console.log("tasklist is refreshing tasks");
-
-            //Force a new state
-            this.setState({
-                tasks: null
-            });
-
-            if (this.props.dbFilter === 'done') {
-                this.props.db.taskCollection.find({ done: true }).sort({ dueDate: 1 }).exec(function (err, docs) {
-                    if (docs.length == 0) {
-                        _this3.setState({
-                            tasks: null
-                        });
-                    } else {
-                        _this3.setState({
-                            tasks: docs
-                        });
-                    }
-                });
-            } else if (this.props.dbFilter === 'starred') {
-                this.props.db.taskCollection.find({ starred: true }).sort({ dueDate: 1 }).exec(function (err, docs) {
-                    if (docs.length == 0) {
-                        _this3.setState({
-                            tasks: null
-                        });
-                    } else {
-                        _this3.setState({
-                            tasks: docs
-                        });
-                    }
-                });
-            } else if (this.props.dbFilter === 'deleted') {
-                this.props.db.taskCollection.find({ deleted: true }).sort({ dueDate: 1 }).exec(function (err, docs) {
-                    if (docs.length == 0) {
-                        _this3.setState({
-                            tasks: null
-                        });
-                    } else {
-                        _this3.setState({
-                            tasks: docs
-                        });
-                    }
-                });
-            } else if (this.props.dbFilter === 'all') {
-                this.props.db.taskCollection.find({ done: false }).sort({ dueDate: 1 }).exec(function (err, docs) {
-                    if (docs.length == 0) {
-                        _this3.setState({
-                            tasks: null
-                        });
-                    } else {
-                        _this3.setState({
-                            tasks: docs
-                        });
-                    }
-                });
-            }
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this2 = this;
 
-            if (this.state.tasks) {
+            if (this.props.db.tasks) {
                 return _react2.default.createElement(
                     'ul',
                     { className: 'list-group' },
-                    this.state.tasks.map(function (task) {
-                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, db: _this4.props.db, parent: _this4 });
+                    this.props.db.tasks.map(function (task) {
+                        return _react2.default.createElement(_TaskComponent2.default, { task: task, key: task._id, db: _this2.props.db, parent: _this2 });
                     })
                 );
             } else {
@@ -2421,17 +2084,9 @@ var TaskList = function (_Component) {
                     'ul',
                     { className: 'list-group' },
                     _react2.default.createElement(
-                        'li',
-                        { className: 'list-group-item' },
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'media-body' },
-                            _react2.default.createElement(
-                                'strong',
-                                null,
-                                'No tasks'
-                            )
-                        )
+                        'p',
+                        null,
+                        'No Tasks'
                     )
                 );
             }
@@ -2439,7 +2094,7 @@ var TaskList = function (_Component) {
     }]);
 
     return TaskList;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = TaskList;
 
@@ -2449,7 +2104,7 @@ TaskList.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Task.component.jsx":9,"react":205}],11:[function(require,module,exports){
+},{"./Task.component.jsx":9,"mobx-react":42,"react":207}],11:[function(require,module,exports){
 (function (__dirname){
 'use strict';
 
@@ -2457,34 +2112,285 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3;
+
 var _nedb = require('nedb');
 
 var _nedb2 = _interopRequireDefault(_nedb);
 
+var _mobx = require('mobx');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+        writable: descriptor.writable,
+        value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+}
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Database = function Database() {
-    _classCallCheck(this, Database);
-
-    this.taskCollection = new _nedb2.default({
-        filename: __dirname + './tasks.json',
-        autoload: true,
-        timestampData: true
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+        desc[key] = descriptor[key];
     });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
 
-    this.projectCollection = new _nedb2.default({
-        filename: __dirname + './projects.json',
-        autoload: true,
-        timestampData: true
-    });
-};
+    if ('value' in desc || desc.initializer) {
+        desc.writable = true;
+    }
 
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+        return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+        desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+        Object['define' + 'Property'](target, property, desc);
+        desc = null;
+    }
+
+    return desc;
+}
+
+function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+}
+
+//TODO save current dbFilter and active item in this class for reference
+var Database = (_class = function () {
+    function Database() {
+        _classCallCheck(this, Database);
+
+        _initDefineProp(this, 'tasks', _descriptor, this);
+
+        _initDefineProp(this, 'projects', _descriptor2, this);
+
+        _initDefineProp(this, 'tags', _descriptor3, this);
+
+        this.dbFilter = null;
+
+        this.taskCollection = new _nedb2.default({
+            filename: __dirname + './tasks.json',
+            autoload: true,
+            timestampData: true
+        });
+
+        this.projectCollection = new _nedb2.default({
+            filename: __dirname + './projects.json',
+            autoload: true,
+            timestampData: true
+        });
+
+        this.findTasks({}, { dueDate: 1 });
+        this.findProjects({}, { createdAt: 1 });
+        this.updateTags();
+    }
+
+    _createClass(Database, [{
+        key: 'insertTask',
+        value: function insertTask(doc) {
+            var _this = this;
+
+            console.log("inserting task");
+
+            this.taskCollection.insert(doc, function (err, newDoc) {
+                if (newDoc.project != '') {
+                    _this.updateProject({ title: newDoc.project }, { $push: { tasks: newDoc._id } });
+                }
+                _this.findTasks(_this.dbFilter);
+                _this.updateTags();
+            });
+        }
+    }, {
+        key: 'findTasks',
+        value: function findTasks(query, sort) {
+            var _this2 = this;
+
+            console.log("Find tasks with query: ");
+            console.log(query);
+            console.log(this.dbFilter);
+
+            this.taskCollection.find(query).sort(sort).exec(function (err, docs) {
+                if (docs.length == 0) {
+                    _this2.tasks = null;
+                } else {
+                    _this2.tasks = docs;
+                }
+            });
+        }
+    }, {
+        key: 'updateTask',
+        value: function updateTask(query, set, previousProject) {
+            var _this3 = this;
+
+            this.taskCollection.update(query, set, function (err, numReplaced) {
+                console.log("Updating task with");
+                console.log(query._id);
+                console.log(set.$set.project);
+                _this3.findTasks(_this3.dbFilter);
+                _this3.updateTags();
+
+                if (set.$set.project) {
+                    _this3.updateProject({ title: set.$set.project }, { $push: { tasks: query._id } });
+                    if (previousProject) {
+                        console.log("Task had previous project, so remove the refernce from that project");
+                        _this3.updateProject({ title: previousProject }, { $pull: { tasks: query._id } });
+                    }
+                } else if (previousProject) {
+                    console.log("Task is no longer assigned to a project but had previous project, so remove the refernce from that project");
+                    _this3.updateProject({ title: previousProject }, { $pull: { tasks: query._id } });
+                }
+            });
+        }
+    }, {
+        key: 'deleteTask',
+        value: function deleteTask(query) {
+            var _this4 = this;
+
+            this.taskCollection.remove(query, {}, function (err, numRemoved) {
+                _this4.findTasks(_this4.dbFilter);
+                _this4.updateTags();
+            });
+        }
+    }, {
+        key: 'insertProject',
+        value: function insertProject(doc) {
+            var _this5 = this;
+
+            console.log("inserting project");
+            this.projectCollection.insert(doc, function (err, newDoc) {
+                _this5.findProjects(_this5.dbFilter);
+                _this5.updateTags();
+            });
+        }
+    }, {
+        key: 'findProjects',
+        value: function findProjects(query, sort) {
+            var _this6 = this;
+
+            this.projectCollection.find().sort(sort).exec(function (err, docs) {
+                if (docs.length == 0) {
+                    _this6.projects = null;
+                } else {
+                    _this6.projects = docs;
+                }
+            });
+        }
+    }, {
+        key: 'updateProject',
+        value: function updateProject(query, set) {
+            var _this7 = this;
+
+            this.projectCollection.update(query, set, function (err, numReplaced) {
+                _this7.findProjects(_this7.dbFilter);
+                _this7.updateTags();
+            });
+        }
+    }, {
+        key: 'deleteProject',
+        value: function deleteProject(query) {
+            var _this8 = this;
+
+            this.projectCollection.remove(query, {}, function (err, numRemoved) {
+                _this8.findProjects(_this8.dbFilter);
+                _this8.updateTags();
+            });
+        }
+    }, {
+        key: 'updateTags',
+        value: function updateTags() {
+            var _this9 = this;
+
+            var tagsArray = [];
+            this.taskCollection.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
+                if (docs.length == 0) {} else {
+                    docs.map(function (task) {
+                        task.tags.map(function (tag) {
+
+                            //Check if tag is in array. If so do not add it.
+                            var flag = 0;
+                            var _iteratorNormalCompletion = true;
+                            var _didIteratorError = false;
+                            var _iteratorError = undefined;
+
+                            try {
+                                for (var _iterator = tagsArray[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                    var uniqueTag = _step.value;
+
+                                    if (uniqueTag === tag) {
+                                        flag = 1;
+                                    }
+                                }
+                            } catch (err) {
+                                _didIteratorError = true;
+                                _iteratorError = err;
+                            } finally {
+                                try {
+                                    if (!_iteratorNormalCompletion && _iterator.return) {
+                                        _iterator.return();
+                                    }
+                                } finally {
+                                    if (_didIteratorError) {
+                                        throw _iteratorError;
+                                    }
+                                }
+                            }
+
+                            if (flag != 1) {
+                                tagsArray.push(tag);
+                            }
+                        });
+                    });
+                }
+                _this9.tags = tagsArray;
+            });
+        }
+    }, {
+        key: 'setActiveItem',
+        value: function setActiveItem(activeItem) {
+            this.activeItem = activeItem;
+        }
+    }, {
+        key: 'setDbFilter',
+        value: function setDbFilter(dbFilter) {
+            this.dbFilter = dbFilter;
+        }
+    }]);
+
+    return Database;
+}(), (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'tasks', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return null;
+    }
+}), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, 'projects', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return null;
+    }
+}), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, 'tags', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return null;
+    }
+})), _class);
 exports.default = new Database();
 
 }).call(this,"/app/data")
-},{"nedb":45}],12:[function(require,module,exports){
+},{"mobx":43,"nedb":47}],12:[function(require,module,exports){
 (function (process){
 /*global setImmediate: false, setTimeout: false, console: false */
 (function () {
@@ -3446,7 +3352,7 @@ exports.default = new Database();
 }());
 
 }).call(this,require('_process'))
-},{"_process":209}],13:[function(require,module,exports){
+},{"_process":211}],13:[function(require,module,exports){
 module.exports.BinarySearchTree = require('./lib/bst');
 module.exports.AVLTree = require('./lib/avltree');
 
@@ -3907,7 +3813,7 @@ AVLTree.prototype.delete = function (key, value) {
 // Interface
 module.exports = AVLTree;
 
-},{"./bst":15,"./customUtils":16,"underscore":206,"util":212}],15:[function(require,module,exports){
+},{"./bst":15,"./customUtils":16,"underscore":208,"util":214}],15:[function(require,module,exports){
 /**
  * Simple binary search tree
  */
@@ -4581,7 +4487,7 @@ var EventListener = {
 
 module.exports = EventListener;
 }).call(this,require('_process'))
-},{"./emptyFunction":24,"_process":209}],18:[function(require,module,exports){
+},{"./emptyFunction":24,"_process":211}],18:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -4858,7 +4764,7 @@ function createArrayFromMixed(obj) {
 
 module.exports = createArrayFromMixed;
 }).call(this,require('_process'))
-},{"./invariant":32,"_process":209}],23:[function(require,module,exports){
+},{"./invariant":32,"_process":211}],23:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -4944,7 +4850,7 @@ function createNodesFromMarkup(markup, handleScript) {
 
 module.exports = createNodesFromMarkup;
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":18,"./createArrayFromMixed":22,"./getMarkupWrap":28,"./invariant":32,"_process":209}],24:[function(require,module,exports){
+},{"./ExecutionEnvironment":18,"./createArrayFromMixed":22,"./getMarkupWrap":28,"./invariant":32,"_process":211}],24:[function(require,module,exports){
 "use strict";
 
 /**
@@ -5005,7 +4911,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = emptyObject;
 }).call(this,require('_process'))
-},{"_process":209}],26:[function(require,module,exports){
+},{"_process":211}],26:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -5164,7 +5070,7 @@ function getMarkupWrap(nodeName) {
 
 module.exports = getMarkupWrap;
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":18,"./invariant":32,"_process":209}],29:[function(require,module,exports){
+},{"./ExecutionEnvironment":18,"./invariant":32,"_process":211}],29:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -5327,7 +5233,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 }).call(this,require('_process'))
-},{"_process":209}],33:[function(require,module,exports){
+},{"_process":211}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5599,7 +5505,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = warning;
 }).call(this,require('_process'))
-},{"./emptyFunction":24,"_process":209}],40:[function(require,module,exports){
+},{"./emptyFunction":24,"_process":211}],40:[function(require,module,exports){
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -9412,6 +9318,3785 @@ module.exports = localforage_js;
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],42:[function(require,module,exports){
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("mobx"), require("react"), require("react-dom"));
+	else if(typeof define === 'function' && define.amd)
+		define(["mobx", "react", "react-dom"], factory);
+	else if(typeof exports === 'object')
+		exports["mobxReact"] = factory(require("mobx"), require("react"), require("react-dom"));
+	else
+		root["mobxReact"] = factory(root["mobx"], root["React"], root["ReactDOM"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_4__) {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.reactiveComponent = exports.PropTypes = exports.propTypes = exports.inject = exports.Provider = exports.useStaticRendering = exports.trackComponents = exports.componentByNodeRegistery = exports.renderReporter = exports.Observer = exports.observer = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _arguments = arguments;
+
+	var _observer = __webpack_require__(1);
+
+	Object.defineProperty(exports, 'observer', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.observer;
+	  }
+	});
+	Object.defineProperty(exports, 'Observer', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.Observer;
+	  }
+	});
+	Object.defineProperty(exports, 'renderReporter', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.renderReporter;
+	  }
+	});
+	Object.defineProperty(exports, 'componentByNodeRegistery', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.componentByNodeRegistery;
+	  }
+	});
+	Object.defineProperty(exports, 'trackComponents', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.trackComponents;
+	  }
+	});
+	Object.defineProperty(exports, 'useStaticRendering', {
+	  enumerable: true,
+	  get: function get() {
+	    return _observer.useStaticRendering;
+	  }
+	});
+
+	var _Provider = __webpack_require__(8);
+
+	Object.defineProperty(exports, 'Provider', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_Provider).default;
+	  }
+	});
+
+	var _inject = __webpack_require__(6);
+
+	Object.defineProperty(exports, 'inject', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_inject).default;
+	  }
+	});
+
+	var _mobx = __webpack_require__(2);
+
+	var _mobx2 = _interopRequireDefault(_mobx);
+
+	var _react = __webpack_require__(3);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(4);
+
+	var _reactNative = __webpack_require__(9);
+
+	var _propTypes = __webpack_require__(10);
+
+	var propTypes = _interopRequireWildcard(_propTypes);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TARGET_LIB_NAME = void 0;
+	if (true) TARGET_LIB_NAME = 'mobx-react';
+	if (false) TARGET_LIB_NAME = 'mobx-react/native';
+	if (false) TARGET_LIB_NAME = 'mobx-react/custom';
+
+	if (!_mobx2.default) throw new Error(TARGET_LIB_NAME + ' requires the MobX package');
+	if (!_react2.default) throw new Error(TARGET_LIB_NAME + ' requires React to be available');
+
+	if (("browser") === 'browser' && typeof _reactDom.unstable_batchedUpdates === "function") _mobx2.default.extras.setReactionScheduler(_reactDom.unstable_batchedUpdates);
+	if (false) _mobx2.default.extras.setReactionScheduler(_reactNative.unstable_batchedUpdates);
+
+	exports.propTypes = propTypes;
+	exports.PropTypes = propTypes;
+	exports.default = module.exports;
+
+	/* Deprecated */
+
+	var reactiveComponent = exports.reactiveComponent = function reactiveComponent() {
+	  console.warn('[mobx-react] `reactiveComponent` has been renamed to `observer` ' + 'and will be removed in 1.1.');
+	  return observer.apply(null, _arguments);
+	};
+
+	/* DevTool support */
+	if ((typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ? 'undefined' : _typeof(__MOBX_DEVTOOLS_GLOBAL_HOOK__)) === 'object') {
+	  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, _mobx2.default);
+	}
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Observer = exports.renderReporter = exports.componentByNodeRegistery = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	exports.trackComponents = trackComponents;
+	exports.useStaticRendering = useStaticRendering;
+	exports.observer = observer;
+
+	var _mobx = __webpack_require__(2);
+
+	var _mobx2 = _interopRequireDefault(_mobx);
+
+	var _react = __webpack_require__(3);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(4);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _EventEmitter = __webpack_require__(5);
+
+	var _EventEmitter2 = _interopRequireDefault(_EventEmitter);
+
+	var _inject = __webpack_require__(6);
+
+	var _inject2 = _interopRequireDefault(_inject);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * dev tool support
+	 */
+	var isDevtoolsEnabled = false;
+
+	var isUsingStaticRendering = false;
+
+	var warnedAboutObserverInjectDeprecation = false;
+
+	// WeakMap<Node, Object>;
+	var componentByNodeRegistery = exports.componentByNodeRegistery = typeof WeakMap !== "undefined" ? new WeakMap() : undefined;
+	var renderReporter = exports.renderReporter = new _EventEmitter2.default();
+
+	function findDOMNode(component) {
+	  if (_reactDom2.default) return _reactDom2.default.findDOMNode(component);
+	  return null;
+	}
+
+	function reportRendering(component) {
+	  var node = findDOMNode(component);
+	  if (node && componentByNodeRegistery) componentByNodeRegistery.set(node, component);
+
+	  renderReporter.emit({
+	    event: 'render',
+	    renderTime: component.__$mobRenderEnd - component.__$mobRenderStart,
+	    totalTime: Date.now() - component.__$mobRenderStart,
+	    component: component,
+	    node: node
+	  });
+	}
+
+	function trackComponents() {
+	  if (typeof WeakMap === "undefined") throw new Error("[mobx-react] tracking components is not supported in this browser.");
+	  if (!isDevtoolsEnabled) isDevtoolsEnabled = true;
+	}
+
+	function useStaticRendering(useStaticRendering) {
+	  isUsingStaticRendering = useStaticRendering;
+	}
+
+	/**
+	 * Utilities
+	 */
+
+	function patch(target, funcName) {
+	  var base = target[funcName];
+	  var mixinFunc = reactiveMixin[funcName];
+	  if (!base) {
+	    target[funcName] = mixinFunc;
+	  } else {
+	    target[funcName] = function () {
+	      base.apply(this, arguments);
+	      mixinFunc.apply(this, arguments);
+	    };
+	  }
+	}
+
+	function isObjectShallowModified(prev, next) {
+	  if (null == prev || null == next || (typeof prev === 'undefined' ? 'undefined' : _typeof(prev)) !== "object" || (typeof next === 'undefined' ? 'undefined' : _typeof(next)) !== "object") {
+	    return prev !== next;
+	  }
+	  var keys = Object.keys(prev);
+	  if (keys.length !== Object.keys(next).length) {
+	    return true;
+	  }
+	  var key = void 0;
+	  for (var i = keys.length - 1; i >= 0, key = keys[i]; i--) {
+	    if (next[key] !== prev[key]) {
+	      return true;
+	    }
+	  }
+	  return false;
+	}
+
+	/**
+	 * ReactiveMixin
+	 */
+	var reactiveMixin = {
+	  componentWillMount: function componentWillMount() {
+	    var _this = this;
+
+	    if (isUsingStaticRendering === true) return;
+	    // Generate friendly name for debugging
+	    var initialName = this.displayName || this.name || this.constructor && (this.constructor.displayName || this.constructor.name) || "<component>";
+	    var rootNodeID = this._reactInternalInstance && this._reactInternalInstance._rootNodeID;
+
+	    /**
+	     * If props are shallowly modified, react will render anyway,
+	     * so atom.reportChanged() should not result in yet another re-render
+	     */
+	    var skipRender = false;
+	    /**
+	     * forceUpdate will re-assign this.props. We don't want that to cause a loop,
+	     * so detect these changes
+	     */
+	    var isForcingUpdate = false;
+
+	    function makePropertyObservableReference(propName) {
+	      var valueHolder = this[propName];
+	      var atom = new _mobx2.default.Atom("reactive " + propName);
+	      Object.defineProperty(this, propName, {
+	        configurable: true, enumerable: true,
+	        get: function get() {
+	          atom.reportObserved();
+	          return valueHolder;
+	        },
+	        set: function set(v) {
+	          if (!isForcingUpdate && isObjectShallowModified(valueHolder, v)) {
+	            valueHolder = v;
+	            skipRender = true;
+	            atom.reportChanged();
+	            skipRender = false;
+	          } else {
+	            valueHolder = v;
+	          }
+	        }
+	      });
+	    }
+
+	    // make this.props an observable reference, see #124
+	    makePropertyObservableReference.call(this, "props");
+	    // make state an observable reference
+	    makePropertyObservableReference.call(this, "state");
+
+	    // wire up reactive render
+	    var baseRender = this.render.bind(this);
+	    var reaction = null;
+	    var isRenderingPending = false;
+
+	    var initialRender = function initialRender() {
+	      reaction = new _mobx2.default.Reaction(initialName + '#' + rootNodeID + '.render()', function () {
+	        if (!isRenderingPending) {
+	          // N.B. Getting here *before mounting* means that a component constructor has side effects (see the relevant test in misc.js)
+	          // This unidiomatic React usage but React will correctly warn about this so we continue as usual
+	          // See #85 / Pull #44
+	          isRenderingPending = true;
+	          if (typeof _this.componentWillReact === "function") _this.componentWillReact(); // TODO: wrap in action?
+	          if (_this.__$mobxIsUnmounted !== true) {
+	            // If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
+	            // TODO: remove this check? Then react will properly warn about the fact that this should not happen? See #73
+	            // However, people also claim this migth happen during unit tests..
+	            var hasError = true;
+	            try {
+	              isForcingUpdate = true;
+	              if (!skipRender) _react2.default.Component.prototype.forceUpdate.call(_this);
+	              hasError = false;
+	            } finally {
+	              isForcingUpdate = false;
+	              if (hasError) reaction.dispose();
+	            }
+	          }
+	        }
+	      });
+	      reactiveRender.$mobx = reaction;
+	      _this.render = reactiveRender;
+	      return reactiveRender();
+	    };
+
+	    var reactiveRender = function reactiveRender() {
+	      isRenderingPending = false;
+	      var rendering = undefined;
+	      reaction.track(function () {
+	        if (isDevtoolsEnabled) {
+	          _this.__$mobRenderStart = Date.now();
+	        }
+	        rendering = _mobx2.default.extras.allowStateChanges(false, baseRender);
+	        if (isDevtoolsEnabled) {
+	          _this.__$mobRenderEnd = Date.now();
+	        }
+	      });
+	      return rendering;
+	    };
+
+	    this.render = initialRender;
+	  },
+
+	  componentWillUnmount: function componentWillUnmount() {
+	    if (isUsingStaticRendering === true) return;
+	    this.render.$mobx && this.render.$mobx.dispose();
+	    this.__$mobxIsUnmounted = true;
+	    if (isDevtoolsEnabled) {
+	      var node = findDOMNode(this);
+	      if (node && componentByNodeRegistery) {
+	        componentByNodeRegistery.delete(node);
+	      }
+	      renderReporter.emit({
+	        event: 'destroy',
+	        component: this,
+	        node: node
+	      });
+	    }
+	  },
+
+	  componentDidMount: function componentDidMount() {
+	    if (isDevtoolsEnabled) {
+	      reportRendering(this);
+	    }
+	  },
+
+	  componentDidUpdate: function componentDidUpdate() {
+	    if (isDevtoolsEnabled) {
+	      reportRendering(this);
+	    }
+	  },
+
+	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	    if (isUsingStaticRendering) {
+	      console.warn("[mobx-react] It seems that a re-rendering of a React component is triggered while in static (server-side) mode. Please make sure components are rendered only once server-side.");
+	    }
+	    // update on any state changes (as is the default)
+	    if (this.state !== nextState) {
+	      return true;
+	    }
+	    // update if props are shallowly not equal, inspired by PureRenderMixin
+	    // we could return just 'false' here, and avoid the `skipRender` checks etc
+	    // however, it is nicer if lifecycle events are triggered like usually,
+	    // so we return true here if props are shallowly modified.
+	    return isObjectShallowModified(this.props, nextProps);
+	  }
+	};
+
+	/**
+	 * Observer function / decorator
+	 */
+	function observer(arg1, arg2) {
+	  if (typeof arg1 === "string") {
+	    throw new Error("Store names should be provided as array");
+	  }
+	  if (Array.isArray(arg1)) {
+	    // component needs stores
+	    if (!warnedAboutObserverInjectDeprecation) {
+	      warnedAboutObserverInjectDeprecation = true;
+	      console.warn('Mobx observer: Using observer to inject stores is deprecated since 4.0. Use `@inject("store1", "store2") @observer ComponentClass` or `inject("store1", "store2")(observer(componentClass))` instead of `@observer(["store1", "store2"]) ComponentClass`');
+	    }
+	    if (!arg2) {
+	      // invoked as decorator
+	      return function (componentClass) {
+	        return observer(arg1, componentClass);
+	      };
+	    } else {
+	      return _inject2.default.apply(null, arg1)(observer(arg2));
+	    }
+	  }
+	  var componentClass = arg1;
+
+	  if (componentClass.isMobxInjector === true) {
+	    console.warn('Mobx observer: You are trying to use \'observer\' on a component that already has \'inject\'. Please apply \'observer\' before applying \'inject\'');
+	  }
+
+	  // Stateless function component:
+	  // If it is function but doesn't seem to be a react class constructor,
+	  // wrap it to a react class automatically
+	  if (typeof componentClass === "function" && (!componentClass.prototype || !componentClass.prototype.render) && !componentClass.isReactClass && !_react2.default.Component.isPrototypeOf(componentClass)) {
+
+	    return observer(_react2.default.createClass({
+	      displayName: componentClass.displayName || componentClass.name,
+	      propTypes: componentClass.propTypes,
+	      contextTypes: componentClass.contextTypes,
+	      getDefaultProps: function getDefaultProps() {
+	        return componentClass.defaultProps;
+	      },
+	      render: function render() {
+	        return componentClass.call(this, this.props, this.context);
+	      }
+	    }));
+	  }
+
+	  if (!componentClass) {
+	    throw new Error("Please pass a valid component to 'observer'");
+	  }
+
+	  var target = componentClass.prototype || componentClass;
+	  ["componentWillMount", "componentWillUnmount", "componentDidMount", "componentDidUpdate"].forEach(function (funcName) {
+	    patch(target, funcName);
+	  });
+	  if (!target.shouldComponentUpdate) {
+	    target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
+	  }
+	  componentClass.isMobXReactObserver = true;
+	  return componentClass;
+	}
+
+	// TODO: support injection somehow as well?
+	var Observer = exports.Observer = observer(function (_ref) {
+	  var children = _ref.children;
+	  return children();
+	});
+
+	Observer.propTypes = {
+	  children: _react2.default.PropTypes.func.isRequired
+	};
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var EventEmitter = function () {
+	  function EventEmitter() {
+	    _classCallCheck(this, EventEmitter);
+
+	    this.listeners = [];
+	  }
+
+	  _createClass(EventEmitter, [{
+	    key: "on",
+	    value: function on(cb) {
+	      var _this = this;
+
+	      this.listeners.push(cb);
+	      return function () {
+	        var index = _this.listeners.indexOf(cb);
+	        if (index !== -1) _this.listeners.splice(index, 1);
+	      };
+	    }
+	  }, {
+	    key: "emit",
+	    value: function emit(data) {
+	      this.listeners.forEach(function (fn) {
+	        return fn(data);
+	      });
+	    }
+	  }]);
+
+	  return EventEmitter;
+	}();
+
+	exports.default = EventEmitter;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	exports.default = inject;
+
+	var _react = __webpack_require__(3);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _hoistNonReactStatics = __webpack_require__(7);
+
+	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
+
+	var _observer = __webpack_require__(1);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var injectorContextTypes = {
+	  mobxStores: _react.PropTypes.object
+	};
+	Object.seal(injectorContextTypes);
+
+	var proxiedInjectorProps = {
+	  contextTypes: {
+	    get: function get() {
+	      return injectorContextTypes;
+	    },
+	    set: function set(_) {
+	      console.warn("Mobx Injector: you are trying to attach `contextTypes` on an component decorated with `inject` (or `observer`) HOC. Please specify the contextTypes on the wrapped component instead. It is accessible through the `wrappedComponent`");
+	    },
+	    configurable: true,
+	    enumerable: false
+	  },
+	  isMobxInjector: {
+	    value: true,
+	    writable: true,
+	    configurable: true,
+	    enumerable: true
+	  }
+	};
+
+	/**
+	 * Store Injection
+	 */
+	function createStoreInjector(grabStoresFn, component, injectNames) {
+	  var displayName = "inject-" + (component.displayName || component.name || component.constructor && component.constructor.name || "Unknown");
+	  if (injectNames) displayName += "-with-" + injectNames;
+
+	  var Injector = _react2.default.createClass({
+	    displayName: displayName,
+	    storeRef: function storeRef(instance) {
+	      this.wrappedInstance = instance;
+	    },
+	    render: function render() {
+	      // Optimization: it might be more efficient to apply the mapper function *outside* the render method
+	      // (if the mapper is a function), that could avoid expensive(?) re-rendering of the injector component
+	      // See this test: 'using a custom injector is not too reactive' in inject.js
+	      var newProps = {};
+	      for (var key in this.props) {
+	        if (this.props.hasOwnProperty(key)) {
+	          newProps[key] = this.props[key];
+	        }
+	      }var additionalProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {};
+	      for (var _key in additionalProps) {
+	        newProps[_key] = additionalProps[_key];
+	      }
+	      newProps.ref = this.storeRef;
+
+	      return _react2.default.createElement(component, newProps);
+	    }
+	  });
+
+	  // Static fields from component should be visible on the generated Injector
+	  (0, _hoistNonReactStatics2.default)(Injector, component);
+
+	  Injector.wrappedComponent = component;
+	  Object.defineProperties(Injector, proxiedInjectorProps);
+
+	  return Injector;
+	}
+
+	function grabStoresByName(storeNames) {
+	  return function (baseStores, nextProps) {
+	    storeNames.forEach(function (storeName) {
+	      if (storeName in nextProps) // prefer props over stores
+	        return;
+	      if (!(storeName in baseStores)) throw new Error("MobX observer: Store '" + storeName + "' is not available! Make sure it is provided by some Provider");
+	      nextProps[storeName] = baseStores[storeName];
+	    });
+	    return nextProps;
+	  };
+	}
+
+	/**
+	 * higher order component that injects stores to a child.
+	 * takes either a varargs list of strings, which are stores read from the context,
+	 * or a function that manually maps the available stores from the context to props:
+	 * storesToProps(mobxStores, props, context) => newProps
+	 */
+	function inject() /* fn(stores, nextProps) or ...storeNames */{
+	  var _arguments = arguments;
+
+	  var grabStoresFn = void 0;
+	  if (typeof arguments[0] === "function") {
+	    grabStoresFn = arguments[0];
+	    return function (componentClass) {
+	      var injected = createStoreInjector(grabStoresFn, componentClass);
+	      injected.isMobxInjector = false; // supress warning
+	      // mark the Injector as observer, to make it react to expressions in `grabStoresFn`,
+	      // see #111
+	      injected = (0, _observer.observer)(injected);
+	      injected.isMobxInjector = true; // restore warning
+	      return injected;
+	    };
+	  } else {
+	    var _ret = function () {
+	      var storeNames = [];
+	      for (var i = 0; i < _arguments.length; i++) {
+	        storeNames[i] = _arguments[i];
+	      }grabStoresFn = grabStoresByName(storeNames);
+	      return {
+	        v: function v(componentClass) {
+	          return createStoreInjector(grabStoresFn, componentClass, storeNames.join("-"));
+	        }
+	      };
+	    }();
+
+	    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	  }
+	}
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2015, Yahoo! Inc.
+	 * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
+	 */
+	'use strict';
+
+	var REACT_STATICS = {
+	    childContextTypes: true,
+	    contextTypes: true,
+	    defaultProps: true,
+	    displayName: true,
+	    getDefaultProps: true,
+	    mixins: true,
+	    propTypes: true,
+	    type: true
+	};
+
+	var KNOWN_STATICS = {
+	    name: true,
+	    length: true,
+	    prototype: true,
+	    caller: true,
+	    arguments: true,
+	    arity: true
+	};
+
+	var isGetOwnPropertySymbolsAvailable = typeof Object.getOwnPropertySymbols === 'function';
+
+	module.exports = function hoistNonReactStatics(targetComponent, sourceComponent, customStatics) {
+	    if (typeof sourceComponent !== 'string') { // don't hoist over string (html) components
+	        var keys = Object.getOwnPropertyNames(sourceComponent);
+
+	        /* istanbul ignore else */
+	        if (isGetOwnPropertySymbolsAvailable) {
+	            keys = keys.concat(Object.getOwnPropertySymbols(sourceComponent));
+	        }
+
+	        for (var i = 0; i < keys.length; ++i) {
+	            if (!REACT_STATICS[keys[i]] && !KNOWN_STATICS[keys[i]] && (!customStatics || !customStatics[keys[i]])) {
+	                try {
+	                    targetComponent[keys[i]] = sourceComponent[keys[i]];
+	                } catch (error) {
+
+	                }
+	            }
+	        }
+	    }
+
+	    return targetComponent;
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _class, _temp;
+
+	var _react = __webpack_require__(3);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var specialReactKeys = { children: true, key: true, ref: true };
+
+	var Provider = (_temp = _class = function (_Component) {
+	  _inherits(Provider, _Component);
+
+	  function Provider() {
+	    _classCallCheck(this, Provider);
+
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Provider).apply(this, arguments));
+	  }
+
+	  _createClass(Provider, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2.default.Children.only(this.props.children);
+	    }
+	  }, {
+	    key: "getChildContext",
+	    value: function getChildContext() {
+	      var stores = {};
+	      // inherit stores
+	      var baseStores = this.context.mobxStores;
+	      if (baseStores) for (var key in baseStores) {
+	        stores[key] = baseStores[key];
+	      }
+	      // add own stores
+	      for (var _key in this.props) {
+	        if (!specialReactKeys[_key]) stores[_key] = this.props[_key];
+	      }return {
+	        mobxStores: stores
+	      };
+	    }
+	  }, {
+	    key: "componentWillReceiveProps",
+	    value: function componentWillReceiveProps(nextProps) {
+	      // Maybe this warning is to aggressive?
+	      if (Object.keys(nextProps).length !== Object.keys(this.props).length) console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
+	      for (var key in nextProps) {
+	        if (!specialReactKeys[key] && this.props[key] !== nextProps[key]) console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
+	      }
+	    }
+	  }]);
+
+	  return Provider;
+	}(_react.Component), _class.contextTypes = {
+	  mobxStores: _react.PropTypes.object
+	}, _class.childContextTypes = {
+	  mobxStores: _react.PropTypes.object.isRequired
+	}, _temp);
+	exports.default = Provider;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	module.exports = null
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.objectOrObservableObject = exports.arrayOrObservableArrayOf = exports.arrayOrObservableArray = exports.observableObject = exports.observableMap = exports.observableArrayOf = exports.observableArray = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _mobx = __webpack_require__(2);
+
+	// Copied from React.PropTypes
+	function createChainableTypeChecker(validate) {
+	  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+	    for (var _len = arguments.length, rest = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
+	      rest[_key - 6] = arguments[_key];
+	    }
+
+	    return (0, _mobx.untracked)(function () {
+	      componentName = componentName || '<<anonymous>>';
+	      propFullName = propFullName || propName;
+	      if (props[propName] == null) {
+	        if (isRequired) {
+	          var actual = props[propName] === null ? 'null' : 'undefined';
+	          return new Error('The ' + location + ' `' + propFullName + '` is marked as required ' + 'in `' + componentName + '`, but its value is `' + actual + '`.');
+	        }
+	        return null;
+	      } else {
+	        return validate.apply(undefined, [props, propName, componentName, location, propFullName].concat(rest));
+	      }
+	    });
+	  }
+
+	  var chainedCheckType = checkType.bind(null, false);
+	  chainedCheckType.isRequired = checkType.bind(null, true);
+	  return chainedCheckType;
+	}
+
+	// Copied from React.PropTypes
+	function isSymbol(propType, propValue) {
+	  // Native Symbol.
+	  if (propType === 'symbol') {
+	    return true;
+	  }
+
+	  // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+	  if (propValue['@@toStringTag'] === 'Symbol') {
+	    return true;
+	  }
+
+	  // Fallback for non-spec compliant Symbols which are polyfilled.
+	  if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+	    return true;
+	  }
+
+	  return false;
+	}
+
+	// Copied from React.PropTypes
+	function getPropType(propValue) {
+	  var propType = typeof propValue === 'undefined' ? 'undefined' : _typeof(propValue);
+	  if (Array.isArray(propValue)) {
+	    return 'array';
+	  }
+	  if (propValue instanceof RegExp) {
+	    // Old webkits (at least until Android 4.0) return 'function' rather than
+	    // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+	    // passes PropTypes.object.
+	    return 'object';
+	  }
+	  if (isSymbol(propType, propValue)) {
+	    return 'symbol';
+	  }
+	  return propType;
+	}
+
+	// This handles more types than `getPropType`. Only used for error messages.
+	// Copied from React.PropTypes
+	function getPreciseType(propValue) {
+	  var propType = getPropType(propValue);
+	  if (propType === 'object') {
+	    if (propValue instanceof Date) {
+	      return 'date';
+	    } else if (propValue instanceof RegExp) {
+	      return 'regexp';
+	    }
+	  }
+	  return propType;
+	}
+
+	function createObservableTypeCheckerCreator(allowNativeType, mobxType) {
+	  return createChainableTypeChecker(function (props, propName, componentName, location, propFullName) {
+	    return (0, _mobx.untracked)(function () {
+	      if (allowNativeType) {
+	        if (getPropType(props[propName]) === mobxType.toLowerCase()) return null;
+	      }
+	      var mobxChecker = void 0;
+	      switch (mobxType) {
+	        case 'Array':
+	          mobxChecker = _mobx.isObservableArray;break;
+	        case 'Object':
+	          mobxChecker = _mobx.isObservableObject;break;
+	        case 'Map':
+	          mobxChecker = _mobx.isObservableMap;break;
+	        default:
+	          throw new Error('Unexpected mobxType: ' + mobxType);
+	      }
+	      var propValue = props[propName];
+	      if (!mobxChecker(propValue)) {
+	        var preciseType = getPreciseType(propValue);
+	        var nativeTypeExpectationMessage = allowNativeType ? ' or javascript `' + mobxType.toLowerCase() + '`' : '';
+	        return new Error('Invalid prop `' + propFullName + '` of type `' + preciseType + '` supplied to' + ' `' + componentName + '`, expected `mobx.Observable' + mobxType + '`' + nativeTypeExpectationMessage + '.');
+	      }
+	      return null;
+	    });
+	  });
+	}
+
+	function createObservableArrayOfTypeChecker(allowNativeType, typeChecker) {
+	  return createChainableTypeChecker(function (props, propName, componentName, location, propFullName) {
+	    for (var _len2 = arguments.length, rest = Array(_len2 > 5 ? _len2 - 5 : 0), _key2 = 5; _key2 < _len2; _key2++) {
+	      rest[_key2 - 5] = arguments[_key2];
+	    }
+
+	    return (0, _mobx.untracked)(function () {
+	      if (typeof typeChecker !== 'function') {
+	        return new Error('Property `' + propFullName + '` of component `' + componentName + '` has ' + 'invalid PropType notation.');
+	      }
+	      var error = createObservableTypeCheckerCreator(allowNativeType, 'Array')(props, propName, componentName);
+	      if (error instanceof Error) return error;
+	      var propValue = props[propName];
+	      for (var i = 0; i < propValue.length; i++) {
+	        error = typeChecker.apply(undefined, [propValue, i, componentName, location, propFullName + '[' + i + ']'].concat(rest));
+	        if (error instanceof Error) return error;
+	      }
+	      return null;
+	    });
+	  });
+	}
+
+	var observableArray = exports.observableArray = createObservableTypeCheckerCreator(false, 'Array');
+	var observableArrayOf = exports.observableArrayOf = createObservableArrayOfTypeChecker.bind(null, false);
+	var observableMap = exports.observableMap = createObservableTypeCheckerCreator(false, 'Map');
+	var observableObject = exports.observableObject = createObservableTypeCheckerCreator(false, 'Object');
+	var arrayOrObservableArray = exports.arrayOrObservableArray = createObservableTypeCheckerCreator(true, 'Array');
+	var arrayOrObservableArrayOf = exports.arrayOrObservableArrayOf = createObservableArrayOfTypeChecker.bind(null, true);
+	var objectOrObservableObject = exports.objectOrObservableObject = createObservableTypeCheckerCreator(true, 'Object');
+
+/***/ }
+/******/ ])
+});
+;
+},{"mobx":43,"react":207,"react-dom":55}],43:[function(require,module,exports){
+(function (global){
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+registerGlobals();
+exports.extras = {
+    allowStateChanges: allowStateChanges,
+    getAtom: getAtom,
+    getDebugName: getDebugName,
+    getDependencyTree: getDependencyTree,
+    getObserverTree: getObserverTree,
+    isComputingDerivation: isComputingDerivation,
+    isSpyEnabled: isSpyEnabled,
+    resetGlobalState: resetGlobalState,
+    spyReport: spyReport,
+    spyReportEnd: spyReportEnd,
+    spyReportStart: spyReportStart,
+    trackTransitions: trackTransitions,
+    setReactionScheduler: setReactionScheduler
+};
+exports._ = {
+    getAdministration: getAdministration,
+    resetGlobalState: resetGlobalState
+};
+if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
+    __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobx(module.exports);
+}
+var actionFieldDecorator = createClassPropertyDecorator(function (target, key, value, args, originalDescriptor) {
+    var actionName = (args && args.length === 1) ? args[0] : (value.name || key || "<unnamed action>");
+    var wrappedAction = action(actionName, value);
+    addHiddenProp(target, key, wrappedAction);
+}, function (key) {
+    return this[key];
+}, function () {
+    invariant(false, "It is not allowed to assign new values to @action fields");
+}, false, true);
+function action(arg1, arg2, arg3, arg4) {
+    if (arguments.length === 1 && typeof arg1 === "function")
+        return createAction(arg1.name || "<unnamed action>", arg1);
+    if (arguments.length === 2 && typeof arg2 === "function")
+        return createAction(arg1, arg2);
+    if (arguments.length === 1 && typeof arg1 === "string")
+        return namedActionDecorator(arg1);
+    return namedActionDecorator(arg2).apply(null, arguments);
+}
+exports.action = action;
+function namedActionDecorator(name) {
+    return function (target, prop, descriptor) {
+        if (descriptor && typeof descriptor.value === "function") {
+            descriptor.value = createAction(name, descriptor.value);
+            descriptor.enumerable = false;
+            descriptor.configurable = true;
+            return descriptor;
+        }
+        return actionFieldDecorator(name).apply(this, arguments);
+    };
+}
+function runInAction(arg1, arg2, arg3) {
+    var actionName = typeof arg1 === "string" ? arg1 : arg1.name || "<unnamed action>";
+    var fn = typeof arg1 === "function" ? arg1 : arg2;
+    var scope = typeof arg1 === "function" ? arg2 : arg3;
+    invariant(typeof fn === "function", "`runInAction` expects a function");
+    invariant(fn.length === 0, "`runInAction` expects a function without arguments");
+    invariant(typeof actionName === "string" && actionName.length > 0, "actions should have valid names, got: '" + actionName + "'");
+    return executeAction(actionName, fn, scope, undefined);
+}
+exports.runInAction = runInAction;
+function isAction(thing) {
+    return typeof thing === "function" && thing.isMobxAction === true;
+}
+exports.isAction = isAction;
+function autorun(arg1, arg2, arg3) {
+    var name, view, scope;
+    if (typeof arg1 === "string") {
+        name = arg1;
+        view = arg2;
+        scope = arg3;
+    }
+    else if (typeof arg1 === "function") {
+        name = arg1.name || ("Autorun@" + getNextId());
+        view = arg1;
+        scope = arg2;
+    }
+    assertUnwrapped(view, "autorun methods cannot have modifiers");
+    invariant(typeof view === "function", "autorun expects a function");
+    invariant(isAction(view) === false, "Warning: attempted to pass an action to autorun. Actions are untracked and will not trigger on state changes. Use `reaction` or wrap only your state modification code in an action.");
+    if (scope)
+        view = view.bind(scope);
+    var reaction = new Reaction(name, function () {
+        this.track(reactionRunner);
+    });
+    function reactionRunner() {
+        view(reaction);
+    }
+    reaction.schedule();
+    return reaction.getDisposer();
+}
+exports.autorun = autorun;
+function when(arg1, arg2, arg3, arg4) {
+    var name, predicate, effect, scope;
+    if (typeof arg1 === "string") {
+        name = arg1;
+        predicate = arg2;
+        effect = arg3;
+        scope = arg4;
+    }
+    else if (typeof arg1 === "function") {
+        name = ("When@" + getNextId());
+        predicate = arg1;
+        effect = arg2;
+        scope = arg3;
+    }
+    var disposer = autorun(name, function (r) {
+        if (predicate.call(scope)) {
+            r.dispose();
+            var prevUntracked = untrackedStart();
+            effect.call(scope);
+            untrackedEnd(prevUntracked);
+        }
+    });
+    return disposer;
+}
+exports.when = when;
+function autorunUntil(predicate, effect, scope) {
+    deprecated("`autorunUntil` is deprecated, please use `when`.");
+    return when.apply(null, arguments);
+}
+exports.autorunUntil = autorunUntil;
+function autorunAsync(arg1, arg2, arg3, arg4) {
+    var name, func, delay, scope;
+    if (typeof arg1 === "string") {
+        name = arg1;
+        func = arg2;
+        delay = arg3;
+        scope = arg4;
+    }
+    else if (typeof arg1 === "function") {
+        name = arg1.name || ("AutorunAsync@" + getNextId());
+        func = arg1;
+        delay = arg2;
+        scope = arg3;
+    }
+    invariant(isAction(func) === false, "Warning: attempted to pass an action to autorunAsync. Actions are untracked and will not trigger on state changes. Use `reaction` or wrap only your state modification code in an action.");
+    if (delay === void 0)
+        delay = 1;
+    if (scope)
+        func = func.bind(scope);
+    var isScheduled = false;
+    var r = new Reaction(name, function () {
+        if (!isScheduled) {
+            isScheduled = true;
+            setTimeout(function () {
+                isScheduled = false;
+                if (!r.isDisposed)
+                    r.track(reactionRunner);
+            }, delay);
+        }
+    });
+    function reactionRunner() { func(r); }
+    r.schedule();
+    return r.getDisposer();
+}
+exports.autorunAsync = autorunAsync;
+function reaction(arg1, arg2, arg3, arg4, arg5, arg6) {
+    var name, expression, effect, fireImmediately, delay, scope;
+    if (typeof arg1 === "string") {
+        name = arg1;
+        expression = arg2;
+        effect = arg3;
+        fireImmediately = arg4;
+        delay = arg5;
+        scope = arg6;
+    }
+    else {
+        name = arg1.name || arg2.name || ("Reaction@" + getNextId());
+        expression = arg1;
+        effect = arg2;
+        fireImmediately = arg3;
+        delay = arg4;
+        scope = arg5;
+    }
+    if (fireImmediately === void 0)
+        fireImmediately = false;
+    if (delay === void 0)
+        delay = 0;
+    var _a = getValueModeFromValue(expression, ValueMode.Reference), valueMode = _a[0], unwrappedExpression = _a[1];
+    var compareStructural = valueMode === ValueMode.Structure;
+    if (scope) {
+        unwrappedExpression = unwrappedExpression.bind(scope);
+        effect = action(name, effect.bind(scope));
+    }
+    var firstTime = true;
+    var isScheduled = false;
+    var nextValue = undefined;
+    var r = new Reaction(name, function () {
+        if (delay < 1) {
+            reactionRunner();
+        }
+        else if (!isScheduled) {
+            isScheduled = true;
+            setTimeout(function () {
+                isScheduled = false;
+                reactionRunner();
+            }, delay);
+        }
+    });
+    function reactionRunner() {
+        if (r.isDisposed)
+            return;
+        var changed = false;
+        r.track(function () {
+            var v = unwrappedExpression(r);
+            changed = valueDidChange(compareStructural, nextValue, v);
+            nextValue = v;
+        });
+        if (firstTime && fireImmediately)
+            effect(nextValue, r);
+        if (!firstTime && changed === true)
+            effect(nextValue, r);
+        if (firstTime)
+            firstTime = false;
+    }
+    r.schedule();
+    return r.getDisposer();
+}
+exports.reaction = reaction;
+var computedDecorator = createClassPropertyDecorator(function (target, name, _, decoratorArgs, originalDescriptor) {
+    invariant(typeof originalDescriptor !== "undefined", "@computed can only be used on getter functions, like: '@computed get myProps() { return ...; }'. It looks like it was used on a property.");
+    var baseValue = originalDescriptor.get;
+    var setter = originalDescriptor.set;
+    invariant(typeof baseValue === "function", "@computed can only be used on getter functions, like: '@computed get myProps() { return ...; }'");
+    var compareStructural = false;
+    if (decoratorArgs && decoratorArgs.length === 1 && decoratorArgs[0].asStructure === true)
+        compareStructural = true;
+    var adm = asObservableObject(target, undefined, ValueMode.Recursive);
+    defineObservableProperty(adm, name, compareStructural ? asStructure(baseValue) : baseValue, false, setter);
+}, function (name) {
+    var observable = this.$mobx.values[name];
+    if (observable === undefined)
+        return undefined;
+    return observable.get();
+}, function (name, value) {
+    this.$mobx.values[name].set(value);
+}, false, true);
+function computed(targetOrExpr, keyOrScopeOrSetter, baseDescriptor, options) {
+    if (typeof targetOrExpr === "function" && arguments.length < 3) {
+        if (typeof keyOrScopeOrSetter === "function")
+            return computedExpr(targetOrExpr, keyOrScopeOrSetter, undefined);
+        else
+            return computedExpr(targetOrExpr, undefined, keyOrScopeOrSetter);
+    }
+    return computedDecorator.apply(null, arguments);
+}
+exports.computed = computed;
+function computedExpr(expr, setter, scope) {
+    var _a = getValueModeFromValue(expr, ValueMode.Recursive), mode = _a[0], value = _a[1];
+    return new ComputedValue(value, scope, mode === ValueMode.Structure, value.name, setter);
+}
+function createTransformer(transformer, onCleanup) {
+    invariant(typeof transformer === "function" && transformer.length === 1, "createTransformer expects a function that accepts one argument");
+    var objectCache = {};
+    var resetId = globalState.resetId;
+    var Transformer = (function (_super) {
+        __extends(Transformer, _super);
+        function Transformer(sourceIdentifier, sourceObject) {
+            _super.call(this, function () { return transformer(sourceObject); }, null, false, "Transformer-" + transformer.name + "-" + sourceIdentifier, undefined);
+            this.sourceIdentifier = sourceIdentifier;
+            this.sourceObject = sourceObject;
+        }
+        Transformer.prototype.onBecomeUnobserved = function () {
+            var lastValue = this.value;
+            _super.prototype.onBecomeUnobserved.call(this);
+            delete objectCache[this.sourceIdentifier];
+            if (onCleanup)
+                onCleanup(lastValue, this.sourceObject);
+        };
+        return Transformer;
+    }(ComputedValue));
+    return function (object) {
+        if (resetId !== globalState.resetId) {
+            objectCache = {};
+            resetId = globalState.resetId;
+        }
+        var identifier = getMemoizationId(object);
+        var reactiveTransformer = objectCache[identifier];
+        if (reactiveTransformer)
+            return reactiveTransformer.get();
+        reactiveTransformer = objectCache[identifier] = new Transformer(identifier, object);
+        return reactiveTransformer.get();
+    };
+}
+exports.createTransformer = createTransformer;
+function getMemoizationId(object) {
+    if (object === null || typeof object !== "object")
+        throw new Error("[mobx] transform expected some kind of object, got: " + object);
+    var tid = object.$transformId;
+    if (tid === undefined) {
+        tid = getNextId();
+        addHiddenProp(object, "$transformId", tid);
+    }
+    return tid;
+}
+function expr(expr, scope) {
+    if (!isComputingDerivation())
+        console.warn("[mobx.expr] 'expr' should only be used inside other reactive functions.");
+    return computed(expr, scope).get();
+}
+exports.expr = expr;
+function extendObservable(target) {
+    var properties = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        properties[_i - 1] = arguments[_i];
+    }
+    invariant(arguments.length >= 2, "extendObservable expected 2 or more arguments");
+    invariant(typeof target === "object", "extendObservable expects an object as first argument");
+    invariant(!(isObservableMap(target)), "extendObservable should not be used on maps, use map.merge instead");
+    properties.forEach(function (propSet) {
+        invariant(typeof propSet === "object", "all arguments of extendObservable should be objects");
+        invariant(!isObservable(propSet), "extending an object with another observable (object) is not supported. Please construct an explicit propertymap, using `toJS` if need. See issue #540");
+        extendObservableHelper(target, propSet, ValueMode.Recursive, null);
+    });
+    return target;
+}
+exports.extendObservable = extendObservable;
+function extendObservableHelper(target, properties, mode, name) {
+    var adm = asObservableObject(target, name, mode);
+    for (var key in properties)
+        if (hasOwnProperty(properties, key)) {
+            if (target === properties && !isPropertyConfigurable(target, key))
+                continue;
+            var descriptor = Object.getOwnPropertyDescriptor(properties, key);
+            setObservableObjectInstanceProperty(adm, key, descriptor);
+        }
+    return target;
+}
+function getDependencyTree(thing, property) {
+    return nodeToDependencyTree(getAtom(thing, property));
+}
+function nodeToDependencyTree(node) {
+    var result = {
+        name: node.name
+    };
+    if (node.observing && node.observing.length > 0)
+        result.dependencies = unique(node.observing).map(nodeToDependencyTree);
+    return result;
+}
+function getObserverTree(thing, property) {
+    return nodeToObserverTree(getAtom(thing, property));
+}
+function nodeToObserverTree(node) {
+    var result = {
+        name: node.name
+    };
+    if (hasObservers(node))
+        result.observers = getObservers(node).map(nodeToObserverTree);
+    return result;
+}
+function intercept(thing, propOrHandler, handler) {
+    if (typeof handler === "function")
+        return interceptProperty(thing, propOrHandler, handler);
+    else
+        return interceptInterceptable(thing, propOrHandler);
+}
+exports.intercept = intercept;
+function interceptInterceptable(thing, handler) {
+    if (isPlainObject(thing) && !isObservableObject(thing)) {
+        deprecated("Passing plain objects to intercept / observe is deprecated and will be removed in 3.0");
+        return getAdministration(observable(thing)).intercept(handler);
+    }
+    return getAdministration(thing).intercept(handler);
+}
+function interceptProperty(thing, property, handler) {
+    if (isPlainObject(thing) && !isObservableObject(thing)) {
+        deprecated("Passing plain objects to intercept / observe is deprecated and will be removed in 3.0");
+        extendObservable(thing, {
+            property: thing[property]
+        });
+        return interceptProperty(thing, property, handler);
+    }
+    return getAdministration(thing, property).intercept(handler);
+}
+function isComputed(value, property) {
+    if (value === null || value === undefined)
+        return false;
+    if (property !== undefined) {
+        if (isObservableObject(value) === false)
+            return false;
+        var atom = getAtom(value, property);
+        return isComputedValue(atom);
+    }
+    return isComputedValue(value);
+}
+exports.isComputed = isComputed;
+function isObservable(value, property) {
+    if (value === null || value === undefined)
+        return false;
+    if (property !== undefined) {
+        if (isObservableArray(value) || isObservableMap(value))
+            throw new Error("[mobx.isObservable] isObservable(object, propertyName) is not supported for arrays and maps. Use map.has or array.length instead.");
+        else if (isObservableObject(value)) {
+            var o = value.$mobx;
+            return o.values && !!o.values[property];
+        }
+        return false;
+    }
+    return !!value.$mobx || isAtom(value) || isReaction(value) || isComputedValue(value);
+}
+exports.isObservable = isObservable;
+var decoratorImpl = createClassPropertyDecorator(function (target, name, baseValue) {
+    var prevA = allowStateChangesStart(true);
+    if (typeof baseValue === "function")
+        baseValue = asReference(baseValue);
+    var adm = asObservableObject(target, undefined, ValueMode.Recursive);
+    defineObservableProperty(adm, name, baseValue, true, undefined);
+    allowStateChangesEnd(prevA);
+}, function (name) {
+    var observable = this.$mobx.values[name];
+    if (observable === undefined)
+        return undefined;
+    return observable.get();
+}, function (name, value) {
+    setPropertyValue(this, name, value);
+}, true, false);
+function observableDecorator(target, key, baseDescriptor) {
+    invariant(arguments.length >= 2 && arguments.length <= 3, "Illegal decorator config", key);
+    assertPropertyConfigurable(target, key);
+    invariant(!baseDescriptor || !baseDescriptor.get, "@observable can not be used on getters, use @computed instead");
+    return decoratorImpl.apply(null, arguments);
+}
+function observable(v, keyOrScope) {
+    if (v === void 0) { v = undefined; }
+    if (typeof arguments[1] === "string")
+        return observableDecorator.apply(null, arguments);
+    invariant(arguments.length < 3, "observable expects zero, one or two arguments");
+    if (isObservable(v))
+        return v;
+    var _a = getValueModeFromValue(v, ValueMode.Recursive), mode = _a[0], value = _a[1];
+    var sourceType = mode === ValueMode.Reference ? ValueType.Reference : getTypeOfValue(value);
+    switch (sourceType) {
+        case ValueType.Array:
+        case ValueType.PlainObject:
+            return makeChildObservable(value, mode);
+        case ValueType.Reference:
+        case ValueType.ComplexObject:
+            return new ObservableValue(value, mode);
+        case ValueType.ComplexFunction:
+            throw new Error("[mobx.observable] To be able to make a function reactive it should not have arguments. If you need an observable reference to a function, use `observable(asReference(f))`");
+        case ValueType.ViewFunction:
+            deprecated("Use `computed(expr)` instead of `observable(expr)`");
+            return computed(v, keyOrScope);
+    }
+    invariant(false, "Illegal State");
+}
+exports.observable = observable;
+var ValueType;
+(function (ValueType) {
+    ValueType[ValueType["Reference"] = 0] = "Reference";
+    ValueType[ValueType["PlainObject"] = 1] = "PlainObject";
+    ValueType[ValueType["ComplexObject"] = 2] = "ComplexObject";
+    ValueType[ValueType["Array"] = 3] = "Array";
+    ValueType[ValueType["ViewFunction"] = 4] = "ViewFunction";
+    ValueType[ValueType["ComplexFunction"] = 5] = "ComplexFunction";
+})(ValueType || (ValueType = {}));
+function getTypeOfValue(value) {
+    if (value === null || value === undefined)
+        return ValueType.Reference;
+    if (typeof value === "function")
+        return value.length ? ValueType.ComplexFunction : ValueType.ViewFunction;
+    if (isArrayLike(value))
+        return ValueType.Array;
+    if (typeof value === "object")
+        return isPlainObject(value) ? ValueType.PlainObject : ValueType.ComplexObject;
+    return ValueType.Reference;
+}
+function observe(thing, propOrCb, cbOrFire, fireImmediately) {
+    if (typeof cbOrFire === "function")
+        return observeObservableProperty(thing, propOrCb, cbOrFire, fireImmediately);
+    else
+        return observeObservable(thing, propOrCb, cbOrFire);
+}
+exports.observe = observe;
+function observeObservable(thing, listener, fireImmediately) {
+    if (isPlainObject(thing) && !isObservableObject(thing)) {
+        deprecated("Passing plain objects to intercept / observe is deprecated and will be removed in 3.0");
+        return getAdministration(observable(thing)).observe(listener, fireImmediately);
+    }
+    return getAdministration(thing).observe(listener, fireImmediately);
+}
+function observeObservableProperty(thing, property, listener, fireImmediately) {
+    if (isPlainObject(thing) && !isObservableObject(thing)) {
+        deprecated("Passing plain objects to intercept / observe is deprecated and will be removed in 3.0");
+        extendObservable(thing, {
+            property: thing[property]
+        });
+        return observeObservableProperty(thing, property, listener, fireImmediately);
+    }
+    return getAdministration(thing, property).observe(listener, fireImmediately);
+}
+function toJS(source, detectCycles, __alreadySeen) {
+    if (detectCycles === void 0) { detectCycles = true; }
+    if (__alreadySeen === void 0) { __alreadySeen = null; }
+    function cache(value) {
+        if (detectCycles)
+            __alreadySeen.push([source, value]);
+        return value;
+    }
+    if (isObservable(source)) {
+        if (detectCycles && __alreadySeen === null)
+            __alreadySeen = [];
+        if (detectCycles && source !== null && typeof source === "object") {
+            for (var i = 0, l = __alreadySeen.length; i < l; i++)
+                if (__alreadySeen[i][0] === source)
+                    return __alreadySeen[i][1];
+        }
+        if (isObservableArray(source)) {
+            var res = cache([]);
+            var toAdd = source.map(function (value) { return toJS(value, detectCycles, __alreadySeen); });
+            res.length = toAdd.length;
+            for (var i = 0, l = toAdd.length; i < l; i++)
+                res[i] = toAdd[i];
+            return res;
+        }
+        if (isObservableObject(source)) {
+            var res = cache({});
+            for (var key in source)
+                res[key] = toJS(source[key], detectCycles, __alreadySeen);
+            return res;
+        }
+        if (isObservableMap(source)) {
+            var res_1 = cache({});
+            source.forEach(function (value, key) { return res_1[key] = toJS(value, detectCycles, __alreadySeen); });
+            return res_1;
+        }
+        if (isObservableValue(source))
+            return toJS(source.get(), detectCycles, __alreadySeen);
+    }
+    return source;
+}
+exports.toJS = toJS;
+function toJSlegacy(source, detectCycles, __alreadySeen) {
+    if (detectCycles === void 0) { detectCycles = true; }
+    if (__alreadySeen === void 0) { __alreadySeen = null; }
+    deprecated("toJSlegacy is deprecated and will be removed in the next major. Use `toJS` instead. See #566");
+    function cache(value) {
+        if (detectCycles)
+            __alreadySeen.push([source, value]);
+        return value;
+    }
+    if (source instanceof Date || source instanceof RegExp)
+        return source;
+    if (detectCycles && __alreadySeen === null)
+        __alreadySeen = [];
+    if (detectCycles && source !== null && typeof source === "object") {
+        for (var i = 0, l = __alreadySeen.length; i < l; i++)
+            if (__alreadySeen[i][0] === source)
+                return __alreadySeen[i][1];
+    }
+    if (!source)
+        return source;
+    if (isArrayLike(source)) {
+        var res = cache([]);
+        var toAdd = source.map(function (value) { return toJSlegacy(value, detectCycles, __alreadySeen); });
+        res.length = toAdd.length;
+        for (var i = 0, l = toAdd.length; i < l; i++)
+            res[i] = toAdd[i];
+        return res;
+    }
+    if (isObservableMap(source)) {
+        var res_2 = cache({});
+        source.forEach(function (value, key) { return res_2[key] = toJSlegacy(value, detectCycles, __alreadySeen); });
+        return res_2;
+    }
+    if (isObservableValue(source))
+        return toJSlegacy(source.get(), detectCycles, __alreadySeen);
+    if (typeof source === "object") {
+        var res = cache({});
+        for (var key in source)
+            res[key] = toJSlegacy(source[key], detectCycles, __alreadySeen);
+        return res;
+    }
+    return source;
+}
+exports.toJSlegacy = toJSlegacy;
+function toJSON(source, detectCycles, __alreadySeen) {
+    if (detectCycles === void 0) { detectCycles = true; }
+    if (__alreadySeen === void 0) { __alreadySeen = null; }
+    deprecated("toJSON is deprecated. Use toJS instead");
+    return toJSlegacy.apply(null, arguments);
+}
+exports.toJSON = toJSON;
+function log(msg) {
+    console.log(msg);
+    return msg;
+}
+function whyRun(thing, prop) {
+    switch (arguments.length) {
+        case 0:
+            thing = globalState.trackingDerivation;
+            if (!thing)
+                return log("whyRun() can only be used if a derivation is active, or by passing an computed value / reaction explicitly. If you invoked whyRun from inside a computation; the computation is currently suspended but re-evaluating because somebody requested it's value.");
+            break;
+        case 2:
+            thing = getAtom(thing, prop);
+            break;
+    }
+    thing = getAtom(thing);
+    if (isComputedValue(thing))
+        return log(thing.whyRun());
+    else if (isReaction(thing))
+        return log(thing.whyRun());
+    else
+        invariant(false, "whyRun can only be used on reactions and computed values");
+}
+exports.whyRun = whyRun;
+function createAction(actionName, fn) {
+    invariant(typeof fn === "function", "`action` can only be invoked on functions");
+    invariant(typeof actionName === "string" && actionName.length > 0, "actions should have valid names, got: '" + actionName + "'");
+    var res = function () {
+        return executeAction(actionName, fn, this, arguments);
+    };
+    res.isMobxAction = true;
+    return res;
+}
+function executeAction(actionName, fn, scope, args) {
+    invariant(!isComputedValue(globalState.trackingDerivation), "Computed values or transformers should not invoke actions or trigger other side effects");
+    var notifySpy = isSpyEnabled();
+    var startTime;
+    if (notifySpy) {
+        startTime = Date.now();
+        var l = (args && args.length) || 0;
+        var flattendArgs = new Array(l);
+        if (l > 0)
+            for (var i = 0; i < l; i++)
+                flattendArgs[i] = args[i];
+        spyReportStart({
+            type: "action",
+            name: actionName,
+            fn: fn,
+            target: scope,
+            arguments: flattendArgs
+        });
+    }
+    var prevUntracked = untrackedStart();
+    transactionStart(actionName, scope, false);
+    var prevAllowStateChanges = allowStateChangesStart(true);
+    try {
+        return fn.apply(scope, args);
+    }
+    finally {
+        allowStateChangesEnd(prevAllowStateChanges);
+        transactionEnd(false);
+        untrackedEnd(prevUntracked);
+        if (notifySpy)
+            spyReportEnd({ time: Date.now() - startTime });
+    }
+}
+function useStrict(strict) {
+    if (arguments.length === 0) {
+        deprecated("`useStrict` without arguments is deprecated, use `isStrictModeEnabled()` instead");
+        return globalState.strictMode;
+    }
+    else {
+        invariant(globalState.trackingDerivation === null, "It is not allowed to set `useStrict` when a derivation is running");
+        globalState.strictMode = strict;
+        globalState.allowStateChanges = !strict;
+    }
+}
+exports.useStrict = useStrict;
+function isStrictModeEnabled() {
+    return globalState.strictMode;
+}
+exports.isStrictModeEnabled = isStrictModeEnabled;
+function allowStateChanges(allowStateChanges, func) {
+    var prev = allowStateChangesStart(allowStateChanges);
+    var res = func();
+    allowStateChangesEnd(prev);
+    return res;
+}
+function allowStateChangesStart(allowStateChanges) {
+    var prev = globalState.allowStateChanges;
+    globalState.allowStateChanges = allowStateChanges;
+    return prev;
+}
+function allowStateChangesEnd(prev) {
+    globalState.allowStateChanges = prev;
+}
+var BaseAtom = (function () {
+    function BaseAtom(name) {
+        if (name === void 0) { name = "Atom@" + getNextId(); }
+        this.name = name;
+        this.isPendingUnobservation = true;
+        this.observers = [];
+        this.observersIndexes = {};
+        this.diffValue = 0;
+        this.lastAccessedBy = 0;
+        this.lowestObserverState = IDerivationState.NOT_TRACKING;
+    }
+    BaseAtom.prototype.onBecomeUnobserved = function () {
+    };
+    BaseAtom.prototype.reportObserved = function () {
+        reportObserved(this);
+    };
+    BaseAtom.prototype.reportChanged = function () {
+        transactionStart("propagatingAtomChange", null, false);
+        propagateChanged(this);
+        transactionEnd(false);
+    };
+    BaseAtom.prototype.toString = function () {
+        return this.name;
+    };
+    return BaseAtom;
+}());
+exports.BaseAtom = BaseAtom;
+var Atom = (function (_super) {
+    __extends(Atom, _super);
+    function Atom(name, onBecomeObservedHandler, onBecomeUnobservedHandler) {
+        if (name === void 0) { name = "Atom@" + getNextId(); }
+        if (onBecomeObservedHandler === void 0) { onBecomeObservedHandler = noop; }
+        if (onBecomeUnobservedHandler === void 0) { onBecomeUnobservedHandler = noop; }
+        _super.call(this, name);
+        this.name = name;
+        this.onBecomeObservedHandler = onBecomeObservedHandler;
+        this.onBecomeUnobservedHandler = onBecomeUnobservedHandler;
+        this.isPendingUnobservation = false;
+        this.isBeingTracked = false;
+    }
+    Atom.prototype.reportObserved = function () {
+        startBatch();
+        _super.prototype.reportObserved.call(this);
+        if (!this.isBeingTracked) {
+            this.isBeingTracked = true;
+            this.onBecomeObservedHandler();
+        }
+        endBatch();
+        return !!globalState.trackingDerivation;
+    };
+    Atom.prototype.onBecomeUnobserved = function () {
+        this.isBeingTracked = false;
+        this.onBecomeUnobservedHandler();
+    };
+    return Atom;
+}(BaseAtom));
+exports.Atom = Atom;
+var isAtom = createInstanceofPredicate("Atom", BaseAtom);
+var ComputedValue = (function () {
+    function ComputedValue(derivation, scope, compareStructural, name, setter) {
+        this.derivation = derivation;
+        this.scope = scope;
+        this.compareStructural = compareStructural;
+        this.dependenciesState = IDerivationState.NOT_TRACKING;
+        this.observing = [];
+        this.newObserving = null;
+        this.isPendingUnobservation = false;
+        this.observers = [];
+        this.observersIndexes = {};
+        this.diffValue = 0;
+        this.runId = 0;
+        this.lastAccessedBy = 0;
+        this.lowestObserverState = IDerivationState.UP_TO_DATE;
+        this.unboundDepsCount = 0;
+        this.__mapid = "#" + getNextId();
+        this.value = undefined;
+        this.isComputing = false;
+        this.isRunningSetter = false;
+        this.name = name || "ComputedValue@" + getNextId();
+        if (setter)
+            this.setter = createAction(name + "-setter", setter);
+    }
+    ComputedValue.prototype.peek = function () {
+        this.isComputing = true;
+        var prevAllowStateChanges = allowStateChangesStart(false);
+        var res = this.derivation.call(this.scope);
+        allowStateChangesEnd(prevAllowStateChanges);
+        this.isComputing = false;
+        return res;
+    };
+    ;
+    ComputedValue.prototype.peekUntracked = function () {
+        var hasError = true;
+        try {
+            var res = this.peek();
+            hasError = false;
+            return res;
+        }
+        finally {
+            if (hasError)
+                handleExceptionInDerivation(this);
+        }
+    };
+    ComputedValue.prototype.onBecomeStale = function () {
+        propagateMaybeChanged(this);
+    };
+    ComputedValue.prototype.onBecomeUnobserved = function () {
+        invariant(this.dependenciesState !== IDerivationState.NOT_TRACKING, "INTERNAL ERROR only onBecomeUnobserved shouldn't be called twice in a row");
+        clearObserving(this);
+        this.value = undefined;
+    };
+    ComputedValue.prototype.get = function () {
+        invariant(!this.isComputing, "Cycle detected in computation " + this.name, this.derivation);
+        startBatch();
+        if (globalState.inBatch === 1) {
+            if (shouldCompute(this))
+                this.value = this.peekUntracked();
+        }
+        else {
+            reportObserved(this);
+            if (shouldCompute(this))
+                if (this.trackAndCompute())
+                    propagateChangeConfirmed(this);
+        }
+        var result = this.value;
+        endBatch();
+        return result;
+    };
+    ComputedValue.prototype.recoverFromError = function () {
+        this.isComputing = false;
+    };
+    ComputedValue.prototype.set = function (value) {
+        if (this.setter) {
+            invariant(!this.isRunningSetter, "The setter of computed value '" + this.name + "' is trying to update itself. Did you intend to update an _observable_ value, instead of the computed property?");
+            this.isRunningSetter = true;
+            try {
+                this.setter.call(this.scope, value);
+            }
+            finally {
+                this.isRunningSetter = false;
+            }
+        }
+        else
+            invariant(false, "[ComputedValue '" + this.name + "'] It is not possible to assign a new value to a computed value.");
+    };
+    ComputedValue.prototype.trackAndCompute = function () {
+        if (isSpyEnabled()) {
+            spyReport({
+                object: this,
+                type: "compute",
+                fn: this.derivation,
+                target: this.scope
+            });
+        }
+        var oldValue = this.value;
+        var newValue = this.value = trackDerivedFunction(this, this.peek);
+        return valueDidChange(this.compareStructural, newValue, oldValue);
+    };
+    ComputedValue.prototype.observe = function (listener, fireImmediately) {
+        var _this = this;
+        var firstTime = true;
+        var prevValue = undefined;
+        return autorun(function () {
+            var newValue = _this.get();
+            if (!firstTime || fireImmediately) {
+                var prevU = untrackedStart();
+                listener(newValue, prevValue);
+                untrackedEnd(prevU);
+            }
+            firstTime = false;
+            prevValue = newValue;
+        });
+    };
+    ComputedValue.prototype.toJSON = function () {
+        return this.get();
+    };
+    ComputedValue.prototype.toString = function () {
+        return this.name + "[" + this.derivation.toString() + "]";
+    };
+    ComputedValue.prototype.whyRun = function () {
+        var isTracking = Boolean(globalState.trackingDerivation);
+        var observing = unique(this.isComputing ? this.newObserving : this.observing).map(function (dep) { return dep.name; });
+        var observers = unique(getObservers(this).map(function (dep) { return dep.name; }));
+        return (("\nWhyRun? computation '" + this.name + "':\n * Running because: " + (isTracking ? "[active] the value of this computation is needed by a reaction" : this.isComputing ? "[get] The value of this computed was requested outside a reaction" : "[idle] not running at the moment") + "\n") +
+            (this.dependenciesState === IDerivationState.NOT_TRACKING
+                ?
+                    " * This computation is suspended (not in use by any reaction) and won't run automatically.\n\tDidn't expect this computation to be suspended at this point?\n\t  1. Make sure this computation is used by a reaction (reaction, autorun, observer).\n\t  2. Check whether you are using this computation synchronously (in the same stack as they reaction that needs it).\n"
+                :
+                    " * This computation will re-run if any of the following observables changes:\n    " + joinStrings(observing) + "\n    " + ((this.isComputing && isTracking) ? " (... or any observable accessed during the remainder of the current run)" : "") + "\n\tMissing items in this list?\n\t  1. Check whether all used values are properly marked as observable (use isObservable to verify)\n\t  2. Make sure you didn't dereference values too early. MobX observes props, not primitives. E.g: use 'person.name' instead of 'name' in your computation.\n  * If the outcome of this computation changes, the following observers will be re-run:\n    " + joinStrings(observers) + "\n"));
+    };
+    return ComputedValue;
+}());
+var isComputedValue = createInstanceofPredicate("ComputedValue", ComputedValue);
+var IDerivationState;
+(function (IDerivationState) {
+    IDerivationState[IDerivationState["NOT_TRACKING"] = -1] = "NOT_TRACKING";
+    IDerivationState[IDerivationState["UP_TO_DATE"] = 0] = "UP_TO_DATE";
+    IDerivationState[IDerivationState["POSSIBLY_STALE"] = 1] = "POSSIBLY_STALE";
+    IDerivationState[IDerivationState["STALE"] = 2] = "STALE";
+})(IDerivationState || (IDerivationState = {}));
+exports.IDerivationState = IDerivationState;
+function shouldCompute(derivation) {
+    switch (derivation.dependenciesState) {
+        case IDerivationState.UP_TO_DATE: return false;
+        case IDerivationState.NOT_TRACKING:
+        case IDerivationState.STALE: return true;
+        case IDerivationState.POSSIBLY_STALE: {
+            var hasError = true;
+            var prevUntracked = untrackedStart();
+            try {
+                var obs = derivation.observing, l = obs.length;
+                for (var i = 0; i < l; i++) {
+                    var obj = obs[i];
+                    if (isComputedValue(obj)) {
+                        obj.get();
+                        if (derivation.dependenciesState === IDerivationState.STALE) {
+                            hasError = false;
+                            untrackedEnd(prevUntracked);
+                            return true;
+                        }
+                    }
+                }
+                hasError = false;
+                changeDependenciesStateTo0(derivation);
+                untrackedEnd(prevUntracked);
+                return false;
+            }
+            finally {
+                if (hasError) {
+                    changeDependenciesStateTo0(derivation);
+                }
+            }
+        }
+    }
+}
+function isComputingDerivation() {
+    return globalState.trackingDerivation !== null;
+}
+function checkIfStateModificationsAreAllowed() {
+    if (!globalState.allowStateChanges) {
+        invariant(false, globalState.strictMode
+            ? "It is not allowed to create or change state outside an `action` when MobX is in strict mode. Wrap the current method in `action` if this state change is intended"
+            : "It is not allowed to change the state when a computed value or transformer is being evaluated. Use 'autorun' to create reactive functions with side-effects.");
+    }
+}
+function trackDerivedFunction(derivation, f) {
+    changeDependenciesStateTo0(derivation);
+    derivation.newObserving = new Array(derivation.observing.length + 100);
+    derivation.unboundDepsCount = 0;
+    derivation.runId = ++globalState.runId;
+    var prevTracking = globalState.trackingDerivation;
+    globalState.trackingDerivation = derivation;
+    var hasException = true;
+    var result;
+    try {
+        result = f.call(derivation);
+        hasException = false;
+    }
+    finally {
+        if (hasException) {
+            handleExceptionInDerivation(derivation);
+        }
+        else {
+            globalState.trackingDerivation = prevTracking;
+            bindDependencies(derivation);
+        }
+    }
+    return result;
+}
+function handleExceptionInDerivation(derivation) {
+    var message = ("[mobx] An uncaught exception occurred while calculating your computed value, autorun or transformer. Or inside the render() method of an observer based React component. " +
+        "These functions should never throw exceptions as MobX will not always be able to recover from them. " +
+        ("Please fix the error reported after this message or enable 'Pause on (caught) exceptions' in your debugger to find the root cause. In: '" + derivation.name + "'. ") +
+        "For more details see https://github.com/mobxjs/mobx/issues/462");
+    if (isSpyEnabled()) {
+        spyReport({
+            type: "error",
+            message: message
+        });
+    }
+    console.warn(message);
+    changeDependenciesStateTo0(derivation);
+    derivation.newObserving = null;
+    derivation.unboundDepsCount = 0;
+    derivation.recoverFromError();
+    endBatch();
+    resetGlobalState();
+}
+function bindDependencies(derivation) {
+    var prevObserving = derivation.observing;
+    var observing = derivation.observing = derivation.newObserving;
+    derivation.newObserving = null;
+    var i0 = 0, l = derivation.unboundDepsCount;
+    for (var i = 0; i < l; i++) {
+        var dep = observing[i];
+        if (dep.diffValue === 0) {
+            dep.diffValue = 1;
+            if (i0 !== i)
+                observing[i0] = dep;
+            i0++;
+        }
+    }
+    observing.length = i0;
+    l = prevObserving.length;
+    while (l--) {
+        var dep = prevObserving[l];
+        if (dep.diffValue === 0) {
+            removeObserver(dep, derivation);
+        }
+        dep.diffValue = 0;
+    }
+    while (i0--) {
+        var dep = observing[i0];
+        if (dep.diffValue === 1) {
+            dep.diffValue = 0;
+            addObserver(dep, derivation);
+        }
+    }
+}
+function clearObserving(derivation) {
+    var obs = derivation.observing;
+    var i = obs.length;
+    while (i--)
+        removeObserver(obs[i], derivation);
+    derivation.dependenciesState = IDerivationState.NOT_TRACKING;
+    obs.length = 0;
+}
+function untracked(action) {
+    var prev = untrackedStart();
+    var res = action();
+    untrackedEnd(prev);
+    return res;
+}
+exports.untracked = untracked;
+function untrackedStart() {
+    var prev = globalState.trackingDerivation;
+    globalState.trackingDerivation = null;
+    return prev;
+}
+function untrackedEnd(prev) {
+    globalState.trackingDerivation = prev;
+}
+function changeDependenciesStateTo0(derivation) {
+    if (derivation.dependenciesState === IDerivationState.UP_TO_DATE)
+        return;
+    derivation.dependenciesState = IDerivationState.UP_TO_DATE;
+    var obs = derivation.observing;
+    var i = obs.length;
+    while (i--)
+        obs[i].lowestObserverState = IDerivationState.UP_TO_DATE;
+}
+var persistentKeys = ["mobxGuid", "resetId", "spyListeners", "strictMode", "runId"];
+var MobXGlobals = (function () {
+    function MobXGlobals() {
+        this.version = 4;
+        this.trackingDerivation = null;
+        this.runId = 0;
+        this.mobxGuid = 0;
+        this.inTransaction = 0;
+        this.isRunningReactions = false;
+        this.inBatch = 0;
+        this.pendingUnobservations = [];
+        this.pendingReactions = [];
+        this.allowStateChanges = true;
+        this.strictMode = false;
+        this.resetId = 0;
+        this.spyListeners = [];
+    }
+    return MobXGlobals;
+}());
+var globalState = (function () {
+    var res = new MobXGlobals();
+    if (global.__mobservableTrackingStack || global.__mobservableViewStack)
+        throw new Error("[mobx] An incompatible version of mobservable is already loaded.");
+    if (global.__mobxGlobal && global.__mobxGlobal.version !== res.version)
+        throw new Error("[mobx] An incompatible version of mobx is already loaded.");
+    if (global.__mobxGlobal)
+        return global.__mobxGlobal;
+    return global.__mobxGlobal = res;
+})();
+function registerGlobals() {
+}
+function resetGlobalState() {
+    globalState.resetId++;
+    var defaultGlobals = new MobXGlobals();
+    for (var key in defaultGlobals)
+        if (persistentKeys.indexOf(key) === -1)
+            globalState[key] = defaultGlobals[key];
+    globalState.allowStateChanges = !globalState.strictMode;
+}
+function hasObservers(observable) {
+    return observable.observers && observable.observers.length > 0;
+}
+function getObservers(observable) {
+    return observable.observers;
+}
+function invariantObservers(observable) {
+    var list = observable.observers;
+    var map = observable.observersIndexes;
+    var l = list.length;
+    for (var i = 0; i < l; i++) {
+        var id = list[i].__mapid;
+        if (i) {
+            invariant(map[id] === i, "INTERNAL ERROR maps derivation.__mapid to index in list");
+        }
+        else {
+            invariant(!(id in map), "INTERNAL ERROR observer on index 0 shouldnt be held in map.");
+        }
+    }
+    invariant(list.length === 0 || Object.keys(map).length === list.length - 1, "INTERNAL ERROR there is no junk in map");
+}
+function addObserver(observable, node) {
+    var l = observable.observers.length;
+    if (l) {
+        observable.observersIndexes[node.__mapid] = l;
+    }
+    observable.observers[l] = node;
+    if (observable.lowestObserverState > node.dependenciesState)
+        observable.lowestObserverState = node.dependenciesState;
+}
+function removeObserver(observable, node) {
+    if (observable.observers.length === 1) {
+        observable.observers.length = 0;
+        queueForUnobservation(observable);
+    }
+    else {
+        var list = observable.observers;
+        var map_1 = observable.observersIndexes;
+        var filler = list.pop();
+        if (filler !== node) {
+            var index = map_1[node.__mapid] || 0;
+            if (index) {
+                map_1[filler.__mapid] = index;
+            }
+            else {
+                delete map_1[filler.__mapid];
+            }
+            list[index] = filler;
+        }
+        delete map_1[node.__mapid];
+    }
+}
+function queueForUnobservation(observable) {
+    if (!observable.isPendingUnobservation) {
+        observable.isPendingUnobservation = true;
+        globalState.pendingUnobservations.push(observable);
+    }
+}
+function startBatch() {
+    globalState.inBatch++;
+}
+function endBatch() {
+    if (globalState.inBatch === 1) {
+        var list = globalState.pendingUnobservations;
+        for (var i = 0; i < list.length; i++) {
+            var observable_1 = list[i];
+            observable_1.isPendingUnobservation = false;
+            if (observable_1.observers.length === 0) {
+                observable_1.onBecomeUnobserved();
+            }
+        }
+        globalState.pendingUnobservations = [];
+    }
+    globalState.inBatch--;
+}
+function reportObserved(observable) {
+    var derivation = globalState.trackingDerivation;
+    if (derivation !== null) {
+        if (derivation.runId !== observable.lastAccessedBy) {
+            observable.lastAccessedBy = derivation.runId;
+            derivation.newObserving[derivation.unboundDepsCount++] = observable;
+        }
+    }
+    else if (observable.observers.length === 0) {
+        queueForUnobservation(observable);
+    }
+}
+function invariantLOS(observable, msg) {
+    var min = getObservers(observable).reduce(function (a, b) { return Math.min(a, b.dependenciesState); }, 2);
+    if (min >= observable.lowestObserverState)
+        return;
+    throw new Error("lowestObserverState is wrong for " + msg + " because " + min + " < " + observable.lowestObserverState);
+}
+function propagateChanged(observable) {
+    if (observable.lowestObserverState === IDerivationState.STALE)
+        return;
+    observable.lowestObserverState = IDerivationState.STALE;
+    var observers = observable.observers;
+    var i = observers.length;
+    while (i--) {
+        var d = observers[i];
+        if (d.dependenciesState === IDerivationState.UP_TO_DATE)
+            d.onBecomeStale();
+        d.dependenciesState = IDerivationState.STALE;
+    }
+}
+function propagateChangeConfirmed(observable) {
+    if (observable.lowestObserverState === IDerivationState.STALE)
+        return;
+    observable.lowestObserverState = IDerivationState.STALE;
+    var observers = observable.observers;
+    var i = observers.length;
+    while (i--) {
+        var d = observers[i];
+        if (d.dependenciesState === IDerivationState.POSSIBLY_STALE)
+            d.dependenciesState = IDerivationState.STALE;
+        else if (d.dependenciesState === IDerivationState.UP_TO_DATE)
+            observable.lowestObserverState = IDerivationState.UP_TO_DATE;
+    }
+}
+function propagateMaybeChanged(observable) {
+    if (observable.lowestObserverState !== IDerivationState.UP_TO_DATE)
+        return;
+    observable.lowestObserverState = IDerivationState.POSSIBLY_STALE;
+    var observers = observable.observers;
+    var i = observers.length;
+    while (i--) {
+        var d = observers[i];
+        if (d.dependenciesState === IDerivationState.UP_TO_DATE) {
+            d.dependenciesState = IDerivationState.POSSIBLY_STALE;
+            d.onBecomeStale();
+        }
+    }
+}
+var Reaction = (function () {
+    function Reaction(name, onInvalidate) {
+        if (name === void 0) { name = "Reaction@" + getNextId(); }
+        this.name = name;
+        this.onInvalidate = onInvalidate;
+        this.observing = [];
+        this.newObserving = [];
+        this.dependenciesState = IDerivationState.NOT_TRACKING;
+        this.diffValue = 0;
+        this.runId = 0;
+        this.unboundDepsCount = 0;
+        this.__mapid = "#" + getNextId();
+        this.isDisposed = false;
+        this._isScheduled = false;
+        this._isTrackPending = false;
+        this._isRunning = false;
+    }
+    Reaction.prototype.onBecomeStale = function () {
+        this.schedule();
+    };
+    Reaction.prototype.schedule = function () {
+        if (!this._isScheduled) {
+            this._isScheduled = true;
+            globalState.pendingReactions.push(this);
+            startBatch();
+            runReactions();
+            endBatch();
+        }
+    };
+    Reaction.prototype.isScheduled = function () {
+        return this._isScheduled;
+    };
+    Reaction.prototype.runReaction = function () {
+        if (!this.isDisposed) {
+            this._isScheduled = false;
+            if (shouldCompute(this)) {
+                this._isTrackPending = true;
+                this.onInvalidate();
+                if (this._isTrackPending && isSpyEnabled()) {
+                    spyReport({
+                        object: this,
+                        type: "scheduled-reaction"
+                    });
+                }
+            }
+        }
+    };
+    Reaction.prototype.track = function (fn) {
+        startBatch();
+        var notify = isSpyEnabled();
+        var startTime;
+        if (notify) {
+            startTime = Date.now();
+            spyReportStart({
+                object: this,
+                type: "reaction",
+                fn: fn
+            });
+        }
+        this._isRunning = true;
+        trackDerivedFunction(this, fn);
+        this._isRunning = false;
+        this._isTrackPending = false;
+        if (this.isDisposed) {
+            clearObserving(this);
+        }
+        if (notify) {
+            spyReportEnd({
+                time: Date.now() - startTime
+            });
+        }
+        endBatch();
+    };
+    Reaction.prototype.recoverFromError = function () {
+        this._isRunning = false;
+        this._isTrackPending = false;
+    };
+    Reaction.prototype.dispose = function () {
+        if (!this.isDisposed) {
+            this.isDisposed = true;
+            if (!this._isRunning) {
+                startBatch();
+                clearObserving(this);
+                endBatch();
+            }
+        }
+    };
+    Reaction.prototype.getDisposer = function () {
+        var r = this.dispose.bind(this);
+        r.$mobx = this;
+        return r;
+    };
+    Reaction.prototype.toString = function () {
+        return "Reaction[" + this.name + "]";
+    };
+    Reaction.prototype.whyRun = function () {
+        var observing = unique(this._isRunning ? this.newObserving : this.observing).map(function (dep) { return dep.name; });
+        return ("\nWhyRun? reaction '" + this.name + "':\n * Status: [" + (this.isDisposed ? "stopped" : this._isRunning ? "running" : this.isScheduled() ? "scheduled" : "idle") + "]\n * This reaction will re-run if any of the following observables changes:\n    " + joinStrings(observing) + "\n    " + ((this._isRunning) ? " (... or any observable accessed during the remainder of the current run)" : "") + "\n\tMissing items in this list?\n\t  1. Check whether all used values are properly marked as observable (use isObservable to verify)\n\t  2. Make sure you didn't dereference values too early. MobX observes props, not primitives. E.g: use 'person.name' instead of 'name' in your computation.\n");
+    };
+    return Reaction;
+}());
+exports.Reaction = Reaction;
+var MAX_REACTION_ITERATIONS = 100;
+var reactionScheduler = function (f) { return f(); };
+function runReactions() {
+    if (globalState.isRunningReactions === true || globalState.inTransaction > 0)
+        return;
+    reactionScheduler(runReactionsHelper);
+}
+function runReactionsHelper() {
+    globalState.isRunningReactions = true;
+    var allReactions = globalState.pendingReactions;
+    var iterations = 0;
+    while (allReactions.length > 0) {
+        if (++iterations === MAX_REACTION_ITERATIONS) {
+            resetGlobalState();
+            throw new Error(("Reaction doesn't converge to a stable state after " + MAX_REACTION_ITERATIONS + " iterations.")
+                + (" Probably there is a cycle in the reactive function: " + allReactions[0]));
+        }
+        var remainingReactions = allReactions.splice(0);
+        for (var i = 0, l = remainingReactions.length; i < l; i++)
+            remainingReactions[i].runReaction();
+    }
+    globalState.isRunningReactions = false;
+}
+var isReaction = createInstanceofPredicate("Reaction", Reaction);
+function setReactionScheduler(fn) {
+    var baseScheduler = reactionScheduler;
+    reactionScheduler = function (f) { return fn(function () { return baseScheduler(f); }); };
+}
+function isSpyEnabled() {
+    return !!globalState.spyListeners.length;
+}
+function spyReport(event) {
+    if (!globalState.spyListeners.length)
+        return false;
+    var listeners = globalState.spyListeners;
+    for (var i = 0, l = listeners.length; i < l; i++)
+        listeners[i](event);
+}
+function spyReportStart(event) {
+    var change = objectAssign({}, event, { spyReportStart: true });
+    spyReport(change);
+}
+var END_EVENT = { spyReportEnd: true };
+function spyReportEnd(change) {
+    if (change)
+        spyReport(objectAssign({}, change, END_EVENT));
+    else
+        spyReport(END_EVENT);
+}
+function spy(listener) {
+    globalState.spyListeners.push(listener);
+    return once(function () {
+        var idx = globalState.spyListeners.indexOf(listener);
+        if (idx !== -1)
+            globalState.spyListeners.splice(idx, 1);
+    });
+}
+exports.spy = spy;
+function trackTransitions(onReport) {
+    deprecated("trackTransitions is deprecated. Use mobx.spy instead");
+    if (typeof onReport === "boolean") {
+        deprecated("trackTransitions only takes a single callback function. If you are using the mobx-react-devtools, please update them first");
+        onReport = arguments[1];
+    }
+    if (!onReport) {
+        deprecated("trackTransitions without callback has been deprecated and is a no-op now. If you are using the mobx-react-devtools, please update them first");
+        return function () { };
+    }
+    return spy(onReport);
+}
+function transaction(action, thisArg, report) {
+    if (thisArg === void 0) { thisArg = undefined; }
+    if (report === void 0) { report = true; }
+    transactionStart((action.name) || "anonymous transaction", thisArg, report);
+    try {
+        return action.call(thisArg);
+    }
+    finally {
+        transactionEnd(report);
+    }
+}
+exports.transaction = transaction;
+function transactionStart(name, thisArg, report) {
+    if (thisArg === void 0) { thisArg = undefined; }
+    if (report === void 0) { report = true; }
+    startBatch();
+    globalState.inTransaction += 1;
+    if (report && isSpyEnabled()) {
+        spyReportStart({
+            type: "transaction",
+            target: thisArg,
+            name: name
+        });
+    }
+}
+function transactionEnd(report) {
+    if (report === void 0) { report = true; }
+    if (--globalState.inTransaction === 0) {
+        runReactions();
+    }
+    if (report && isSpyEnabled())
+        spyReportEnd();
+    endBatch();
+}
+function hasInterceptors(interceptable) {
+    return (interceptable.interceptors && interceptable.interceptors.length > 0);
+}
+function registerInterceptor(interceptable, handler) {
+    var interceptors = interceptable.interceptors || (interceptable.interceptors = []);
+    interceptors.push(handler);
+    return once(function () {
+        var idx = interceptors.indexOf(handler);
+        if (idx !== -1)
+            interceptors.splice(idx, 1);
+    });
+}
+function interceptChange(interceptable, change) {
+    var prevU = untrackedStart();
+    var interceptors = interceptable.interceptors;
+    for (var i = 0, l = interceptors.length; i < l; i++) {
+        change = interceptors[i](change);
+        invariant(!change || change.type, "Intercept handlers should return nothing or a change object");
+        if (!change)
+            return null;
+    }
+    untrackedEnd(prevU);
+    return change;
+}
+function hasListeners(listenable) {
+    return listenable.changeListeners && listenable.changeListeners.length > 0;
+}
+function registerListener(listenable, handler) {
+    var listeners = listenable.changeListeners || (listenable.changeListeners = []);
+    listeners.push(handler);
+    return once(function () {
+        var idx = listeners.indexOf(handler);
+        if (idx !== -1)
+            listeners.splice(idx, 1);
+    });
+}
+function notifyListeners(listenable, change) {
+    var prevU = untrackedStart();
+    var listeners = listenable.changeListeners;
+    if (!listeners)
+        return;
+    listeners = listeners.slice();
+    for (var i = 0, l = listeners.length; i < l; i++) {
+        if (Array.isArray(change)) {
+            listeners[i].apply(null, change);
+        }
+        else {
+            listeners[i](change);
+        }
+    }
+    untrackedEnd(prevU);
+}
+var ValueMode;
+(function (ValueMode) {
+    ValueMode[ValueMode["Recursive"] = 0] = "Recursive";
+    ValueMode[ValueMode["Reference"] = 1] = "Reference";
+    ValueMode[ValueMode["Structure"] = 2] = "Structure";
+    ValueMode[ValueMode["Flat"] = 3] = "Flat";
+})(ValueMode || (ValueMode = {}));
+function withModifier(modifier, value) {
+    assertUnwrapped(value, "Modifiers are not allowed to be nested");
+    return {
+        mobxModifier: modifier,
+        value: value
+    };
+}
+function getModifier(value) {
+    if (value) {
+        return value.mobxModifier || null;
+    }
+    return null;
+}
+function asReference(value) {
+    return withModifier(ValueMode.Reference, value);
+}
+exports.asReference = asReference;
+asReference.mobxModifier = ValueMode.Reference;
+function asStructure(value) {
+    return withModifier(ValueMode.Structure, value);
+}
+exports.asStructure = asStructure;
+asStructure.mobxModifier = ValueMode.Structure;
+function asFlat(value) {
+    return withModifier(ValueMode.Flat, value);
+}
+exports.asFlat = asFlat;
+asFlat.mobxModifier = ValueMode.Flat;
+function asMap(data, modifierFunc) {
+    return map(data, modifierFunc);
+}
+exports.asMap = asMap;
+function getValueModeFromValue(value, defaultMode) {
+    var mode = getModifier(value);
+    if (mode)
+        return [mode, value.value];
+    return [defaultMode, value];
+}
+function getValueModeFromModifierFunc(func) {
+    if (func === undefined)
+        return ValueMode.Recursive;
+    var mod = getModifier(func);
+    invariant(mod !== null, "Cannot determine value mode from function. Please pass in one of these: mobx.asReference, mobx.asStructure or mobx.asFlat, got: " + func);
+    return mod;
+}
+function makeChildObservable(value, parentMode, name) {
+    var childMode;
+    if (isObservable(value))
+        return value;
+    switch (parentMode) {
+        case ValueMode.Reference:
+            return value;
+        case ValueMode.Flat:
+            assertUnwrapped(value, "Items inside 'asFlat' cannot have modifiers");
+            childMode = ValueMode.Reference;
+            break;
+        case ValueMode.Structure:
+            assertUnwrapped(value, "Items inside 'asStructure' cannot have modifiers");
+            childMode = ValueMode.Structure;
+            break;
+        case ValueMode.Recursive:
+            _a = getValueModeFromValue(value, ValueMode.Recursive), childMode = _a[0], value = _a[1];
+            break;
+        default:
+            invariant(false, "Illegal State");
+    }
+    if (Array.isArray(value))
+        return createObservableArray(value, childMode, name);
+    if (isPlainObject(value) && Object.isExtensible(value))
+        return extendObservableHelper(value, value, childMode, name);
+    return value;
+    var _a;
+}
+function assertUnwrapped(value, message) {
+    if (getModifier(value) !== null)
+        throw new Error("[mobx] asStructure / asReference / asFlat cannot be used here. " + message);
+}
+var safariPrototypeSetterInheritanceBug = (function () {
+    var v = false;
+    var p = {};
+    Object.defineProperty(p, "0", { set: function () { v = true; } });
+    Object.create(p)["0"] = 1;
+    return v === false;
+})();
+var OBSERVABLE_ARRAY_BUFFER_SIZE = 0;
+var StubArray = (function () {
+    function StubArray() {
+    }
+    return StubArray;
+}());
+StubArray.prototype = [];
+var ObservableArrayAdministration = (function () {
+    function ObservableArrayAdministration(name, mode, array, owned) {
+        this.mode = mode;
+        this.array = array;
+        this.owned = owned;
+        this.lastKnownLength = 0;
+        this.interceptors = null;
+        this.changeListeners = null;
+        this.atom = new BaseAtom(name || ("ObservableArray@" + getNextId()));
+    }
+    ObservableArrayAdministration.prototype.makeReactiveArrayItem = function (value) {
+        assertUnwrapped(value, "Array values cannot have modifiers");
+        if (this.mode === ValueMode.Flat || this.mode === ValueMode.Reference)
+            return value;
+        return makeChildObservable(value, this.mode, this.atom.name + "[..]");
+    };
+    ObservableArrayAdministration.prototype.intercept = function (handler) {
+        return registerInterceptor(this, handler);
+    };
+    ObservableArrayAdministration.prototype.observe = function (listener, fireImmediately) {
+        if (fireImmediately === void 0) { fireImmediately = false; }
+        if (fireImmediately) {
+            listener({
+                object: this.array,
+                type: "splice",
+                index: 0,
+                added: this.values.slice(),
+                addedCount: this.values.length,
+                removed: [],
+                removedCount: 0
+            });
+        }
+        return registerListener(this, listener);
+    };
+    ObservableArrayAdministration.prototype.getArrayLength = function () {
+        this.atom.reportObserved();
+        return this.values.length;
+    };
+    ObservableArrayAdministration.prototype.setArrayLength = function (newLength) {
+        if (typeof newLength !== "number" || newLength < 0)
+            throw new Error("[mobx.array] Out of range: " + newLength);
+        var currentLength = this.values.length;
+        if (newLength === currentLength)
+            return;
+        else if (newLength > currentLength)
+            this.spliceWithArray(currentLength, 0, new Array(newLength - currentLength));
+        else
+            this.spliceWithArray(newLength, currentLength - newLength);
+    };
+    ObservableArrayAdministration.prototype.updateArrayLength = function (oldLength, delta) {
+        if (oldLength !== this.lastKnownLength)
+            throw new Error("[mobx] Modification exception: the internal structure of an observable array was changed. Did you use peek() to change it?");
+        this.lastKnownLength += delta;
+        if (delta > 0 && oldLength + delta + 1 > OBSERVABLE_ARRAY_BUFFER_SIZE)
+            reserveArrayBuffer(oldLength + delta + 1);
+    };
+    ObservableArrayAdministration.prototype.spliceWithArray = function (index, deleteCount, newItems) {
+        checkIfStateModificationsAreAllowed();
+        var length = this.values.length;
+        if (index === undefined)
+            index = 0;
+        else if (index > length)
+            index = length;
+        else if (index < 0)
+            index = Math.max(0, length + index);
+        if (arguments.length === 1)
+            deleteCount = length - index;
+        else if (deleteCount === undefined || deleteCount === null)
+            deleteCount = 0;
+        else
+            deleteCount = Math.max(0, Math.min(deleteCount, length - index));
+        if (newItems === undefined)
+            newItems = [];
+        if (hasInterceptors(this)) {
+            var change = interceptChange(this, {
+                object: this.array,
+                type: "splice",
+                index: index,
+                removedCount: deleteCount,
+                added: newItems
+            });
+            if (!change)
+                return EMPTY_ARRAY;
+            deleteCount = change.removedCount;
+            newItems = change.added;
+        }
+        newItems = newItems.map(this.makeReactiveArrayItem, this);
+        var lengthDelta = newItems.length - deleteCount;
+        this.updateArrayLength(length, lengthDelta);
+        var res = (_a = this.values).splice.apply(_a, [index, deleteCount].concat(newItems));
+        if (deleteCount !== 0 || newItems.length !== 0)
+            this.notifyArraySplice(index, newItems, res);
+        return res;
+        var _a;
+    };
+    ObservableArrayAdministration.prototype.notifyArrayChildUpdate = function (index, newValue, oldValue) {
+        var notifySpy = !this.owned && isSpyEnabled();
+        var notify = hasListeners(this);
+        var change = notify || notifySpy ? {
+            object: this.array,
+            type: "update",
+            index: index, newValue: newValue, oldValue: oldValue
+        } : null;
+        if (notifySpy)
+            spyReportStart(change);
+        this.atom.reportChanged();
+        if (notify)
+            notifyListeners(this, change);
+        if (notifySpy)
+            spyReportEnd();
+    };
+    ObservableArrayAdministration.prototype.notifyArraySplice = function (index, added, removed) {
+        var notifySpy = !this.owned && isSpyEnabled();
+        var notify = hasListeners(this);
+        var change = notify || notifySpy ? {
+            object: this.array,
+            type: "splice",
+            index: index, removed: removed, added: added,
+            removedCount: removed.length,
+            addedCount: added.length
+        } : null;
+        if (notifySpy)
+            spyReportStart(change);
+        this.atom.reportChanged();
+        if (notify)
+            notifyListeners(this, change);
+        if (notifySpy)
+            spyReportEnd();
+    };
+    return ObservableArrayAdministration;
+}());
+var ObservableArray = (function (_super) {
+    __extends(ObservableArray, _super);
+    function ObservableArray(initialValues, mode, name, owned) {
+        if (owned === void 0) { owned = false; }
+        _super.call(this);
+        var adm = new ObservableArrayAdministration(name, mode, this, owned);
+        addHiddenFinalProp(this, "$mobx", adm);
+        if (initialValues && initialValues.length) {
+            adm.updateArrayLength(0, initialValues.length);
+            adm.values = initialValues.map(adm.makeReactiveArrayItem, adm);
+            adm.notifyArraySplice(0, adm.values.slice(), EMPTY_ARRAY);
+        }
+        else {
+            adm.values = [];
+        }
+        if (safariPrototypeSetterInheritanceBug) {
+            Object.defineProperty(adm.array, "0", ENTRY_0);
+        }
+    }
+    ObservableArray.prototype.intercept = function (handler) {
+        return this.$mobx.intercept(handler);
+    };
+    ObservableArray.prototype.observe = function (listener, fireImmediately) {
+        if (fireImmediately === void 0) { fireImmediately = false; }
+        return this.$mobx.observe(listener, fireImmediately);
+    };
+    ObservableArray.prototype.clear = function () {
+        return this.splice(0);
+    };
+    ObservableArray.prototype.concat = function () {
+        var arrays = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            arrays[_i - 0] = arguments[_i];
+        }
+        this.$mobx.atom.reportObserved();
+        return Array.prototype.concat.apply(this.slice(), arrays.map(function (a) { return isObservableArray(a) ? a.slice() : a; }));
+    };
+    ObservableArray.prototype.replace = function (newItems) {
+        return this.$mobx.spliceWithArray(0, this.$mobx.values.length, newItems);
+    };
+    ObservableArray.prototype.toJS = function () {
+        return this.slice();
+    };
+    ObservableArray.prototype.toJSON = function () {
+        return this.toJS();
+    };
+    ObservableArray.prototype.peek = function () {
+        return this.$mobx.values;
+    };
+    ObservableArray.prototype.find = function (predicate, thisArg, fromIndex) {
+        if (fromIndex === void 0) { fromIndex = 0; }
+        this.$mobx.atom.reportObserved();
+        var items = this.$mobx.values, l = items.length;
+        for (var i = fromIndex; i < l; i++)
+            if (predicate.call(thisArg, items[i], i, this))
+                return items[i];
+        return undefined;
+    };
+    ObservableArray.prototype.splice = function (index, deleteCount) {
+        var newItems = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            newItems[_i - 2] = arguments[_i];
+        }
+        switch (arguments.length) {
+            case 0:
+                return [];
+            case 1:
+                return this.$mobx.spliceWithArray(index);
+            case 2:
+                return this.$mobx.spliceWithArray(index, deleteCount);
+        }
+        return this.$mobx.spliceWithArray(index, deleteCount, newItems);
+    };
+    ObservableArray.prototype.push = function () {
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i - 0] = arguments[_i];
+        }
+        var adm = this.$mobx;
+        adm.spliceWithArray(adm.values.length, 0, items);
+        return adm.values.length;
+    };
+    ObservableArray.prototype.pop = function () {
+        return this.splice(Math.max(this.$mobx.values.length - 1, 0), 1)[0];
+    };
+    ObservableArray.prototype.shift = function () {
+        return this.splice(0, 1)[0];
+    };
+    ObservableArray.prototype.unshift = function () {
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i - 0] = arguments[_i];
+        }
+        var adm = this.$mobx;
+        adm.spliceWithArray(0, 0, items);
+        return adm.values.length;
+    };
+    ObservableArray.prototype.reverse = function () {
+        this.$mobx.atom.reportObserved();
+        var clone = this.slice();
+        return clone.reverse.apply(clone, arguments);
+    };
+    ObservableArray.prototype.sort = function (compareFn) {
+        this.$mobx.atom.reportObserved();
+        var clone = this.slice();
+        return clone.sort.apply(clone, arguments);
+    };
+    ObservableArray.prototype.remove = function (value) {
+        var idx = this.$mobx.values.indexOf(value);
+        if (idx > -1) {
+            this.splice(idx, 1);
+            return true;
+        }
+        return false;
+    };
+    ObservableArray.prototype.toString = function () {
+        return "[mobx.array] " + Array.prototype.toString.apply(this.$mobx.values, arguments);
+    };
+    ObservableArray.prototype.toLocaleString = function () {
+        return "[mobx.array] " + Array.prototype.toLocaleString.apply(this.$mobx.values, arguments);
+    };
+    return ObservableArray;
+}(StubArray));
+declareIterator(ObservableArray.prototype, function () {
+    return arrayAsIterator(this.slice());
+});
+makeNonEnumerable(ObservableArray.prototype, [
+    "constructor",
+    "intercept",
+    "observe",
+    "clear",
+    "concat",
+    "replace",
+    "toJS",
+    "toJSON",
+    "peek",
+    "find",
+    "splice",
+    "push",
+    "pop",
+    "shift",
+    "unshift",
+    "reverse",
+    "sort",
+    "remove",
+    "toString",
+    "toLocaleString"
+]);
+Object.defineProperty(ObservableArray.prototype, "length", {
+    enumerable: false,
+    configurable: true,
+    get: function () {
+        return this.$mobx.getArrayLength();
+    },
+    set: function (newLength) {
+        this.$mobx.setArrayLength(newLength);
+    }
+});
+[
+    "every",
+    "filter",
+    "forEach",
+    "indexOf",
+    "join",
+    "lastIndexOf",
+    "map",
+    "reduce",
+    "reduceRight",
+    "slice",
+    "some"
+].forEach(function (funcName) {
+    var baseFunc = Array.prototype[funcName];
+    invariant(typeof baseFunc === "function", "Base function not defined on Array prototype: '" + funcName + "'");
+    addHiddenProp(ObservableArray.prototype, funcName, function () {
+        this.$mobx.atom.reportObserved();
+        return baseFunc.apply(this.$mobx.values, arguments);
+    });
+});
+var ENTRY_0 = {
+    configurable: true,
+    enumerable: false,
+    set: createArraySetter(0),
+    get: createArrayGetter(0)
+};
+function createArrayBufferItem(index) {
+    var set = createArraySetter(index);
+    var get = createArrayGetter(index);
+    Object.defineProperty(ObservableArray.prototype, "" + index, {
+        enumerable: false,
+        configurable: true,
+        set: set, get: get
+    });
+}
+function createArraySetter(index) {
+    return function (newValue) {
+        var adm = this.$mobx;
+        var values = adm.values;
+        assertUnwrapped(newValue, "Modifiers cannot be used on array values. For non-reactive array values use makeReactive(asFlat(array)).");
+        if (index < values.length) {
+            checkIfStateModificationsAreAllowed();
+            var oldValue = values[index];
+            if (hasInterceptors(adm)) {
+                var change = interceptChange(adm, {
+                    type: "update",
+                    object: adm.array,
+                    index: index, newValue: newValue
+                });
+                if (!change)
+                    return;
+                newValue = change.newValue;
+            }
+            newValue = adm.makeReactiveArrayItem(newValue);
+            var changed = (adm.mode === ValueMode.Structure) ? !deepEquals(oldValue, newValue) : oldValue !== newValue;
+            if (changed) {
+                values[index] = newValue;
+                adm.notifyArrayChildUpdate(index, newValue, oldValue);
+            }
+        }
+        else if (index === values.length) {
+            adm.spliceWithArray(index, 0, [newValue]);
+        }
+        else
+            throw new Error("[mobx.array] Index out of bounds, " + index + " is larger than " + values.length);
+    };
+}
+function createArrayGetter(index) {
+    return function () {
+        var impl = this.$mobx;
+        if (impl && index < impl.values.length) {
+            impl.atom.reportObserved();
+            return impl.values[index];
+        }
+        console.warn("[mobx.array] Attempt to read an array index (" + index + ") that is out of bounds (" + impl.values.length + "). Please check length first. Out of bound indices will not be tracked by MobX");
+        return undefined;
+    };
+}
+function reserveArrayBuffer(max) {
+    for (var index = OBSERVABLE_ARRAY_BUFFER_SIZE; index < max; index++)
+        createArrayBufferItem(index);
+    OBSERVABLE_ARRAY_BUFFER_SIZE = max;
+}
+reserveArrayBuffer(1000);
+function createObservableArray(initialValues, mode, name) {
+    return new ObservableArray(initialValues, mode, name);
+}
+function fastArray(initialValues) {
+    deprecated("fastArray is deprecated. Please use `observable(asFlat([]))`");
+    return createObservableArray(initialValues, ValueMode.Flat, null);
+}
+exports.fastArray = fastArray;
+var isObservableArrayAdministration = createInstanceofPredicate("ObservableArrayAdministration", ObservableArrayAdministration);
+function isObservableArray(thing) {
+    return isObject(thing) && isObservableArrayAdministration(thing.$mobx);
+}
+exports.isObservableArray = isObservableArray;
+var ObservableMapMarker = {};
+var ObservableMap = (function () {
+    function ObservableMap(initialData, valueModeFunc) {
+        var _this = this;
+        this.$mobx = ObservableMapMarker;
+        this._data = {};
+        this._hasMap = {};
+        this.name = "ObservableMap@" + getNextId();
+        this._keys = new ObservableArray(null, ValueMode.Reference, this.name + ".keys()", true);
+        this.interceptors = null;
+        this.changeListeners = null;
+        this._valueMode = getValueModeFromModifierFunc(valueModeFunc);
+        if (this._valueMode === ValueMode.Flat)
+            this._valueMode = ValueMode.Reference;
+        allowStateChanges(true, function () {
+            if (isPlainObject(initialData))
+                _this.merge(initialData);
+            else if (Array.isArray(initialData))
+                initialData.forEach(function (_a) {
+                    var key = _a[0], value = _a[1];
+                    return _this.set(key, value);
+                });
+        });
+    }
+    ObservableMap.prototype._has = function (key) {
+        return typeof this._data[key] !== "undefined";
+    };
+    ObservableMap.prototype.has = function (key) {
+        if (!this.isValidKey(key))
+            return false;
+        key = "" + key;
+        if (this._hasMap[key])
+            return this._hasMap[key].get();
+        return this._updateHasMapEntry(key, false).get();
+    };
+    ObservableMap.prototype.set = function (key, value) {
+        this.assertValidKey(key);
+        key = "" + key;
+        var hasKey = this._has(key);
+        assertUnwrapped(value, "[mobx.map.set] Expected unwrapped value to be inserted to key '" + key + "'. If you need to use modifiers pass them as second argument to the constructor");
+        if (hasInterceptors(this)) {
+            var change = interceptChange(this, {
+                type: hasKey ? "update" : "add",
+                object: this,
+                newValue: value,
+                name: key
+            });
+            if (!change)
+                return;
+            value = change.newValue;
+        }
+        if (hasKey) {
+            this._updateValue(key, value);
+        }
+        else {
+            this._addValue(key, value);
+        }
+    };
+    ObservableMap.prototype.delete = function (key) {
+        var _this = this;
+        this.assertValidKey(key);
+        key = "" + key;
+        if (hasInterceptors(this)) {
+            var change = interceptChange(this, {
+                type: "delete",
+                object: this,
+                name: key
+            });
+            if (!change)
+                return false;
+        }
+        if (this._has(key)) {
+            var notifySpy = isSpyEnabled();
+            var notify = hasListeners(this);
+            var change = notify || notifySpy ? {
+                type: "delete",
+                object: this,
+                oldValue: this._data[key].value,
+                name: key
+            } : null;
+            if (notifySpy)
+                spyReportStart(change);
+            transaction(function () {
+                _this._keys.remove(key);
+                _this._updateHasMapEntry(key, false);
+                var observable = _this._data[key];
+                observable.setNewValue(undefined);
+                _this._data[key] = undefined;
+            }, undefined, false);
+            if (notify)
+                notifyListeners(this, change);
+            if (notifySpy)
+                spyReportEnd();
+            return true;
+        }
+        return false;
+    };
+    ObservableMap.prototype._updateHasMapEntry = function (key, value) {
+        var entry = this._hasMap[key];
+        if (entry) {
+            entry.setNewValue(value);
+        }
+        else {
+            entry = this._hasMap[key] = new ObservableValue(value, ValueMode.Reference, this.name + "." + key + "?", false);
+        }
+        return entry;
+    };
+    ObservableMap.prototype._updateValue = function (name, newValue) {
+        var observable = this._data[name];
+        newValue = observable.prepareNewValue(newValue);
+        if (newValue !== UNCHANGED) {
+            var notifySpy = isSpyEnabled();
+            var notify = hasListeners(this);
+            var change = notify || notifySpy ? {
+                type: "update",
+                object: this,
+                oldValue: observable.value,
+                name: name, newValue: newValue
+            } : null;
+            if (notifySpy)
+                spyReportStart(change);
+            observable.setNewValue(newValue);
+            if (notify)
+                notifyListeners(this, change);
+            if (notifySpy)
+                spyReportEnd();
+        }
+    };
+    ObservableMap.prototype._addValue = function (name, newValue) {
+        var _this = this;
+        transaction(function () {
+            var observable = _this._data[name] = new ObservableValue(newValue, _this._valueMode, _this.name + "." + name, false);
+            newValue = observable.value;
+            _this._updateHasMapEntry(name, true);
+            _this._keys.push(name);
+        }, undefined, false);
+        var notifySpy = isSpyEnabled();
+        var notify = hasListeners(this);
+        var change = notify || notifySpy ? {
+            type: "add",
+            object: this,
+            name: name, newValue: newValue
+        } : null;
+        if (notifySpy)
+            spyReportStart(change);
+        if (notify)
+            notifyListeners(this, change);
+        if (notifySpy)
+            spyReportEnd();
+    };
+    ObservableMap.prototype.get = function (key) {
+        key = "" + key;
+        if (this.has(key))
+            return this._data[key].get();
+        return undefined;
+    };
+    ObservableMap.prototype.keys = function () {
+        return arrayAsIterator(this._keys.slice());
+    };
+    ObservableMap.prototype.values = function () {
+        return arrayAsIterator(this._keys.map(this.get, this));
+    };
+    ObservableMap.prototype.entries = function () {
+        var _this = this;
+        return arrayAsIterator(this._keys.map(function (key) { return [key, _this.get(key)]; }));
+    };
+    ObservableMap.prototype.forEach = function (callback, thisArg) {
+        var _this = this;
+        this.keys().forEach(function (key) { return callback.call(thisArg, _this.get(key), key); });
+    };
+    ObservableMap.prototype.merge = function (other) {
+        var _this = this;
+        transaction(function () {
+            if (isObservableMap(other))
+                other.keys().forEach(function (key) { return _this.set(key, other.get(key)); });
+            else
+                Object.keys(other).forEach(function (key) { return _this.set(key, other[key]); });
+        }, undefined, false);
+        return this;
+    };
+    ObservableMap.prototype.clear = function () {
+        var _this = this;
+        transaction(function () {
+            untracked(function () {
+                _this.keys().forEach(_this.delete, _this);
+            });
+        }, undefined, false);
+    };
+    Object.defineProperty(ObservableMap.prototype, "size", {
+        get: function () {
+            return this._keys.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    ObservableMap.prototype.toJS = function () {
+        var _this = this;
+        var res = {};
+        this.keys().forEach(function (key) { return res[key] = _this.get(key); });
+        return res;
+    };
+    ObservableMap.prototype.toJs = function () {
+        deprecated("toJs is deprecated, use toJS instead");
+        return this.toJS();
+    };
+    ObservableMap.prototype.toJSON = function () {
+        return this.toJS();
+    };
+    ObservableMap.prototype.isValidKey = function (key) {
+        if (key === null || key === undefined)
+            return false;
+        if (typeof key !== "string" && typeof key !== "number" && typeof key !== "boolean")
+            return false;
+        return true;
+    };
+    ObservableMap.prototype.assertValidKey = function (key) {
+        if (!this.isValidKey(key))
+            throw new Error("[mobx.map] Invalid key: '" + key + "'");
+    };
+    ObservableMap.prototype.toString = function () {
+        var _this = this;
+        return this.name + "[{ " + this.keys().map(function (key) { return (key + ": " + ("" + _this.get(key))); }).join(", ") + " }]";
+    };
+    ObservableMap.prototype.observe = function (listener, fireImmediately) {
+        invariant(fireImmediately !== true, "`observe` doesn't support the fire immediately property for observable maps.");
+        return registerListener(this, listener);
+    };
+    ObservableMap.prototype.intercept = function (handler) {
+        return registerInterceptor(this, handler);
+    };
+    return ObservableMap;
+}());
+exports.ObservableMap = ObservableMap;
+declareIterator(ObservableMap.prototype, function () {
+    return this.entries();
+});
+function map(initialValues, valueModifier) {
+    return new ObservableMap(initialValues, valueModifier);
+}
+exports.map = map;
+var isObservableMap = createInstanceofPredicate("ObservableMap", ObservableMap);
+exports.isObservableMap = isObservableMap;
+var ObservableObjectAdministration = (function () {
+    function ObservableObjectAdministration(target, name, mode) {
+        this.target = target;
+        this.name = name;
+        this.mode = mode;
+        this.values = {};
+        this.changeListeners = null;
+        this.interceptors = null;
+    }
+    ObservableObjectAdministration.prototype.observe = function (callback, fireImmediately) {
+        invariant(fireImmediately !== true, "`observe` doesn't support the fire immediately property for observable objects.");
+        return registerListener(this, callback);
+    };
+    ObservableObjectAdministration.prototype.intercept = function (handler) {
+        return registerInterceptor(this, handler);
+    };
+    return ObservableObjectAdministration;
+}());
+function asObservableObject(target, name, mode) {
+    if (mode === void 0) { mode = ValueMode.Recursive; }
+    if (isObservableObject(target))
+        return target.$mobx;
+    if (!isPlainObject(target))
+        name = target.constructor.name + "@" + getNextId();
+    if (!name)
+        name = "ObservableObject@" + getNextId();
+    var adm = new ObservableObjectAdministration(target, name, mode);
+    addHiddenFinalProp(target, "$mobx", adm);
+    return adm;
+}
+function setObservableObjectInstanceProperty(adm, propName, descriptor) {
+    if (adm.values[propName]) {
+        invariant("value" in descriptor, "cannot redefine property " + propName);
+        adm.target[propName] = descriptor.value;
+    }
+    else {
+        if ("value" in descriptor)
+            defineObservableProperty(adm, propName, descriptor.value, true, undefined);
+        else
+            defineObservableProperty(adm, propName, descriptor.get, true, descriptor.set);
+    }
+}
+function defineObservableProperty(adm, propName, newValue, asInstanceProperty, setter) {
+    if (asInstanceProperty)
+        assertPropertyConfigurable(adm.target, propName);
+    var observable;
+    var name = adm.name + "." + propName;
+    var isComputed = true;
+    if (isComputedValue(newValue)) {
+        observable = newValue;
+        newValue.name = name;
+        if (!newValue.scope)
+            newValue.scope = adm.target;
+    }
+    else if (typeof newValue === "function" && newValue.length === 0 && !isAction(newValue)) {
+        observable = new ComputedValue(newValue, adm.target, false, name, setter);
+    }
+    else if (getModifier(newValue) === ValueMode.Structure && typeof newValue.value === "function" && newValue.value.length === 0) {
+        observable = new ComputedValue(newValue.value, adm.target, true, name, setter);
+    }
+    else {
+        isComputed = false;
+        if (hasInterceptors(adm)) {
+            var change = interceptChange(adm, {
+                object: adm.target,
+                name: propName,
+                type: "add",
+                newValue: newValue
+            });
+            if (!change)
+                return;
+            newValue = change.newValue;
+        }
+        observable = new ObservableValue(newValue, adm.mode, name, false);
+        newValue = observable.value;
+    }
+    adm.values[propName] = observable;
+    if (asInstanceProperty) {
+        Object.defineProperty(adm.target, propName, isComputed ? generateComputedPropConfig(propName) : generateObservablePropConfig(propName));
+    }
+    if (!isComputed)
+        notifyPropertyAddition(adm, adm.target, propName, newValue);
+}
+var observablePropertyConfigs = {};
+var computedPropertyConfigs = {};
+function generateObservablePropConfig(propName) {
+    var config = observablePropertyConfigs[propName];
+    if (config)
+        return config;
+    return observablePropertyConfigs[propName] = {
+        configurable: true,
+        enumerable: true,
+        get: function () {
+            return this.$mobx.values[propName].get();
+        },
+        set: function (v) {
+            setPropertyValue(this, propName, v);
+        }
+    };
+}
+function generateComputedPropConfig(propName) {
+    var config = computedPropertyConfigs[propName];
+    if (config)
+        return config;
+    return computedPropertyConfigs[propName] = {
+        configurable: true,
+        enumerable: false,
+        get: function () {
+            return this.$mobx.values[propName].get();
+        },
+        set: function (v) {
+            return this.$mobx.values[propName].set(v);
+        }
+    };
+}
+function setPropertyValue(instance, name, newValue) {
+    var adm = instance.$mobx;
+    var observable = adm.values[name];
+    if (hasInterceptors(adm)) {
+        var change = interceptChange(adm, {
+            type: "update",
+            object: instance,
+            name: name, newValue: newValue
+        });
+        if (!change)
+            return;
+        newValue = change.newValue;
+    }
+    newValue = observable.prepareNewValue(newValue);
+    if (newValue !== UNCHANGED) {
+        var notify = hasListeners(adm);
+        var notifySpy = isSpyEnabled();
+        var change = notify || notifySpy ? {
+            type: "update",
+            object: instance,
+            oldValue: observable.value,
+            name: name, newValue: newValue
+        } : null;
+        if (notifySpy)
+            spyReportStart(change);
+        observable.setNewValue(newValue);
+        if (notify)
+            notifyListeners(adm, change);
+        if (notifySpy)
+            spyReportEnd();
+    }
+}
+function notifyPropertyAddition(adm, object, name, newValue) {
+    var notify = hasListeners(adm);
+    var notifySpy = isSpyEnabled();
+    var change = notify || notifySpy ? {
+        type: "add",
+        object: object, name: name, newValue: newValue
+    } : null;
+    if (notifySpy)
+        spyReportStart(change);
+    if (notify)
+        notifyListeners(adm, change);
+    if (notifySpy)
+        spyReportEnd();
+}
+var isObservableObjectAdministration = createInstanceofPredicate("ObservableObjectAdministration", ObservableObjectAdministration);
+function isObservableObject(thing) {
+    if (isObject(thing)) {
+        runLazyInitializers(thing);
+        return isObservableObjectAdministration(thing.$mobx);
+    }
+    return false;
+}
+exports.isObservableObject = isObservableObject;
+var UNCHANGED = {};
+var ObservableValue = (function (_super) {
+    __extends(ObservableValue, _super);
+    function ObservableValue(value, mode, name, notifySpy) {
+        if (name === void 0) { name = "ObservableValue@" + getNextId(); }
+        if (notifySpy === void 0) { notifySpy = true; }
+        _super.call(this, name);
+        this.mode = mode;
+        this.hasUnreportedChange = false;
+        this.value = undefined;
+        var _a = getValueModeFromValue(value, ValueMode.Recursive), childmode = _a[0], unwrappedValue = _a[1];
+        if (this.mode === ValueMode.Recursive)
+            this.mode = childmode;
+        this.value = makeChildObservable(unwrappedValue, this.mode, this.name);
+        if (notifySpy && isSpyEnabled()) {
+            spyReport({ type: "create", object: this, newValue: this.value });
+        }
+    }
+    ObservableValue.prototype.set = function (newValue) {
+        var oldValue = this.value;
+        newValue = this.prepareNewValue(newValue);
+        if (newValue !== UNCHANGED) {
+            var notifySpy = isSpyEnabled();
+            if (notifySpy) {
+                spyReportStart({
+                    type: "update",
+                    object: this,
+                    newValue: newValue, oldValue: oldValue
+                });
+            }
+            this.setNewValue(newValue);
+            if (notifySpy)
+                spyReportEnd();
+        }
+    };
+    ObservableValue.prototype.prepareNewValue = function (newValue) {
+        assertUnwrapped(newValue, "Modifiers cannot be used on non-initial values.");
+        checkIfStateModificationsAreAllowed();
+        if (hasInterceptors(this)) {
+            var change = interceptChange(this, { object: this, type: "update", newValue: newValue });
+            if (!change)
+                return UNCHANGED;
+            newValue = change.newValue;
+        }
+        var changed = valueDidChange(this.mode === ValueMode.Structure, this.value, newValue);
+        if (changed)
+            return makeChildObservable(newValue, this.mode, this.name);
+        return UNCHANGED;
+    };
+    ObservableValue.prototype.setNewValue = function (newValue) {
+        var oldValue = this.value;
+        this.value = newValue;
+        this.reportChanged();
+        if (hasListeners(this))
+            notifyListeners(this, [newValue, oldValue]);
+    };
+    ObservableValue.prototype.get = function () {
+        this.reportObserved();
+        return this.value;
+    };
+    ObservableValue.prototype.intercept = function (handler) {
+        return registerInterceptor(this, handler);
+    };
+    ObservableValue.prototype.observe = function (listener, fireImmediately) {
+        if (fireImmediately)
+            listener(this.value, undefined);
+        return registerListener(this, listener);
+    };
+    ObservableValue.prototype.toJSON = function () {
+        return this.get();
+    };
+    ObservableValue.prototype.toString = function () {
+        return this.name + "[" + this.value + "]";
+    };
+    return ObservableValue;
+}(BaseAtom));
+var isObservableValue = createInstanceofPredicate("ObservableValue", ObservableValue);
+function getAtom(thing, property) {
+    if (typeof thing === "object" && thing !== null) {
+        if (isObservableArray(thing)) {
+            invariant(property === undefined, "It is not possible to get index atoms from arrays");
+            return thing.$mobx.atom;
+        }
+        if (isObservableMap(thing)) {
+            if (property === undefined)
+                return getAtom(thing._keys);
+            var observable_2 = thing._data[property] || thing._hasMap[property];
+            invariant(!!observable_2, "the entry '" + property + "' does not exist in the observable map '" + getDebugName(thing) + "'");
+            return observable_2;
+        }
+        runLazyInitializers(thing);
+        if (isObservableObject(thing)) {
+            invariant(!!property, "please specify a property");
+            var observable_3 = thing.$mobx.values[property];
+            invariant(!!observable_3, "no observable property '" + property + "' found on the observable object '" + getDebugName(thing) + "'");
+            return observable_3;
+        }
+        if (isAtom(thing) || isComputedValue(thing) || isReaction(thing)) {
+            return thing;
+        }
+    }
+    else if (typeof thing === "function") {
+        if (isReaction(thing.$mobx)) {
+            return thing.$mobx;
+        }
+    }
+    invariant(false, "Cannot obtain atom from " + thing);
+}
+function getAdministration(thing, property) {
+    invariant(thing, "Expecting some object");
+    if (property !== undefined)
+        return getAdministration(getAtom(thing, property));
+    if (isAtom(thing) || isComputedValue(thing) || isReaction(thing))
+        return thing;
+    if (isObservableMap(thing))
+        return thing;
+    runLazyInitializers(thing);
+    if (thing.$mobx)
+        return thing.$mobx;
+    invariant(false, "Cannot obtain administration from " + thing);
+}
+function getDebugName(thing, property) {
+    var named;
+    if (property !== undefined)
+        named = getAtom(thing, property);
+    else if (isObservableObject(thing) || isObservableMap(thing))
+        named = getAdministration(thing);
+    else
+        named = getAtom(thing);
+    return named.name;
+}
+function createClassPropertyDecorator(onInitialize, get, set, enumerable, allowCustomArguments) {
+    function classPropertyDecorator(target, key, descriptor, customArgs, argLen) {
+        invariant(allowCustomArguments || quacksLikeADecorator(arguments), "This function is a decorator, but it wasn't invoked like a decorator");
+        if (!descriptor) {
+            var newDescriptor = {
+                enumerable: enumerable,
+                configurable: true,
+                get: function () {
+                    if (!this.__mobxInitializedProps || this.__mobxInitializedProps[key] !== true)
+                        typescriptInitializeProperty(this, key, undefined, onInitialize, customArgs, descriptor);
+                    return get.call(this, key);
+                },
+                set: function (v) {
+                    if (!this.__mobxInitializedProps || this.__mobxInitializedProps[key] !== true) {
+                        typescriptInitializeProperty(this, key, v, onInitialize, customArgs, descriptor);
+                    }
+                    else {
+                        set.call(this, key, v);
+                    }
+                }
+            };
+            if (arguments.length < 3 || arguments.length === 5 && argLen < 3) {
+                Object.defineProperty(target, key, newDescriptor);
+            }
+            return newDescriptor;
+        }
+        else {
+            if (!hasOwnProperty(target, "__mobxLazyInitializers")) {
+                addHiddenProp(target, "__mobxLazyInitializers", (target.__mobxLazyInitializers && target.__mobxLazyInitializers.slice()) || []);
+            }
+            var value_1 = descriptor.value, initializer_1 = descriptor.initializer;
+            target.__mobxLazyInitializers.push(function (instance) {
+                onInitialize(instance, key, (initializer_1 ? initializer_1.call(instance) : value_1), customArgs, descriptor);
+            });
+            return {
+                enumerable: enumerable, configurable: true,
+                get: function () {
+                    if (this.__mobxDidRunLazyInitializers !== true)
+                        runLazyInitializers(this);
+                    return get.call(this, key);
+                },
+                set: function (v) {
+                    if (this.__mobxDidRunLazyInitializers !== true)
+                        runLazyInitializers(this);
+                    set.call(this, key, v);
+                }
+            };
+        }
+    }
+    if (allowCustomArguments) {
+        return function () {
+            if (quacksLikeADecorator(arguments))
+                return classPropertyDecorator.apply(null, arguments);
+            var outerArgs = arguments;
+            var argLen = arguments.length;
+            return function (target, key, descriptor) { return classPropertyDecorator(target, key, descriptor, outerArgs, argLen); };
+        };
+    }
+    return classPropertyDecorator;
+}
+function typescriptInitializeProperty(instance, key, v, onInitialize, customArgs, baseDescriptor) {
+    if (!hasOwnProperty(instance, "__mobxInitializedProps"))
+        addHiddenProp(instance, "__mobxInitializedProps", {});
+    instance.__mobxInitializedProps[key] = true;
+    onInitialize(instance, key, v, customArgs, baseDescriptor);
+}
+function runLazyInitializers(instance) {
+    if (instance.__mobxDidRunLazyInitializers === true)
+        return;
+    if (instance.__mobxLazyInitializers) {
+        addHiddenProp(instance, "__mobxDidRunLazyInitializers", true);
+        instance.__mobxDidRunLazyInitializers && instance.__mobxLazyInitializers.forEach(function (initializer) { return initializer(instance); });
+    }
+}
+function quacksLikeADecorator(args) {
+    return (args.length === 2 || args.length === 3) && typeof args[1] === "string";
+}
+function iteratorSymbol() {
+    return (typeof Symbol === "function" && Symbol.iterator) || "@@iterator";
+}
+var IS_ITERATING_MARKER = "__$$iterating";
+function arrayAsIterator(array) {
+    invariant(array[IS_ITERATING_MARKER] !== true, "Illegal state: cannot recycle array as iterator");
+    addHiddenFinalProp(array, IS_ITERATING_MARKER, true);
+    var idx = -1;
+    addHiddenFinalProp(array, "next", function next() {
+        idx++;
+        return {
+            done: idx >= this.length,
+            value: idx < this.length ? this[idx] : undefined
+        };
+    });
+    return array;
+}
+function declareIterator(prototType, iteratorFactory) {
+    addHiddenFinalProp(prototType, iteratorSymbol(), iteratorFactory);
+}
+var SimpleEventEmitter = (function () {
+    function SimpleEventEmitter() {
+        this.listeners = [];
+        deprecated("extras.SimpleEventEmitter is deprecated and will be removed in the next major release");
+    }
+    SimpleEventEmitter.prototype.emit = function () {
+        var listeners = this.listeners.slice();
+        for (var i = 0, l = listeners.length; i < l; i++)
+            listeners[i].apply(null, arguments);
+    };
+    SimpleEventEmitter.prototype.on = function (listener) {
+        var _this = this;
+        this.listeners.push(listener);
+        return once(function () {
+            var idx = _this.listeners.indexOf(listener);
+            if (idx !== -1)
+                _this.listeners.splice(idx, 1);
+        });
+    };
+    SimpleEventEmitter.prototype.once = function (listener) {
+        var subscription = this.on(function () {
+            subscription();
+            listener.apply(this, arguments);
+        });
+        return subscription;
+    };
+    return SimpleEventEmitter;
+}());
+exports.SimpleEventEmitter = SimpleEventEmitter;
+var EMPTY_ARRAY = [];
+Object.freeze(EMPTY_ARRAY);
+function getNextId() {
+    return ++globalState.mobxGuid;
+}
+function invariant(check, message, thing) {
+    if (!check)
+        throw new Error("[mobx] Invariant failed: " + message + (thing ? " in '" + thing + "'" : ""));
+}
+var deprecatedMessages = [];
+function deprecated(msg) {
+    if (deprecatedMessages.indexOf(msg) !== -1)
+        return;
+    deprecatedMessages.push(msg);
+    console.error("[mobx] Deprecated: " + msg);
+}
+function once(func) {
+    var invoked = false;
+    return function () {
+        if (invoked)
+            return;
+        invoked = true;
+        return func.apply(this, arguments);
+    };
+}
+var noop = function () { };
+function unique(list) {
+    var res = [];
+    list.forEach(function (item) {
+        if (res.indexOf(item) === -1)
+            res.push(item);
+    });
+    return res;
+}
+function joinStrings(things, limit, separator) {
+    if (limit === void 0) { limit = 100; }
+    if (separator === void 0) { separator = " - "; }
+    if (!things)
+        return "";
+    var sliced = things.slice(0, limit);
+    return "" + sliced.join(separator) + (things.length > limit ? " (... and " + (things.length - limit) + "more)" : "");
+}
+function isObject(value) {
+    return value !== null && typeof value === "object";
+}
+function isPlainObject(value) {
+    if (value === null || typeof value !== "object")
+        return false;
+    var proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+}
+function objectAssign() {
+    var res = arguments[0];
+    for (var i = 1, l = arguments.length; i < l; i++) {
+        var source = arguments[i];
+        for (var key in source)
+            if (hasOwnProperty(source, key)) {
+                res[key] = source[key];
+            }
+    }
+    return res;
+}
+function valueDidChange(compareStructural, oldValue, newValue) {
+    return compareStructural
+        ? !deepEquals(oldValue, newValue)
+        : oldValue !== newValue;
+}
+var prototypeHasOwnProperty = Object.prototype.hasOwnProperty;
+function hasOwnProperty(object, propName) {
+    return prototypeHasOwnProperty.call(object, propName);
+}
+function makeNonEnumerable(object, propNames) {
+    for (var i = 0; i < propNames.length; i++) {
+        addHiddenProp(object, propNames[i], object[propNames[i]]);
+    }
+}
+function addHiddenProp(object, propName, value) {
+    Object.defineProperty(object, propName, {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: value
+    });
+}
+function addHiddenFinalProp(object, propName, value) {
+    Object.defineProperty(object, propName, {
+        enumerable: false,
+        writable: false,
+        configurable: true,
+        value: value
+    });
+}
+function isPropertyConfigurable(object, prop) {
+    var descriptor = Object.getOwnPropertyDescriptor(object, prop);
+    return !descriptor || (descriptor.configurable !== false && descriptor.writable !== false);
+}
+function assertPropertyConfigurable(object, prop) {
+    invariant(isPropertyConfigurable(object, prop), "Cannot make property '" + prop + "' observable, it is not configurable and writable in the target object");
+}
+function getEnumerableKeys(obj) {
+    var res = [];
+    for (var key in obj)
+        res.push(key);
+    return res;
+}
+function deepEquals(a, b) {
+    if (a === null && b === null)
+        return true;
+    if (a === undefined && b === undefined)
+        return true;
+    var aIsArray = isArrayLike(a);
+    if (aIsArray !== isArrayLike(b)) {
+        return false;
+    }
+    else if (aIsArray) {
+        if (a.length !== b.length)
+            return false;
+        for (var i = a.length - 1; i >= 0; i--)
+            if (!deepEquals(a[i], b[i]))
+                return false;
+        return true;
+    }
+    else if (typeof a === "object" && typeof b === "object") {
+        if (a === null || b === null)
+            return false;
+        if (getEnumerableKeys(a).length !== getEnumerableKeys(b).length)
+            return false;
+        for (var prop in a) {
+            if (!(prop in b))
+                return false;
+            if (!deepEquals(a[prop], b[prop]))
+                return false;
+        }
+        return true;
+    }
+    return a === b;
+}
+function createInstanceofPredicate(name, clazz) {
+    var propName = "isMobX" + name;
+    clazz.prototype[propName] = true;
+    return function (x) {
+        return isObject(x) && x[propName] === true;
+    };
+}
+function isArrayLike(x) {
+    return Array.isArray(x) || isObservableArray(x);
+}
+exports.isArrayLike = isArrayLike;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],44:[function(require,module,exports){
 //! moment.js
 //! version : 2.16.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -13711,7 +17396,7 @@ return hooks;
 
 })));
 
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * Specific customUtils for the browser, where we don't have access to the Crypto and Buffer modules
  */
@@ -13791,7 +17476,7 @@ function uid (len) {
 
 module.exports.uid = uid;
 
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * Way data is stored for this database
  * For a Node.js/Node Webkit database it's the file system
@@ -13888,12 +17573,12 @@ module.exports.mkdirp = mkdirp;
 module.exports.ensureDatafileIntegrity = ensureDatafileIntegrity;
 
 
-},{"localforage":41}],45:[function(require,module,exports){
+},{"localforage":41}],47:[function(require,module,exports){
 var Datastore = require('./lib/datastore');
 
 module.exports = Datastore;
 
-},{"./lib/datastore":47}],46:[function(require,module,exports){
+},{"./lib/datastore":49}],48:[function(require,module,exports){
 /**
  * Manage access to data, be it to find, update or remove it
  */
@@ -14099,7 +17784,7 @@ Cursor.prototype.exec = function () {
 // Interface
 module.exports = Cursor;
 
-},{"./model":50,"underscore":206}],47:[function(require,module,exports){
+},{"./model":52,"underscore":208}],49:[function(require,module,exports){
 var customUtils = require('./customUtils')
   , model = require('./model')
   , async = require('async')
@@ -14805,7 +18490,7 @@ Datastore.prototype.remove = function () {
 
 module.exports = Datastore;
 
-},{"./cursor":46,"./customUtils":43,"./executor":48,"./indexes":49,"./model":50,"./persistence":51,"async":12,"events":207,"underscore":206,"util":212}],48:[function(require,module,exports){
+},{"./cursor":48,"./customUtils":45,"./executor":50,"./indexes":51,"./model":52,"./persistence":53,"async":12,"events":209,"underscore":208,"util":214}],50:[function(require,module,exports){
 (function (process){
 /**
  * Responsible for sequentially executing actions on the database
@@ -14887,7 +18572,7 @@ Executor.prototype.processBuffer = function () {
 module.exports = Executor;
 
 }).call(this,require('_process'))
-},{"_process":209,"async":12}],49:[function(require,module,exports){
+},{"_process":211,"async":12}],51:[function(require,module,exports){
 var BinarySearchTree = require('binary-search-tree').AVLTree
   , model = require('./model')
   , _ = require('underscore')
@@ -15183,7 +18868,7 @@ Index.prototype.getAll = function () {
 // Interface
 module.exports = Index;
 
-},{"./model":50,"binary-search-tree":13,"underscore":206,"util":212}],50:[function(require,module,exports){
+},{"./model":52,"binary-search-tree":13,"underscore":208,"util":214}],52:[function(require,module,exports){
 /**
  * Handle models (i.e. docs)
  * Serialization/deserialization
@@ -16020,7 +19705,7 @@ module.exports.match = match;
 module.exports.areThingsEqual = areThingsEqual;
 module.exports.compareThings = compareThings;
 
-},{"underscore":206,"util":212}],51:[function(require,module,exports){
+},{"underscore":208,"util":214}],53:[function(require,module,exports){
 (function (process){
 /**
  * Handle every persistence-related task
@@ -16338,7 +20023,7 @@ Persistence.prototype.loadDatabase = function (cb) {
 module.exports = Persistence;
 
 }).call(this,require('_process'))
-},{"./customUtils":43,"./indexes":49,"./model":50,"./storage":44,"_process":209,"async":12,"path":208}],52:[function(require,module,exports){
+},{"./customUtils":45,"./indexes":51,"./model":52,"./storage":46,"_process":211,"async":12,"path":210}],54:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -16423,12 +20108,12 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/ReactDOM');
 
-},{"./lib/ReactDOM":83}],54:[function(require,module,exports){
+},{"./lib/ReactDOM":85}],56:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -16502,7 +20187,7 @@ var ARIADOMPropertyConfig = {
 };
 
 module.exports = ARIADOMPropertyConfig;
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -16526,7 +20211,7 @@ var AutoFocusUtils = {
 };
 
 module.exports = AutoFocusUtils;
-},{"./ReactDOMComponentTree":86,"fbjs/lib/focusNode":26}],56:[function(require,module,exports){
+},{"./ReactDOMComponentTree":88,"fbjs/lib/focusNode":26}],58:[function(require,module,exports){
 /**
  * Copyright 2013-present Facebook, Inc.
  * All rights reserved.
@@ -16911,7 +20596,7 @@ var BeforeInputEventPlugin = {
 };
 
 module.exports = BeforeInputEventPlugin;
-},{"./EventPropagators":72,"./FallbackCompositionState":73,"./SyntheticCompositionEvent":137,"./SyntheticInputEvent":141,"fbjs/lib/ExecutionEnvironment":18}],57:[function(require,module,exports){
+},{"./EventPropagators":74,"./FallbackCompositionState":75,"./SyntheticCompositionEvent":139,"./SyntheticInputEvent":143,"fbjs/lib/ExecutionEnvironment":18}],59:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -17059,7 +20744,7 @@ var CSSProperty = {
 };
 
 module.exports = CSSProperty;
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -17270,7 +20955,7 @@ var CSSPropertyOperations = {
 
 module.exports = CSSPropertyOperations;
 }).call(this,require('_process'))
-},{"./CSSProperty":57,"./ReactInstrumentation":115,"./dangerousStyleValue":154,"_process":209,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/camelizeStyleName":20,"fbjs/lib/hyphenateStyleName":31,"fbjs/lib/memoizeStringOnly":35,"fbjs/lib/warning":39}],59:[function(require,module,exports){
+},{"./CSSProperty":59,"./ReactInstrumentation":117,"./dangerousStyleValue":156,"_process":211,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/camelizeStyleName":20,"fbjs/lib/hyphenateStyleName":31,"fbjs/lib/memoizeStringOnly":35,"fbjs/lib/warning":39}],61:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -17391,7 +21076,7 @@ var CallbackQueue = function () {
 
 module.exports = PooledClass.addPoolingTo(CallbackQueue);
 }).call(this,require('_process'))
-},{"./PooledClass":77,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],60:[function(require,module,exports){
+},{"./PooledClass":79,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],62:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -17712,7 +21397,7 @@ var ChangeEventPlugin = {
 };
 
 module.exports = ChangeEventPlugin;
-},{"./EventPluginHub":69,"./EventPropagators":72,"./ReactDOMComponentTree":86,"./ReactUpdates":130,"./SyntheticEvent":139,"./getEventTarget":162,"./isEventSupported":170,"./isTextInputElement":171,"fbjs/lib/ExecutionEnvironment":18}],61:[function(require,module,exports){
+},{"./EventPluginHub":71,"./EventPropagators":74,"./ReactDOMComponentTree":88,"./ReactUpdates":132,"./SyntheticEvent":141,"./getEventTarget":164,"./isEventSupported":172,"./isTextInputElement":173,"fbjs/lib/ExecutionEnvironment":18}],63:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -17939,7 +21624,7 @@ var DOMChildrenOperations = {
 
 module.exports = DOMChildrenOperations;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":62,"./Danger":66,"./ReactDOMComponentTree":86,"./ReactInstrumentation":115,"./createMicrosoftUnsafeLocalFunction":153,"./setInnerHTML":175,"./setTextContent":176,"_process":209}],62:[function(require,module,exports){
+},{"./DOMLazyTree":64,"./Danger":68,"./ReactDOMComponentTree":88,"./ReactInstrumentation":117,"./createMicrosoftUnsafeLocalFunction":155,"./setInnerHTML":177,"./setTextContent":178,"_process":211}],64:[function(require,module,exports){
 /**
  * Copyright 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -18057,7 +21742,7 @@ DOMLazyTree.queueHTML = queueHTML;
 DOMLazyTree.queueText = queueText;
 
 module.exports = DOMLazyTree;
-},{"./DOMNamespaces":63,"./createMicrosoftUnsafeLocalFunction":153,"./setInnerHTML":175,"./setTextContent":176}],63:[function(require,module,exports){
+},{"./DOMNamespaces":65,"./createMicrosoftUnsafeLocalFunction":155,"./setInnerHTML":177,"./setTextContent":178}],65:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -18077,7 +21762,7 @@ var DOMNamespaces = {
 };
 
 module.exports = DOMNamespaces;
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -18289,7 +21974,7 @@ var DOMProperty = {
 
 module.exports = DOMProperty;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],65:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],67:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -18528,7 +22213,7 @@ var DOMPropertyOperations = {
 
 module.exports = DOMPropertyOperations;
 }).call(this,require('_process'))
-},{"./DOMProperty":64,"./ReactDOMComponentTree":86,"./ReactInstrumentation":115,"./quoteAttributeValueForBrowser":172,"_process":209,"fbjs/lib/warning":39}],66:[function(require,module,exports){
+},{"./DOMProperty":66,"./ReactDOMComponentTree":88,"./ReactInstrumentation":117,"./quoteAttributeValueForBrowser":174,"_process":211,"fbjs/lib/warning":39}],68:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -18578,7 +22263,7 @@ var Danger = {
 
 module.exports = Danger;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":62,"./reactProdInvariant":173,"_process":209,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/createNodesFromMarkup":23,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32}],67:[function(require,module,exports){
+},{"./DOMLazyTree":64,"./reactProdInvariant":175,"_process":211,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/createNodesFromMarkup":23,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32}],69:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -18604,7 +22289,7 @@ module.exports = Danger;
 var DefaultEventPluginOrder = ['ResponderEventPlugin', 'SimpleEventPlugin', 'TapEventPlugin', 'EnterLeaveEventPlugin', 'ChangeEventPlugin', 'SelectEventPlugin', 'BeforeInputEventPlugin'];
 
 module.exports = DefaultEventPluginOrder;
-},{}],68:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -18704,7 +22389,7 @@ var EnterLeaveEventPlugin = {
 };
 
 module.exports = EnterLeaveEventPlugin;
-},{"./EventPropagators":72,"./ReactDOMComponentTree":86,"./SyntheticMouseEvent":143}],69:[function(require,module,exports){
+},{"./EventPropagators":74,"./ReactDOMComponentTree":88,"./SyntheticMouseEvent":145}],71:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -18957,7 +22642,7 @@ var EventPluginHub = {
 
 module.exports = EventPluginHub;
 }).call(this,require('_process'))
-},{"./EventPluginRegistry":70,"./EventPluginUtils":71,"./ReactErrorUtils":106,"./accumulateInto":150,"./forEachAccumulated":158,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],70:[function(require,module,exports){
+},{"./EventPluginRegistry":72,"./EventPluginUtils":73,"./ReactErrorUtils":108,"./accumulateInto":152,"./forEachAccumulated":160,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],72:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -19214,7 +22899,7 @@ var EventPluginRegistry = {
 
 module.exports = EventPluginRegistry;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],71:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],73:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -19442,7 +23127,7 @@ var EventPluginUtils = {
 
 module.exports = EventPluginUtils;
 }).call(this,require('_process'))
-},{"./ReactErrorUtils":106,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],72:[function(require,module,exports){
+},{"./ReactErrorUtils":108,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],74:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -19578,7 +23263,7 @@ var EventPropagators = {
 
 module.exports = EventPropagators;
 }).call(this,require('_process'))
-},{"./EventPluginHub":69,"./EventPluginUtils":71,"./accumulateInto":150,"./forEachAccumulated":158,"_process":209,"fbjs/lib/warning":39}],73:[function(require,module,exports){
+},{"./EventPluginHub":71,"./EventPluginUtils":73,"./accumulateInto":152,"./forEachAccumulated":160,"_process":211,"fbjs/lib/warning":39}],75:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -19673,7 +23358,7 @@ _assign(FallbackCompositionState.prototype, {
 PooledClass.addPoolingTo(FallbackCompositionState);
 
 module.exports = FallbackCompositionState;
-},{"./PooledClass":77,"./getTextContentAccessor":167,"object-assign":52}],74:[function(require,module,exports){
+},{"./PooledClass":79,"./getTextContentAccessor":169,"object-assign":54}],76:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -19885,7 +23570,7 @@ var HTMLDOMPropertyConfig = {
 };
 
 module.exports = HTMLDOMPropertyConfig;
-},{"./DOMProperty":64}],75:[function(require,module,exports){
+},{"./DOMProperty":66}],77:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -19944,7 +23629,7 @@ var KeyEscapeUtils = {
 };
 
 module.exports = KeyEscapeUtils;
-},{}],76:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -20081,7 +23766,7 @@ var LinkedValueUtils = {
 
 module.exports = LinkedValueUtils;
 }).call(this,require('_process'))
-},{"./ReactPropTypesSecret":123,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/React":183}],77:[function(require,module,exports){
+},{"./ReactPropTypesSecret":125,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/React":185}],79:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -20207,7 +23892,7 @@ var PooledClass = {
 
 module.exports = PooledClass;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],78:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],80:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -20535,7 +24220,7 @@ var ReactBrowserEventEmitter = _assign({}, ReactEventEmitterMixin, {
 });
 
 module.exports = ReactBrowserEventEmitter;
-},{"./EventPluginRegistry":70,"./ReactEventEmitterMixin":107,"./ViewportMetrics":149,"./getVendorPrefixedEventName":168,"./isEventSupported":170,"object-assign":52}],79:[function(require,module,exports){
+},{"./EventPluginRegistry":72,"./ReactEventEmitterMixin":109,"./ViewportMetrics":151,"./getVendorPrefixedEventName":170,"./isEventSupported":172,"object-assign":54}],81:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -20691,7 +24376,7 @@ var ReactChildReconciler = {
 
 module.exports = ReactChildReconciler;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":75,"./ReactReconciler":125,"./instantiateReactComponent":169,"./shouldUpdateReactComponent":177,"./traverseAllChildren":178,"_process":209,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],80:[function(require,module,exports){
+},{"./KeyEscapeUtils":77,"./ReactReconciler":127,"./instantiateReactComponent":171,"./shouldUpdateReactComponent":179,"./traverseAllChildren":180,"_process":211,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],82:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -20721,7 +24406,7 @@ var ReactComponentBrowserEnvironment = {
 };
 
 module.exports = ReactComponentBrowserEnvironment;
-},{"./DOMChildrenOperations":61,"./ReactDOMIDOperations":90}],81:[function(require,module,exports){
+},{"./DOMChildrenOperations":63,"./ReactDOMIDOperations":92}],83:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -20769,7 +24454,7 @@ var ReactComponentEnvironment = {
 
 module.exports = ReactComponentEnvironment;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],82:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],84:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -21673,7 +25358,7 @@ var ReactCompositeComponent = {
 
 module.exports = ReactCompositeComponent;
 }).call(this,require('_process'))
-},{"./ReactComponentEnvironment":81,"./ReactErrorUtils":106,"./ReactInstanceMap":114,"./ReactInstrumentation":115,"./ReactNodeTypes":120,"./ReactReconciler":125,"./checkReactTypeSpec":152,"./reactProdInvariant":173,"./shouldUpdateReactComponent":177,"_process":209,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/shallowEqual":38,"fbjs/lib/warning":39,"object-assign":52,"react/lib/React":183,"react/lib/ReactCurrentOwner":188}],83:[function(require,module,exports){
+},{"./ReactComponentEnvironment":83,"./ReactErrorUtils":108,"./ReactInstanceMap":116,"./ReactInstrumentation":117,"./ReactNodeTypes":122,"./ReactReconciler":127,"./checkReactTypeSpec":154,"./reactProdInvariant":175,"./shouldUpdateReactComponent":179,"_process":211,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/shallowEqual":38,"fbjs/lib/warning":39,"object-assign":54,"react/lib/React":185,"react/lib/ReactCurrentOwner":190}],85:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -21786,7 +25471,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactDOM;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":86,"./ReactDOMInvalidARIAHook":92,"./ReactDOMNullInputValuePropHook":93,"./ReactDOMUnknownPropertyHook":100,"./ReactDefaultInjection":103,"./ReactInstrumentation":115,"./ReactMount":118,"./ReactReconciler":125,"./ReactUpdates":130,"./ReactVersion":131,"./findDOMNode":156,"./getHostComponentFromComposite":163,"./renderSubtreeIntoContainer":174,"_process":209,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/warning":39}],84:[function(require,module,exports){
+},{"./ReactDOMComponentTree":88,"./ReactDOMInvalidARIAHook":94,"./ReactDOMNullInputValuePropHook":95,"./ReactDOMUnknownPropertyHook":102,"./ReactDefaultInjection":105,"./ReactInstrumentation":117,"./ReactMount":120,"./ReactReconciler":127,"./ReactUpdates":132,"./ReactVersion":133,"./findDOMNode":158,"./getHostComponentFromComposite":165,"./renderSubtreeIntoContainer":176,"_process":211,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/warning":39}],86:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22783,7 +26468,7 @@ _assign(ReactDOMComponent.prototype, ReactDOMComponent.Mixin, ReactMultiChild.Mi
 
 module.exports = ReactDOMComponent;
 }).call(this,require('_process'))
-},{"./AutoFocusUtils":55,"./CSSPropertyOperations":58,"./DOMLazyTree":62,"./DOMNamespaces":63,"./DOMProperty":64,"./DOMPropertyOperations":65,"./EventPluginHub":69,"./EventPluginRegistry":70,"./ReactBrowserEventEmitter":78,"./ReactDOMComponentFlags":85,"./ReactDOMComponentTree":86,"./ReactDOMInput":91,"./ReactDOMOption":94,"./ReactDOMSelect":95,"./ReactDOMTextarea":98,"./ReactInstrumentation":115,"./ReactMultiChild":119,"./ReactServerRenderingTransaction":127,"./escapeTextContentForBrowser":155,"./isEventSupported":170,"./reactProdInvariant":173,"./validateDOMNesting":179,"_process":209,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32,"fbjs/lib/shallowEqual":38,"fbjs/lib/warning":39,"object-assign":52}],85:[function(require,module,exports){
+},{"./AutoFocusUtils":57,"./CSSPropertyOperations":60,"./DOMLazyTree":64,"./DOMNamespaces":65,"./DOMProperty":66,"./DOMPropertyOperations":67,"./EventPluginHub":71,"./EventPluginRegistry":72,"./ReactBrowserEventEmitter":80,"./ReactDOMComponentFlags":87,"./ReactDOMComponentTree":88,"./ReactDOMInput":93,"./ReactDOMOption":96,"./ReactDOMSelect":97,"./ReactDOMTextarea":100,"./ReactInstrumentation":117,"./ReactMultiChild":121,"./ReactServerRenderingTransaction":129,"./escapeTextContentForBrowser":157,"./isEventSupported":172,"./reactProdInvariant":175,"./validateDOMNesting":181,"_process":211,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32,"fbjs/lib/shallowEqual":38,"fbjs/lib/warning":39,"object-assign":54}],87:[function(require,module,exports){
 /**
  * Copyright 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -22801,7 +26486,7 @@ var ReactDOMComponentFlags = {
 };
 
 module.exports = ReactDOMComponentFlags;
-},{}],86:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22991,7 +26676,7 @@ var ReactDOMComponentTree = {
 
 module.exports = ReactDOMComponentTree;
 }).call(this,require('_process'))
-},{"./DOMProperty":64,"./ReactDOMComponentFlags":85,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],87:[function(require,module,exports){
+},{"./DOMProperty":66,"./ReactDOMComponentFlags":87,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],89:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23026,7 +26711,7 @@ function ReactDOMContainerInfo(topLevelWrapper, node) {
 
 module.exports = ReactDOMContainerInfo;
 }).call(this,require('_process'))
-},{"./validateDOMNesting":179,"_process":209}],88:[function(require,module,exports){
+},{"./validateDOMNesting":181,"_process":211}],90:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -23086,7 +26771,7 @@ _assign(ReactDOMEmptyComponent.prototype, {
 });
 
 module.exports = ReactDOMEmptyComponent;
-},{"./DOMLazyTree":62,"./ReactDOMComponentTree":86,"object-assign":52}],89:[function(require,module,exports){
+},{"./DOMLazyTree":64,"./ReactDOMComponentTree":88,"object-assign":54}],91:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -23105,7 +26790,7 @@ var ReactDOMFeatureFlags = {
 };
 
 module.exports = ReactDOMFeatureFlags;
-},{}],90:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -23139,7 +26824,7 @@ var ReactDOMIDOperations = {
 };
 
 module.exports = ReactDOMIDOperations;
-},{"./DOMChildrenOperations":61,"./ReactDOMComponentTree":86}],91:[function(require,module,exports){
+},{"./DOMChildrenOperations":63,"./ReactDOMComponentTree":88}],93:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23409,7 +27094,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMInput;
 }).call(this,require('_process'))
-},{"./DOMPropertyOperations":65,"./LinkedValueUtils":76,"./ReactDOMComponentTree":86,"./ReactUpdates":130,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":52}],92:[function(require,module,exports){
+},{"./DOMPropertyOperations":67,"./LinkedValueUtils":78,"./ReactDOMComponentTree":88,"./ReactUpdates":132,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":54}],94:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23504,7 +27189,7 @@ var ReactDOMInvalidARIAHook = {
 
 module.exports = ReactDOMInvalidARIAHook;
 }).call(this,require('_process'))
-},{"./DOMProperty":64,"_process":209,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],93:[function(require,module,exports){
+},{"./DOMProperty":66,"_process":211,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],95:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23549,7 +27234,7 @@ var ReactDOMNullInputValuePropHook = {
 
 module.exports = ReactDOMNullInputValuePropHook;
 }).call(this,require('_process'))
-},{"_process":209,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],94:[function(require,module,exports){
+},{"_process":211,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],96:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23674,7 +27359,7 @@ var ReactDOMOption = {
 
 module.exports = ReactDOMOption;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":86,"./ReactDOMSelect":95,"_process":209,"fbjs/lib/warning":39,"object-assign":52,"react/lib/React":183}],95:[function(require,module,exports){
+},{"./ReactDOMComponentTree":88,"./ReactDOMSelect":97,"_process":211,"fbjs/lib/warning":39,"object-assign":54,"react/lib/React":185}],97:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23876,7 +27561,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMSelect;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":76,"./ReactDOMComponentTree":86,"./ReactUpdates":130,"_process":209,"fbjs/lib/warning":39,"object-assign":52}],96:[function(require,module,exports){
+},{"./LinkedValueUtils":78,"./ReactDOMComponentTree":88,"./ReactUpdates":132,"_process":211,"fbjs/lib/warning":39,"object-assign":54}],98:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -24088,7 +27773,7 @@ var ReactDOMSelection = {
 };
 
 module.exports = ReactDOMSelection;
-},{"./getNodeForCharacterOffset":166,"./getTextContentAccessor":167,"fbjs/lib/ExecutionEnvironment":18}],97:[function(require,module,exports){
+},{"./getNodeForCharacterOffset":168,"./getTextContentAccessor":169,"fbjs/lib/ExecutionEnvironment":18}],99:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24254,7 +27939,7 @@ _assign(ReactDOMTextComponent.prototype, {
 
 module.exports = ReactDOMTextComponent;
 }).call(this,require('_process'))
-},{"./DOMChildrenOperations":61,"./DOMLazyTree":62,"./ReactDOMComponentTree":86,"./escapeTextContentForBrowser":155,"./reactProdInvariant":173,"./validateDOMNesting":179,"_process":209,"fbjs/lib/invariant":32,"object-assign":52}],98:[function(require,module,exports){
+},{"./DOMChildrenOperations":63,"./DOMLazyTree":64,"./ReactDOMComponentTree":88,"./escapeTextContentForBrowser":157,"./reactProdInvariant":175,"./validateDOMNesting":181,"_process":211,"fbjs/lib/invariant":32,"object-assign":54}],100:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24410,7 +28095,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMTextarea;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":76,"./ReactDOMComponentTree":86,"./ReactUpdates":130,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":52}],99:[function(require,module,exports){
+},{"./LinkedValueUtils":78,"./ReactDOMComponentTree":88,"./ReactUpdates":132,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":54}],101:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -24548,7 +28233,7 @@ module.exports = {
   traverseEnterLeave: traverseEnterLeave
 };
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],100:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],102:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24662,7 +28347,7 @@ var ReactDOMUnknownPropertyHook = {
 
 module.exports = ReactDOMUnknownPropertyHook;
 }).call(this,require('_process'))
-},{"./DOMProperty":64,"./EventPluginRegistry":70,"_process":209,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],101:[function(require,module,exports){
+},{"./DOMProperty":66,"./EventPluginRegistry":72,"_process":211,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],103:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -25025,7 +28710,7 @@ if (/[?&]react_perf\b/.test(url)) {
 
 module.exports = ReactDebugTool;
 }).call(this,require('_process'))
-},{"./ReactHostOperationHistoryHook":111,"./ReactInvalidSetStateWarningHook":116,"_process":209,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/performanceNow":37,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],102:[function(require,module,exports){
+},{"./ReactHostOperationHistoryHook":113,"./ReactInvalidSetStateWarningHook":118,"_process":211,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/performanceNow":37,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],104:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25093,7 +28778,7 @@ var ReactDefaultBatchingStrategy = {
 };
 
 module.exports = ReactDefaultBatchingStrategy;
-},{"./ReactUpdates":130,"./Transaction":148,"fbjs/lib/emptyFunction":24,"object-assign":52}],103:[function(require,module,exports){
+},{"./ReactUpdates":132,"./Transaction":150,"fbjs/lib/emptyFunction":24,"object-assign":54}],105:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25179,7 +28864,7 @@ function inject() {
 module.exports = {
   inject: inject
 };
-},{"./ARIADOMPropertyConfig":54,"./BeforeInputEventPlugin":56,"./ChangeEventPlugin":60,"./DefaultEventPluginOrder":67,"./EnterLeaveEventPlugin":68,"./HTMLDOMPropertyConfig":74,"./ReactComponentBrowserEnvironment":80,"./ReactDOMComponent":84,"./ReactDOMComponentTree":86,"./ReactDOMEmptyComponent":88,"./ReactDOMTextComponent":97,"./ReactDOMTreeTraversal":99,"./ReactDefaultBatchingStrategy":102,"./ReactEventListener":108,"./ReactInjection":112,"./ReactReconcileTransaction":124,"./SVGDOMPropertyConfig":132,"./SelectEventPlugin":133,"./SimpleEventPlugin":134}],104:[function(require,module,exports){
+},{"./ARIADOMPropertyConfig":56,"./BeforeInputEventPlugin":58,"./ChangeEventPlugin":62,"./DefaultEventPluginOrder":69,"./EnterLeaveEventPlugin":70,"./HTMLDOMPropertyConfig":76,"./ReactComponentBrowserEnvironment":82,"./ReactDOMComponent":86,"./ReactDOMComponentTree":88,"./ReactDOMEmptyComponent":90,"./ReactDOMTextComponent":99,"./ReactDOMTreeTraversal":101,"./ReactDefaultBatchingStrategy":104,"./ReactEventListener":110,"./ReactInjection":114,"./ReactReconcileTransaction":126,"./SVGDOMPropertyConfig":134,"./SelectEventPlugin":135,"./SimpleEventPlugin":136}],106:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -25199,7 +28884,7 @@ module.exports = {
 var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 0xeac7;
 
 module.exports = REACT_ELEMENT_TYPE;
-},{}],105:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -25229,7 +28914,7 @@ var ReactEmptyComponent = {
 ReactEmptyComponent.injection = ReactEmptyComponentInjection;
 
 module.exports = ReactEmptyComponent;
-},{}],106:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -25308,7 +28993,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactErrorUtils;
 }).call(this,require('_process'))
-},{"_process":209}],107:[function(require,module,exports){
+},{"_process":211}],109:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25341,7 +29026,7 @@ var ReactEventEmitterMixin = {
 };
 
 module.exports = ReactEventEmitterMixin;
-},{"./EventPluginHub":69}],108:[function(require,module,exports){
+},{"./EventPluginHub":71}],110:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25496,7 +29181,7 @@ var ReactEventListener = {
 };
 
 module.exports = ReactEventListener;
-},{"./PooledClass":77,"./ReactDOMComponentTree":86,"./ReactUpdates":130,"./getEventTarget":162,"fbjs/lib/EventListener":17,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/getUnboundedScrollPosition":29,"object-assign":52}],109:[function(require,module,exports){
+},{"./PooledClass":79,"./ReactDOMComponentTree":88,"./ReactUpdates":132,"./getEventTarget":164,"fbjs/lib/EventListener":17,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/getUnboundedScrollPosition":29,"object-assign":54}],111:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25518,7 +29203,7 @@ var ReactFeatureFlags = {
 };
 
 module.exports = ReactFeatureFlags;
-},{}],110:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -25596,7 +29281,7 @@ var ReactHostComponent = {
 
 module.exports = ReactHostComponent;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"object-assign":52}],111:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"object-assign":54}],113:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -25630,7 +29315,7 @@ var ReactHostOperationHistoryHook = {
 };
 
 module.exports = ReactHostOperationHistoryHook;
-},{}],112:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25664,7 +29349,7 @@ var ReactInjection = {
 };
 
 module.exports = ReactInjection;
-},{"./DOMProperty":64,"./EventPluginHub":69,"./EventPluginUtils":71,"./ReactBrowserEventEmitter":78,"./ReactComponentEnvironment":81,"./ReactEmptyComponent":105,"./ReactHostComponent":110,"./ReactUpdates":130}],113:[function(require,module,exports){
+},{"./DOMProperty":66,"./EventPluginHub":71,"./EventPluginUtils":73,"./ReactBrowserEventEmitter":80,"./ReactComponentEnvironment":83,"./ReactEmptyComponent":107,"./ReactHostComponent":112,"./ReactUpdates":132}],115:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25788,7 +29473,7 @@ var ReactInputSelection = {
 };
 
 module.exports = ReactInputSelection;
-},{"./ReactDOMSelection":96,"fbjs/lib/containsNode":21,"fbjs/lib/focusNode":26,"fbjs/lib/getActiveElement":27}],114:[function(require,module,exports){
+},{"./ReactDOMSelection":98,"fbjs/lib/containsNode":21,"fbjs/lib/focusNode":26,"fbjs/lib/getActiveElement":27}],116:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25836,7 +29521,7 @@ var ReactInstanceMap = {
 };
 
 module.exports = ReactInstanceMap;
-},{}],115:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -25862,7 +29547,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = { debugTool: debugTool };
 }).call(this,require('_process'))
-},{"./ReactDebugTool":101,"_process":209}],116:[function(require,module,exports){
+},{"./ReactDebugTool":103,"_process":211}],118:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -25901,7 +29586,7 @@ var ReactInvalidSetStateWarningHook = {
 
 module.exports = ReactInvalidSetStateWarningHook;
 }).call(this,require('_process'))
-},{"_process":209,"fbjs/lib/warning":39}],117:[function(require,module,exports){
+},{"_process":211,"fbjs/lib/warning":39}],119:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25951,7 +29636,7 @@ var ReactMarkupChecksum = {
 };
 
 module.exports = ReactMarkupChecksum;
-},{"./adler32":151}],118:[function(require,module,exports){
+},{"./adler32":153}],120:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26491,7 +30176,7 @@ var ReactMount = {
 
 module.exports = ReactMount;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":62,"./DOMProperty":64,"./ReactBrowserEventEmitter":78,"./ReactDOMComponentTree":86,"./ReactDOMContainerInfo":87,"./ReactDOMFeatureFlags":89,"./ReactFeatureFlags":109,"./ReactInstanceMap":114,"./ReactInstrumentation":115,"./ReactMarkupChecksum":117,"./ReactReconciler":125,"./ReactUpdateQueue":129,"./ReactUpdates":130,"./instantiateReactComponent":169,"./reactProdInvariant":173,"./setInnerHTML":175,"./shouldUpdateReactComponent":177,"_process":209,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/React":183,"react/lib/ReactCurrentOwner":188}],119:[function(require,module,exports){
+},{"./DOMLazyTree":64,"./DOMProperty":66,"./ReactBrowserEventEmitter":80,"./ReactDOMComponentTree":88,"./ReactDOMContainerInfo":89,"./ReactDOMFeatureFlags":91,"./ReactFeatureFlags":111,"./ReactInstanceMap":116,"./ReactInstrumentation":117,"./ReactMarkupChecksum":119,"./ReactReconciler":127,"./ReactUpdateQueue":131,"./ReactUpdates":132,"./instantiateReactComponent":171,"./reactProdInvariant":175,"./setInnerHTML":177,"./shouldUpdateReactComponent":179,"_process":211,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/React":185,"react/lib/ReactCurrentOwner":190}],121:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26943,7 +30628,7 @@ var ReactMultiChild = {
 
 module.exports = ReactMultiChild;
 }).call(this,require('_process'))
-},{"./ReactChildReconciler":79,"./ReactComponentEnvironment":81,"./ReactInstanceMap":114,"./ReactInstrumentation":115,"./ReactReconciler":125,"./flattenChildren":157,"./reactProdInvariant":173,"_process":209,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32,"react/lib/ReactCurrentOwner":188}],120:[function(require,module,exports){
+},{"./ReactChildReconciler":81,"./ReactComponentEnvironment":83,"./ReactInstanceMap":116,"./ReactInstrumentation":117,"./ReactReconciler":127,"./flattenChildren":159,"./reactProdInvariant":175,"_process":211,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32,"react/lib/ReactCurrentOwner":190}],122:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26985,7 +30670,7 @@ var ReactNodeTypes = {
 
 module.exports = ReactNodeTypes;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"react/lib/React":183}],121:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"react/lib/React":185}],123:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27081,7 +30766,7 @@ var ReactOwner = {
 
 module.exports = ReactOwner;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],122:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],124:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27108,7 +30793,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactPropTypeLocationNames;
 }).call(this,require('_process'))
-},{"_process":209}],123:[function(require,module,exports){
+},{"_process":211}],125:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -27125,7 +30810,7 @@ module.exports = ReactPropTypeLocationNames;
 var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
-},{}],124:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27305,7 +30990,7 @@ PooledClass.addPoolingTo(ReactReconcileTransaction);
 
 module.exports = ReactReconcileTransaction;
 }).call(this,require('_process'))
-},{"./CallbackQueue":59,"./PooledClass":77,"./ReactBrowserEventEmitter":78,"./ReactInputSelection":113,"./ReactInstrumentation":115,"./ReactUpdateQueue":129,"./Transaction":148,"_process":209,"object-assign":52}],125:[function(require,module,exports){
+},{"./CallbackQueue":61,"./PooledClass":79,"./ReactBrowserEventEmitter":80,"./ReactInputSelection":115,"./ReactInstrumentation":117,"./ReactUpdateQueue":131,"./Transaction":150,"_process":211,"object-assign":54}],127:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27475,7 +31160,7 @@ var ReactReconciler = {
 
 module.exports = ReactReconciler;
 }).call(this,require('_process'))
-},{"./ReactInstrumentation":115,"./ReactRef":126,"_process":209,"fbjs/lib/warning":39}],126:[function(require,module,exports){
+},{"./ReactInstrumentation":117,"./ReactRef":128,"_process":211,"fbjs/lib/warning":39}],128:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -27564,7 +31249,7 @@ ReactRef.detachRefs = function (instance, element) {
 };
 
 module.exports = ReactRef;
-},{"./ReactOwner":121}],127:[function(require,module,exports){
+},{"./ReactOwner":123}],129:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -27656,7 +31341,7 @@ PooledClass.addPoolingTo(ReactServerRenderingTransaction);
 
 module.exports = ReactServerRenderingTransaction;
 }).call(this,require('_process'))
-},{"./PooledClass":77,"./ReactInstrumentation":115,"./ReactServerUpdateQueue":128,"./Transaction":148,"_process":209,"object-assign":52}],128:[function(require,module,exports){
+},{"./PooledClass":79,"./ReactInstrumentation":117,"./ReactServerUpdateQueue":130,"./Transaction":150,"_process":211,"object-assign":54}],130:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -27797,7 +31482,7 @@ var ReactServerUpdateQueue = function () {
 
 module.exports = ReactServerUpdateQueue;
 }).call(this,require('_process'))
-},{"./ReactUpdateQueue":129,"_process":209,"fbjs/lib/warning":39}],129:[function(require,module,exports){
+},{"./ReactUpdateQueue":131,"_process":211,"fbjs/lib/warning":39}],131:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -28025,7 +31710,7 @@ var ReactUpdateQueue = {
 
 module.exports = ReactUpdateQueue;
 }).call(this,require('_process'))
-},{"./ReactInstanceMap":114,"./ReactInstrumentation":115,"./ReactUpdates":130,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":188}],130:[function(require,module,exports){
+},{"./ReactInstanceMap":116,"./ReactInstrumentation":117,"./ReactUpdates":132,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":190}],132:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28278,7 +31963,7 @@ var ReactUpdates = {
 
 module.exports = ReactUpdates;
 }).call(this,require('_process'))
-},{"./CallbackQueue":59,"./PooledClass":77,"./ReactFeatureFlags":109,"./ReactReconciler":125,"./Transaction":148,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"object-assign":52}],131:[function(require,module,exports){
+},{"./CallbackQueue":61,"./PooledClass":79,"./ReactFeatureFlags":111,"./ReactReconciler":127,"./Transaction":150,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"object-assign":54}],133:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -28292,7 +31977,7 @@ module.exports = ReactUpdates;
 'use strict';
 
 module.exports = '15.4.0';
-},{}],132:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -28594,7 +32279,7 @@ Object.keys(ATTRS).forEach(function (key) {
 });
 
 module.exports = SVGDOMPropertyConfig;
-},{}],133:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -28785,7 +32470,7 @@ var SelectEventPlugin = {
 };
 
 module.exports = SelectEventPlugin;
-},{"./EventPropagators":72,"./ReactDOMComponentTree":86,"./ReactInputSelection":113,"./SyntheticEvent":139,"./isTextInputElement":171,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/getActiveElement":27,"fbjs/lib/shallowEqual":38}],134:[function(require,module,exports){
+},{"./EventPropagators":74,"./ReactDOMComponentTree":88,"./ReactInputSelection":115,"./SyntheticEvent":141,"./isTextInputElement":173,"fbjs/lib/ExecutionEnvironment":18,"fbjs/lib/getActiveElement":27,"fbjs/lib/shallowEqual":38}],136:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -29030,7 +32715,7 @@ var SimpleEventPlugin = {
 
 module.exports = SimpleEventPlugin;
 }).call(this,require('_process'))
-},{"./EventPropagators":72,"./ReactDOMComponentTree":86,"./SyntheticAnimationEvent":135,"./SyntheticClipboardEvent":136,"./SyntheticDragEvent":138,"./SyntheticEvent":139,"./SyntheticFocusEvent":140,"./SyntheticKeyboardEvent":142,"./SyntheticMouseEvent":143,"./SyntheticTouchEvent":144,"./SyntheticTransitionEvent":145,"./SyntheticUIEvent":146,"./SyntheticWheelEvent":147,"./getEventCharCode":159,"./reactProdInvariant":173,"_process":209,"fbjs/lib/EventListener":17,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32}],135:[function(require,module,exports){
+},{"./EventPropagators":74,"./ReactDOMComponentTree":88,"./SyntheticAnimationEvent":137,"./SyntheticClipboardEvent":138,"./SyntheticDragEvent":140,"./SyntheticEvent":141,"./SyntheticFocusEvent":142,"./SyntheticKeyboardEvent":144,"./SyntheticMouseEvent":145,"./SyntheticTouchEvent":146,"./SyntheticTransitionEvent":147,"./SyntheticUIEvent":148,"./SyntheticWheelEvent":149,"./getEventCharCode":161,"./reactProdInvariant":175,"_process":211,"fbjs/lib/EventListener":17,"fbjs/lib/emptyFunction":24,"fbjs/lib/invariant":32}],137:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29069,7 +32754,7 @@ function SyntheticAnimationEvent(dispatchConfig, dispatchMarker, nativeEvent, na
 SyntheticEvent.augmentClass(SyntheticAnimationEvent, AnimationEventInterface);
 
 module.exports = SyntheticAnimationEvent;
-},{"./SyntheticEvent":139}],136:[function(require,module,exports){
+},{"./SyntheticEvent":141}],138:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29107,7 +32792,7 @@ function SyntheticClipboardEvent(dispatchConfig, dispatchMarker, nativeEvent, na
 SyntheticEvent.augmentClass(SyntheticClipboardEvent, ClipboardEventInterface);
 
 module.exports = SyntheticClipboardEvent;
-},{"./SyntheticEvent":139}],137:[function(require,module,exports){
+},{"./SyntheticEvent":141}],139:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29143,7 +32828,7 @@ function SyntheticCompositionEvent(dispatchConfig, dispatchMarker, nativeEvent, 
 SyntheticEvent.augmentClass(SyntheticCompositionEvent, CompositionEventInterface);
 
 module.exports = SyntheticCompositionEvent;
-},{"./SyntheticEvent":139}],138:[function(require,module,exports){
+},{"./SyntheticEvent":141}],140:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29179,7 +32864,7 @@ function SyntheticDragEvent(dispatchConfig, dispatchMarker, nativeEvent, nativeE
 SyntheticMouseEvent.augmentClass(SyntheticDragEvent, DragEventInterface);
 
 module.exports = SyntheticDragEvent;
-},{"./SyntheticMouseEvent":143}],139:[function(require,module,exports){
+},{"./SyntheticMouseEvent":145}],141:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -29449,7 +33134,7 @@ function getPooledWarningPropertyDefinition(propName, getVal) {
   }
 }
 }).call(this,require('_process'))
-},{"./PooledClass":77,"_process":209,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39,"object-assign":52}],140:[function(require,module,exports){
+},{"./PooledClass":79,"_process":211,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39,"object-assign":54}],142:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29485,7 +33170,7 @@ function SyntheticFocusEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticFocusEvent, FocusEventInterface);
 
 module.exports = SyntheticFocusEvent;
-},{"./SyntheticUIEvent":146}],141:[function(require,module,exports){
+},{"./SyntheticUIEvent":148}],143:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29522,7 +33207,7 @@ function SyntheticInputEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticEvent.augmentClass(SyntheticInputEvent, InputEventInterface);
 
 module.exports = SyntheticInputEvent;
-},{"./SyntheticEvent":139}],142:[function(require,module,exports){
+},{"./SyntheticEvent":141}],144:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29606,7 +33291,7 @@ function SyntheticKeyboardEvent(dispatchConfig, dispatchMarker, nativeEvent, nat
 SyntheticUIEvent.augmentClass(SyntheticKeyboardEvent, KeyboardEventInterface);
 
 module.exports = SyntheticKeyboardEvent;
-},{"./SyntheticUIEvent":146,"./getEventCharCode":159,"./getEventKey":160,"./getEventModifierState":161}],143:[function(require,module,exports){
+},{"./SyntheticUIEvent":148,"./getEventCharCode":161,"./getEventKey":162,"./getEventModifierState":163}],145:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29678,7 +33363,7 @@ function SyntheticMouseEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticMouseEvent, MouseEventInterface);
 
 module.exports = SyntheticMouseEvent;
-},{"./SyntheticUIEvent":146,"./ViewportMetrics":149,"./getEventModifierState":161}],144:[function(require,module,exports){
+},{"./SyntheticUIEvent":148,"./ViewportMetrics":151,"./getEventModifierState":163}],146:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29723,7 +33408,7 @@ function SyntheticTouchEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticTouchEvent, TouchEventInterface);
 
 module.exports = SyntheticTouchEvent;
-},{"./SyntheticUIEvent":146,"./getEventModifierState":161}],145:[function(require,module,exports){
+},{"./SyntheticUIEvent":148,"./getEventModifierState":163}],147:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29762,7 +33447,7 @@ function SyntheticTransitionEvent(dispatchConfig, dispatchMarker, nativeEvent, n
 SyntheticEvent.augmentClass(SyntheticTransitionEvent, TransitionEventInterface);
 
 module.exports = SyntheticTransitionEvent;
-},{"./SyntheticEvent":139}],146:[function(require,module,exports){
+},{"./SyntheticEvent":141}],148:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29821,7 +33506,7 @@ function SyntheticUIEvent(dispatchConfig, dispatchMarker, nativeEvent, nativeEve
 SyntheticEvent.augmentClass(SyntheticUIEvent, UIEventInterface);
 
 module.exports = SyntheticUIEvent;
-},{"./SyntheticEvent":139,"./getEventTarget":162}],147:[function(require,module,exports){
+},{"./SyntheticEvent":141,"./getEventTarget":164}],149:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29875,7 +33560,7 @@ function SyntheticWheelEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticMouseEvent.augmentClass(SyntheticWheelEvent, WheelEventInterface);
 
 module.exports = SyntheticWheelEvent;
-},{"./SyntheticMouseEvent":143}],148:[function(require,module,exports){
+},{"./SyntheticMouseEvent":145}],150:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30102,7 +33787,7 @@ var TransactionImpl = {
 
 module.exports = TransactionImpl;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],149:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],151:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30129,7 +33814,7 @@ var ViewportMetrics = {
 };
 
 module.exports = ViewportMetrics;
-},{}],150:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -30189,7 +33874,7 @@ function accumulateInto(current, next) {
 
 module.exports = accumulateInto;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32}],151:[function(require,module,exports){
+},{"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32}],153:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30233,7 +33918,7 @@ function adler32(data) {
 }
 
 module.exports = adler32;
-},{}],152:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30322,7 +34007,7 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
 module.exports = checkReactTypeSpec;
 }).call(this,require('_process'))
-},{"./ReactPropTypeLocationNames":122,"./ReactPropTypesSecret":123,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],153:[function(require,module,exports){
+},{"./ReactPropTypeLocationNames":124,"./ReactPropTypesSecret":125,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],155:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30354,7 +34039,7 @@ var createMicrosoftUnsafeLocalFunction = function (func) {
 };
 
 module.exports = createMicrosoftUnsafeLocalFunction;
-},{}],154:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30435,7 +34120,7 @@ function dangerousStyleValue(name, value, component) {
 
 module.exports = dangerousStyleValue;
 }).call(this,require('_process'))
-},{"./CSSProperty":57,"_process":209,"fbjs/lib/warning":39}],155:[function(require,module,exports){
+},{"./CSSProperty":59,"_process":211,"fbjs/lib/warning":39}],157:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -30558,7 +34243,7 @@ function escapeTextContentForBrowser(text) {
 }
 
 module.exports = escapeTextContentForBrowser;
-},{}],156:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30620,7 +34305,7 @@ function findDOMNode(componentOrElement) {
 
 module.exports = findDOMNode;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":86,"./ReactInstanceMap":114,"./getHostComponentFromComposite":163,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":188}],157:[function(require,module,exports){
+},{"./ReactDOMComponentTree":88,"./ReactInstanceMap":116,"./getHostComponentFromComposite":165,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":190}],159:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30698,7 +34383,7 @@ function flattenChildren(children, selfDebugID) {
 
 module.exports = flattenChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":75,"./traverseAllChildren":178,"_process":209,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":187}],158:[function(require,module,exports){
+},{"./KeyEscapeUtils":77,"./traverseAllChildren":180,"_process":211,"fbjs/lib/warning":39,"react/lib/ReactComponentTreeHook":189}],160:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30729,7 +34414,7 @@ function forEachAccumulated(arr, cb, scope) {
 }
 
 module.exports = forEachAccumulated;
-},{}],159:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30779,7 +34464,7 @@ function getEventCharCode(nativeEvent) {
 }
 
 module.exports = getEventCharCode;
-},{}],160:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30881,7 +34566,7 @@ function getEventKey(nativeEvent) {
 }
 
 module.exports = getEventKey;
-},{"./getEventCharCode":159}],161:[function(require,module,exports){
+},{"./getEventCharCode":161}],163:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30924,7 +34609,7 @@ function getEventModifierState(nativeEvent) {
 }
 
 module.exports = getEventModifierState;
-},{}],162:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30959,7 +34644,7 @@ function getEventTarget(nativeEvent) {
 }
 
 module.exports = getEventTarget;
-},{}],163:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30989,7 +34674,7 @@ function getHostComponentFromComposite(inst) {
 }
 
 module.exports = getHostComponentFromComposite;
-},{"./ReactNodeTypes":120}],164:[function(require,module,exports){
+},{"./ReactNodeTypes":122}],166:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31030,7 +34715,7 @@ function getIteratorFn(maybeIterable) {
 }
 
 module.exports = getIteratorFn;
-},{}],165:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31051,7 +34736,7 @@ function getNextDebugID() {
 }
 
 module.exports = getNextDebugID;
-},{}],166:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31125,7 +34810,7 @@ function getNodeForCharacterOffset(root, offset) {
 }
 
 module.exports = getNodeForCharacterOffset;
-},{}],167:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31158,7 +34843,7 @@ function getTextContentAccessor() {
 }
 
 module.exports = getTextContentAccessor;
-},{"fbjs/lib/ExecutionEnvironment":18}],168:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":18}],170:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31259,7 +34944,7 @@ function getVendorPrefixedEventName(eventName) {
 }
 
 module.exports = getVendorPrefixedEventName;
-},{"fbjs/lib/ExecutionEnvironment":18}],169:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":18}],171:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31379,7 +35064,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
 
 module.exports = instantiateReactComponent;
 }).call(this,require('_process'))
-},{"./ReactCompositeComponent":82,"./ReactEmptyComponent":105,"./ReactHostComponent":110,"./getNextDebugID":165,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":52}],170:[function(require,module,exports){
+},{"./ReactCompositeComponent":84,"./ReactEmptyComponent":107,"./ReactHostComponent":112,"./getNextDebugID":167,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":54}],172:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31439,7 +35124,7 @@ function isEventSupported(eventNameSuffix, capture) {
 }
 
 module.exports = isEventSupported;
-},{"fbjs/lib/ExecutionEnvironment":18}],171:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":18}],173:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31490,7 +35175,7 @@ function isTextInputElement(elem) {
 }
 
 module.exports = isTextInputElement;
-},{}],172:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31516,7 +35201,7 @@ function quoteAttributeValueForBrowser(value) {
 }
 
 module.exports = quoteAttributeValueForBrowser;
-},{"./escapeTextContentForBrowser":155}],173:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":157}],175:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31555,7 +35240,7 @@ function reactProdInvariant(code) {
 }
 
 module.exports = reactProdInvariant;
-},{}],174:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31571,7 +35256,7 @@ module.exports = reactProdInvariant;
 var ReactMount = require('./ReactMount');
 
 module.exports = ReactMount.renderSubtreeIntoContainer;
-},{"./ReactMount":118}],175:[function(require,module,exports){
+},{"./ReactMount":120}],177:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31669,7 +35354,7 @@ if (ExecutionEnvironment.canUseDOM) {
 }
 
 module.exports = setInnerHTML;
-},{"./DOMNamespaces":63,"./createMicrosoftUnsafeLocalFunction":153,"fbjs/lib/ExecutionEnvironment":18}],176:[function(require,module,exports){
+},{"./DOMNamespaces":65,"./createMicrosoftUnsafeLocalFunction":155,"fbjs/lib/ExecutionEnvironment":18}],178:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31721,7 +35406,7 @@ if (ExecutionEnvironment.canUseDOM) {
 }
 
 module.exports = setTextContent;
-},{"./escapeTextContentForBrowser":155,"./setInnerHTML":175,"fbjs/lib/ExecutionEnvironment":18}],177:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":157,"./setInnerHTML":177,"fbjs/lib/ExecutionEnvironment":18}],179:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31763,7 +35448,7 @@ function shouldUpdateReactComponent(prevElement, nextElement) {
 }
 
 module.exports = shouldUpdateReactComponent;
-},{}],178:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31941,7 +35626,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":75,"./ReactElementSymbol":104,"./getIteratorFn":164,"./reactProdInvariant":173,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":188}],179:[function(require,module,exports){
+},{"./KeyEscapeUtils":77,"./ReactElementSymbol":106,"./getIteratorFn":166,"./reactProdInvariant":175,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"react/lib/ReactCurrentOwner":190}],181:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -32325,7 +36010,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = validateDOMNesting;
 }).call(this,require('_process'))
-},{"_process":209,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39,"object-assign":52}],180:[function(require,module,exports){
+},{"_process":211,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39,"object-assign":54}],182:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32442,11 +36127,11 @@ function setDefaultId() {
     }
   }
 }
-},{"flatpickr":40,"react":205}],181:[function(require,module,exports){
-arguments[4][75][0].apply(exports,arguments)
-},{"dup":75}],182:[function(require,module,exports){
+},{"flatpickr":40,"react":207}],183:[function(require,module,exports){
 arguments[4][77][0].apply(exports,arguments)
-},{"./reactProdInvariant":203,"_process":209,"dup":77,"fbjs/lib/invariant":32}],183:[function(require,module,exports){
+},{"dup":77}],184:[function(require,module,exports){
+arguments[4][79][0].apply(exports,arguments)
+},{"./reactProdInvariant":205,"_process":211,"dup":79,"fbjs/lib/invariant":32}],185:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -32537,7 +36222,7 @@ var React = {
 
 module.exports = React;
 }).call(this,require('_process'))
-},{"./ReactChildren":184,"./ReactClass":185,"./ReactComponent":186,"./ReactDOMFactories":189,"./ReactElement":190,"./ReactElementValidator":192,"./ReactPropTypes":195,"./ReactPureComponent":197,"./ReactVersion":198,"./onlyChild":202,"_process":209,"fbjs/lib/warning":39,"object-assign":52}],184:[function(require,module,exports){
+},{"./ReactChildren":186,"./ReactClass":187,"./ReactComponent":188,"./ReactDOMFactories":191,"./ReactElement":192,"./ReactElementValidator":194,"./ReactPropTypes":197,"./ReactPureComponent":199,"./ReactVersion":200,"./onlyChild":204,"_process":211,"fbjs/lib/warning":39,"object-assign":54}],186:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -32728,7 +36413,7 @@ var ReactChildren = {
 };
 
 module.exports = ReactChildren;
-},{"./PooledClass":182,"./ReactElement":190,"./traverseAllChildren":204,"fbjs/lib/emptyFunction":24}],185:[function(require,module,exports){
+},{"./PooledClass":184,"./ReactElement":192,"./traverseAllChildren":206,"fbjs/lib/emptyFunction":24}],187:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -33447,7 +37132,7 @@ var ReactClass = {
 
 module.exports = ReactClass;
 }).call(this,require('_process'))
-},{"./ReactComponent":186,"./ReactElement":190,"./ReactNoopUpdateQueue":193,"./ReactPropTypeLocationNames":194,"./reactProdInvariant":203,"_process":209,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":52}],186:[function(require,module,exports){
+},{"./ReactComponent":188,"./ReactElement":192,"./ReactNoopUpdateQueue":195,"./ReactPropTypeLocationNames":196,"./reactProdInvariant":205,"_process":211,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39,"object-assign":54}],188:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -33567,7 +37252,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactComponent;
 }).call(this,require('_process'))
-},{"./ReactNoopUpdateQueue":193,"./canDefineProperty":199,"./reactProdInvariant":203,"_process":209,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],187:[function(require,module,exports){
+},{"./ReactNoopUpdateQueue":195,"./canDefineProperty":201,"./reactProdInvariant":205,"_process":211,"fbjs/lib/emptyObject":25,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],189:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -33895,7 +37580,7 @@ var ReactComponentTreeHook = {
 
 module.exports = ReactComponentTreeHook;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":188,"./reactProdInvariant":203,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],188:[function(require,module,exports){
+},{"./ReactCurrentOwner":190,"./reactProdInvariant":205,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],190:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33926,7 +37611,7 @@ var ReactCurrentOwner = {
 };
 
 module.exports = ReactCurrentOwner;
-},{}],189:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -34098,7 +37783,7 @@ var ReactDOMFactories = {
 
 module.exports = ReactDOMFactories;
 }).call(this,require('_process'))
-},{"./ReactElement":190,"./ReactElementValidator":192,"_process":209}],190:[function(require,module,exports){
+},{"./ReactElement":192,"./ReactElementValidator":194,"_process":211}],192:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -34441,9 +38126,9 @@ ReactElement.isValidElement = function (object) {
 
 module.exports = ReactElement;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":188,"./ReactElementSymbol":191,"./canDefineProperty":199,"_process":209,"fbjs/lib/warning":39,"object-assign":52}],191:[function(require,module,exports){
-arguments[4][104][0].apply(exports,arguments)
-},{"dup":104}],192:[function(require,module,exports){
+},{"./ReactCurrentOwner":190,"./ReactElementSymbol":193,"./canDefineProperty":201,"_process":211,"fbjs/lib/warning":39,"object-assign":54}],193:[function(require,module,exports){
+arguments[4][106][0].apply(exports,arguments)
+},{"dup":106}],194:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -34672,7 +38357,7 @@ var ReactElementValidator = {
 
 module.exports = ReactElementValidator;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":187,"./ReactCurrentOwner":188,"./ReactElement":190,"./canDefineProperty":199,"./checkReactTypeSpec":200,"./getIteratorFn":201,"_process":209,"fbjs/lib/warning":39}],193:[function(require,module,exports){
+},{"./ReactComponentTreeHook":189,"./ReactCurrentOwner":190,"./ReactElement":192,"./canDefineProperty":201,"./checkReactTypeSpec":202,"./getIteratorFn":203,"_process":211,"fbjs/lib/warning":39}],195:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -34770,9 +38455,9 @@ var ReactNoopUpdateQueue = {
 
 module.exports = ReactNoopUpdateQueue;
 }).call(this,require('_process'))
-},{"_process":209,"fbjs/lib/warning":39}],194:[function(require,module,exports){
-arguments[4][122][0].apply(exports,arguments)
-},{"_process":209,"dup":122}],195:[function(require,module,exports){
+},{"_process":211,"fbjs/lib/warning":39}],196:[function(require,module,exports){
+arguments[4][124][0].apply(exports,arguments)
+},{"_process":211,"dup":124}],197:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35208,9 +38893,9 @@ function getClassName(propValue) {
 
 module.exports = ReactPropTypes;
 }).call(this,require('_process'))
-},{"./ReactElement":190,"./ReactPropTypeLocationNames":194,"./ReactPropTypesSecret":196,"./getIteratorFn":201,"_process":209,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39}],196:[function(require,module,exports){
-arguments[4][123][0].apply(exports,arguments)
-},{"dup":123}],197:[function(require,module,exports){
+},{"./ReactElement":192,"./ReactPropTypeLocationNames":196,"./ReactPropTypesSecret":198,"./getIteratorFn":203,"_process":211,"fbjs/lib/emptyFunction":24,"fbjs/lib/warning":39}],198:[function(require,module,exports){
+arguments[4][125][0].apply(exports,arguments)
+},{"dup":125}],199:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35252,9 +38937,9 @@ _assign(ReactPureComponent.prototype, ReactComponent.prototype);
 ReactPureComponent.prototype.isPureReactComponent = true;
 
 module.exports = ReactPureComponent;
-},{"./ReactComponent":186,"./ReactNoopUpdateQueue":193,"fbjs/lib/emptyObject":25,"object-assign":52}],198:[function(require,module,exports){
-arguments[4][131][0].apply(exports,arguments)
-},{"dup":131}],199:[function(require,module,exports){
+},{"./ReactComponent":188,"./ReactNoopUpdateQueue":195,"fbjs/lib/emptyObject":25,"object-assign":54}],200:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],201:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35282,7 +38967,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = canDefineProperty;
 }).call(this,require('_process'))
-},{"_process":209}],200:[function(require,module,exports){
+},{"_process":211}],202:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35371,9 +39056,9 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
 module.exports = checkReactTypeSpec;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":187,"./ReactPropTypeLocationNames":194,"./ReactPropTypesSecret":196,"./reactProdInvariant":203,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],201:[function(require,module,exports){
-arguments[4][164][0].apply(exports,arguments)
-},{"dup":164}],202:[function(require,module,exports){
+},{"./ReactComponentTreeHook":189,"./ReactPropTypeLocationNames":196,"./ReactPropTypesSecret":198,"./reactProdInvariant":205,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],203:[function(require,module,exports){
+arguments[4][166][0].apply(exports,arguments)
+},{"dup":166}],204:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35413,9 +39098,9 @@ function onlyChild(children) {
 
 module.exports = onlyChild;
 }).call(this,require('_process'))
-},{"./ReactElement":190,"./reactProdInvariant":203,"_process":209,"fbjs/lib/invariant":32}],203:[function(require,module,exports){
-arguments[4][173][0].apply(exports,arguments)
-},{"dup":173}],204:[function(require,module,exports){
+},{"./ReactElement":192,"./reactProdInvariant":205,"_process":211,"fbjs/lib/invariant":32}],205:[function(require,module,exports){
+arguments[4][175][0].apply(exports,arguments)
+},{"dup":175}],206:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35593,12 +39278,12 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":181,"./ReactCurrentOwner":188,"./ReactElementSymbol":191,"./getIteratorFn":201,"./reactProdInvariant":203,"_process":209,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],205:[function(require,module,exports){
+},{"./KeyEscapeUtils":183,"./ReactCurrentOwner":190,"./ReactElementSymbol":193,"./getIteratorFn":203,"./reactProdInvariant":205,"_process":211,"fbjs/lib/invariant":32,"fbjs/lib/warning":39}],207:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/React');
 
-},{"./lib/React":183}],206:[function(require,module,exports){
+},{"./lib/React":185}],208:[function(require,module,exports){
 //     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -36826,7 +40511,7 @@ module.exports = require('./lib/React');
 
 }).call(this);
 
-},{}],207:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -37130,7 +40815,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],208:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -37358,7 +41043,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":209}],209:[function(require,module,exports){
+},{"_process":211}],211:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -37540,7 +41225,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],210:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -37565,14 +41250,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],211:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],212:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -38162,4 +41847,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":211,"_process":209,"inherits":210}]},{},[1]);
+},{"./support/isBuffer":213,"_process":211,"inherits":212}]},{},[1]);
