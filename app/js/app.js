@@ -841,7 +841,7 @@ var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component
         var _this = _possibleConstructorReturn(this, (CreateProjectDialog.__proto__ || Object.getPrototypeOf(CreateProjectDialog)).call(this));
 
         _this.state = {
-            startDate: null,
+            dueDate: null,
             isActive: false
         };
         return _this;
@@ -858,6 +858,9 @@ var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component
             this.refs.projectTitleInput.value = "";
             this.refs.projectNotesTextarea.value = "";
             this.refs.projectTagsInput.value = "";
+            this.setState({
+                dueDate: null
+            });
         }
 
         /**
@@ -1358,6 +1361,9 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
             this.refs.taskNotesTextarea.value = "";
             this.refs.taskTagsInput.value = "";
             this.refs.taskRepeatCheckbox.checked = false;
+            this.setState({
+                dueDate: null
+            });
         }
 
         /**

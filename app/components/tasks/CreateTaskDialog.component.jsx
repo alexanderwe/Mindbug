@@ -23,6 +23,9 @@ export default class CreateTaskDialog extends Component {
         this.refs.taskNotesTextarea.value="";
         this.refs.taskTagsInput.value = "";
         this.refs.taskRepeatCheckbox.checked = false;
+        this.setState({
+            dueDate: null
+        });
     }
 
     /**
@@ -93,10 +96,6 @@ export default class CreateTaskDialog extends Component {
     * Refreshes tags in the navbar.
     */
     addTask(){
-        console.log("current dueDate");
-        console.log(this.state.dueDate);
-
-
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,

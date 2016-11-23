@@ -9,7 +9,7 @@ export default class CreateProjectDialog extends Component {
     constructor(props){
         super();
         this.state={
-            startDate: null,
+            dueDate: null,
             isActive: false
         }
     }
@@ -21,6 +21,9 @@ export default class CreateProjectDialog extends Component {
         this.refs.projectTitleInput.value = "";
         this.refs.projectNotesTextarea.value="";
         this.refs.projectTagsInput.value = "";
+        this.setState({
+            dueDate: null
+        });
     }
 
     /**

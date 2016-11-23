@@ -11,7 +11,7 @@
     "GTD"
   ],
   "author": "Alexander Weiß",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "build": {
     "appId": "com.github.alxanderwe.mindbug",
     "category": "public.app-category.productivity",
