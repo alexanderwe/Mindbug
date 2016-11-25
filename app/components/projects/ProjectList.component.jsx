@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import Project from './Project.component.jsx';
 
-@observer
-export default class ProjectList extends Component{
+
+@observer export default class ProjectList extends Component{
 
     constructor(props){
         super(props);
@@ -16,7 +16,7 @@ export default class ProjectList extends Component{
                 <div className="tile is-ancestor">
                     <div className="tile is-vertical is-parent">
                         {this.props.db.projects.map((project)=>{
-                            return <Project project={project} db={this.props.db} id={project._id} parent={this} key={project._id}/>
+                            return <Project project={project} db={this.props.db} parent={this} key={project._id}/>
                         })}
                     </div>
                 </div>

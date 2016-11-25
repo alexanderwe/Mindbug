@@ -1,13 +1,13 @@
 import Datastore from 'nedb';
-import {observable} from 'mobx';
+import {observable,action} from 'mobx';
 
 
 //TODO save current dbFilter and active item in this class for reference
 class Database{
 
-    @observable tasks = null;
-    @observable projects = null;
-    @observable tags = null;
+    @observable tasks = new Array();
+    @observable projects = new Array();
+    @observable tags = new Array();
     dbFilter = null;
 
 
@@ -25,23 +25,26 @@ class Database{
         });
 
         this.findTasks({}, { dueDate:1 });
-        this.findProjects({}, { createdAt: 1 });
+        this.findProjects({},{dueDate: 1});
         this.updateTags();
 
     }
 
+    @action
     insertTask(doc){
         console.log("inserting task");
 
         this.taskCollection.insert(doc,(err, newDoc) => {
             if(newDoc.project != '' ){
-                this.updateProject({ title: newDoc.project }, { $push: { tasks: newDoc._id} });
+                this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id} });
             }
             this.findTasks(this.dbFilter);
+            //TODO create task while ciewing projects --> projects view is not updated
             this.updateTags();
         });
     }
 
+    @action
     findTasks(query,sort){
         console.log("Find tasks with query: ");
         console.log(query);
@@ -56,34 +59,35 @@ class Database{
         })
     }
 
-    updateTask(query, set, previousProject){
+    @action
+    updateTask(query, set, previousProjectId){
         this.taskCollection.update(query, set ,(err, numReplaced) => {
-            console.log("Updating task with");
-            console.log(query._id);
-            console.log(set.$set.project);
             this.findTasks(this.dbFilter);
             this.updateTags();
 
             if(set.$set.project){
-                this.updateProject({ title: set.$set.project }, { $push: { tasks: query._id} });
-                if(previousProject){
+                this.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id} });
+                if(previousProjectId){
                     console.log("Task had previous project, so remove the refernce from that project");
-                    this.updateProject({ title: previousProject }, { $pull: { tasks: query._id} });
+                    this.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id} });
                 }
-            } else if(previousProject){
+            } else if(previousProjectId){
                 console.log("Task is no longer assigned to a project but had previous project, so remove the refernce from that project");
-                this.updateProject({ title: previousProject }, { $pull: { tasks: query._id} });
+                this.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id} });
             }
         });
     }
 
+    @action
     deleteTask(query){
         this.taskCollection.remove(query, {}, (err, numRemoved) => {
             this.findTasks(this.dbFilter);
+            this.findProjects(this.dbFilter);
             this.updateTags();
         });
     }
 
+    @action
     insertProject(doc){
         console.log("inserting project");
         this.projectCollection.insert(doc,(err, newDoc) => {
@@ -92,8 +96,12 @@ class Database{
         });
     }
 
+    @action
     findProjects(query,sort){
-        this.projectCollection.find().sort(sort).exec((err,docs)=>{
+        console.log("find projects with: ");
+        console.log(query);
+        console.log(sort);
+        this.projectCollection.find(query).sort(sort).exec((err,docs)=>{
             if (docs.length==0) {
                 this.projects = null;
             } else {
@@ -102,13 +110,38 @@ class Database{
         })
     }
 
+    findProjectSynchronous(projectId){
+        if (this.projects) {
+            return this.projects.find(x => x._id === projectId);
+        } else {
+            return null;
+        }
+
+    }
+
+    findProjectSynchronousWithName(projectName){
+        console.log("find project with name " + projectName);
+        if (this.projects) {
+            return this.projects.find(x => x.title === projectName);
+        } else {
+            return null;
+        }
+
+    }
+
+    @action
     updateProject(query, set){
         this.projectCollection.update(query, set ,(err, numReplaced) => {
+            console.log("Project updated with: ");
+            console.log(query);
+
+
             this.findProjects(this.dbFilter);
             this.updateTags();
         });
     }
 
+    @action
     deleteProject(query){
         this.projectCollection.remove(query, {}, (err, numRemoved) => {
             this.findProjects(this.dbFilter);
@@ -116,6 +149,7 @@ class Database{
         });
     }
 
+    @action
      updateTags(){
         var tagsArray = [];
         this.taskCollection.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
@@ -142,10 +176,12 @@ class Database{
     }
 
 
+    @action
     setActiveItem(activeItem){
         this.activeItem = activeItem;
     }
 
+    @action
     setDbFilter(dbFilter){
         this.dbFilter = dbFilter;
     }

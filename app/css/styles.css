@@ -78,6 +78,9 @@ a {
 .main-content {
   background-color: #fff;
 }
+.item-level {
+  margin-right: 10px;
+}
 .fa {
   margin-right: 5px;
   vertical-align: baseline;

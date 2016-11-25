@@ -1,58 +1,38 @@
 import React, {Component} from 'react';
+import {observer} from 'mobx-react';
 
+@observer
 export default class ToolbarHeader extends Component{
 
     constructor(props){
         super(props);
     }
 
-    openDialog(){
-        this.props.parent.refs.createTaskDialog.showDialog();
-    }
-
-    goHome(){
-        this.props.parent.setState({ //app
-            activeItem: "tasks",
-        });
-
-        this.props.parent.refs.navbar.setState({ //app-->navbar
-            activeItem: "tasks",
-        });
-
-        if(this.props.parent.refs.taskList){
-            this.props.parent.refs.taskList.refreshTasks(); //app-->tasklist
-        }
-    }
-
     render(){
         return(
-            <header className="toolbar draggable">
-                <p className="control has-addons">
-                    <a className="button">
-                        <span className="icon is-small">
-                            <i className="fa fa-align-left"></i>
-                        </span>
-                        <span>Left</span>
-                    </a>
-                    <a className="button">
-                        <span className="icon is-small">
-                            <i className="fa fa-align-center"></i>
-                        </span>
-                        <span>Center</span>
-                    </a>
-                    <a className="button">
-                        <span className="icon is-small">
-                            <i className="fa fa-align-right"></i>
-                        </span>
-                        <span>Right</span>
-                    </a>
-                </p>
-            </header>
+            <nav className="level">
+                <div className="level-item has-text-centered">
+                    <p className="heading">Tasks</p>
+                    <p className="title">{this.props.db.tasks.length}</p>
+                </div>
+                <div className="level-item has-text-centered">
+                    <p className="heading">Projects</p>
+                    <p className="title">{this.props.db.projects.length}</p>
+                </div>
+                <div className="level-item has-text-centered">
+                    <p className="heading">Followers</p>
+                    <p className="title">456K</p>
+                </div>
+                <div className="level-item has-text-centered">
+                    <p className="heading">Likes</p>
+                    <p className="title">789</p>
+                </div>
+            </nav>
         )
     }
 }
 
 ToolbarHeader.propTypes = {
     parent: React.PropTypes.object.isRequired,
-    tasksDb: React.PropTypes.object.isRequired,
+    db: React.PropTypes.object.isRequired,
 };

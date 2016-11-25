@@ -99,7 +99,7 @@ export default class CreateTaskDialog extends Component {
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
-            project: this.refs.projectSelect ? this.refs.projectSelect.value: null,
+            project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
             repeat: this.refs.taskRepeatCheckbox.checked,

@@ -27,15 +27,32 @@ export default class Navbar extends Component {
         });
 
         var filterToSet;
-        if(dbFilter === 'all'){
-            filterToSet = {done:false};
-        } else if(dbFilter === 'done'){
-            filterToSet = {done:true};
-        } else if(dbFilter === 'starred') {
-            filterToSet = {starred:true};
-        } else if(dbFilter === 'deleted') {
-            filterToSet = {deleted:true};
+        switch (pageName){
+            case 'tasks':
+                if(dbFilter === 'all'){
+                    filterToSet = {done:false};
+                } else if(dbFilter === 'done'){
+                    filterToSet = {done:true};
+                } else if(dbFilter === 'starred') {
+                    filterToSet = {starred:true};
+                } else if(dbFilter === 'deleted') {
+                    filterToSet = {deleted:true};
+                }
+                break;
+            case 'projects':
+                if(dbFilter === 'all'){
+                    filterToSet = {open:true};
+                } else if(dbFilter === 'done'){
+                    filterToSet = {done:true};
+                } else if(dbFilter === 'starred') {
+                    filterToSet = {starred:true};
+                } else if(dbFilter === 'deleted') {
+                    filterToSet = {deleted:true};
+                }
+                break;
+            default: break;
         }
+
 
         //Set active item in the main component
         this.props.parent.setState({ //app

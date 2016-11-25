@@ -15,9 +15,26 @@ export default class Project extends Component{
     }
 
 
+    componentWillMount(){
+        console.log("Will Mount project");
+    }
+
+
     componentDidMount(){
         console.log("Mount project");
-        console.log(this.props.project);
+    }
+
+
+    loadTasks(){
+        this.props.db.taskCollection.find({project: this.props.project._id}).sort({ createdAt: 1 }).exec((err,docs)=>{
+            if (docs.length==0) {
+                //doNothing
+            } else {
+                this.setState({
+                    tasks: docs
+                });
+            }
+        });
     }
 
     /**
@@ -70,7 +87,7 @@ export default class Project extends Component{
                     <p className="title">{this.props.project.title}</p>
 
                         {this.props.project.tasks.map((task)=>{
-                            return <p key={task}>{task}</p>
+                            return <p key={task._id}>{task}</p>
                         })}
                      <button className="delete" onClick={()=>this.deleteProject()}></button>
                      <button className="btn-round btn-warning" onClick={()=>this.edit()}>
@@ -83,8 +100,8 @@ export default class Project extends Component{
                 <div className="tile is-child box project is-edit">
                     <p className="title">{this.props.project.title}</p>
 
-                        {this.props.project.tasks.map((task)=>{
-                            return <p key={task}>{task}</p>
+                        {this.state.tasks.map((task)=>{
+                            return <p key={task._id}>{task.title}</p>
                         })}
                         <button className="delete" onClick={()=>this.cancelEdit()} />
                         <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>

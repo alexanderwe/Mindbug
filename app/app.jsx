@@ -6,6 +6,8 @@ import Database from './data/Database.js'
 import ToolbarHeader from './components/navigation/ToolbarHeader.component.jsx';
 import Navbar from './components/navigation/Navbar.component.jsx';
 
+import Today from './components/general/Today.component.jsx';
+
 import TaskList from './components/tasks/TaskList.component.jsx';
 import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx';
 import ProjectList from './components/projects/ProjectList.component.jsx';
@@ -66,9 +68,11 @@ class Main extends Component {
                         </div>
                         <div className="pane main-content" id="mainPane">
                             {this.state.activeItem === 'tasks' ? (
-                                <TaskList ref="taskList" parent={this} db={Database} dbFilter={this.state.dbFilter} />
+                                <TaskList ref="taskList" parent={this} db={Database} />
                             ) : this.state.activeItem === 'projects' ? (
-                                <ProjectList ref="projectsList" parent={this} db={Database} dbFilter={this.state.dbFilter}/>
+                                <ProjectList ref="projectsList" parent={this} db={Database} />
+                            ) : this.state.activeItem === 'general' ? (
+                                    <Today ref="projectsList" parent={this} db={Database}/>
                             ) : null}
                         </div>
                     </div>

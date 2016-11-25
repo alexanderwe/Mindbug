@@ -28,7 +28,7 @@ export default class Task extends Component {
         this.props.db.deleteTask({ _id: this.props.task._id});
         if (this.props.task.project){
             console.log("Task had a project, delete the reference in the project aswell");
-            this.props.db.updateProject({ title: this.props.task.project }, { $pull: { tasks: this.props.task._id} });
+            this.props.db.updateProject({ _id: this.props.task.project }, { $pull: { tasks: this.props.task._id} });
         }
     }
 
@@ -77,7 +77,7 @@ export default class Task extends Component {
             notes: this.refs.taskNotesTextarea.value,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
-            project: this.refs.projectSelect ? this.refs.projectSelect.value: null
+            project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null
         }},this.props.task.project);
         this.cancelEdit();
     }
@@ -128,7 +128,7 @@ export default class Task extends Component {
                         <select ref="projectSelect">
                             <option></option>
                             {this.props.db.projects.map((project)=>{
-                                if(project.title === this.props.task.project){
+                                if(project._id === this.props.task.project){
                                     return <option key={project._id} selected>{project.title}</option>
                                 }else{
                                     return <option key={project._id}>{project.title}</option>
@@ -149,18 +149,13 @@ export default class Task extends Component {
             return (
                 <div className="box task">
                     <article className="media">
-                        <div className="media-left">
-                            <figure className="image is-64x64">
-                                <img src="http://placehold.it/128x128" alt="Image" />
-                            </figure>
-                        </div>
                         <div className="media-content">
                             <div className="content">
 
                                     <h3>{this.props.task.title}</h3> <small>Due to: </small> <small>{this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null}</small>
                                     <br />
                                     {this.props.task.notes}<br />
-                                    <span>In project: {this.props.task.project}</span>
+                                <span>In project: {this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : null}</span>
                                     <br />
                                     {this.props.task.tags.map((tag)=>{
                                         return <Tag name={tag} key={tag} parent={this}/>
@@ -172,6 +167,10 @@ export default class Task extends Component {
                                     <a className={this.props.task.starred ? 'item-level active': 'item-level'} onClick={()=>this.starTask()}>
                                         <span className="icon is-small"><i className="fa fa-star"></i></span>
                                     </a>
+                                    <a className="item-level" onClick={()=>this.share()}>
+                                        <span className="icon is-small"><i className="fa fa-share" aria-hidden="true"></i></span>
+                                    </a>
+
                                 </div>
                             </nav>
                         </div>
@@ -199,11 +198,6 @@ export default class Task extends Component {
             return (
                 <div className="box task is-edit">
                     <article className="media">
-                        <div className="media-left">
-                            <figure className="image is-64x64">
-                                <img src="http://placehold.it/128x128" alt="Image" />
-                            </figure>
-                        </div>
                         <div className="media-content">
                             <div className="content">
                                 <p>
@@ -219,13 +213,6 @@ export default class Task extends Component {
                                     <input className="input" type="text"ref="taskTagsInput" defaultValue={this.getTagsString()}/>
                                 </p>
                             </div>
-                            <nav className="level">
-                                <div className="level-left">
-                                    <a className={this.props.task.starred ? 'item-level active': 'item-level'} onClick={()=>this.starTask()}>
-                                        <span className="icon is-small"><i className="fa fa-star"></i></span>
-                                    </a>
-                                </div>
-                            </nav>
                         </div>
                         <div className="media-right">
                             <div className="media-right">
