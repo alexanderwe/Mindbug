@@ -2,12 +2,13 @@ import Datastore from 'nedb';
 import {observable,action} from 'mobx';
 
 
-//TODO save current dbFilter and active item in this class for reference
 class Database{
 
     @observable tasks = new Array();
     @observable projects = new Array();
     @observable tags = new Array();
+    allTasks = new Array();
+    allProjects = new Array();
     dbFilter = null;
 
 
@@ -27,6 +28,8 @@ class Database{
         this.findTasks({}, { dueDate:1 });
         this.findProjects({},{dueDate: 1});
         this.updateTags();
+        this.refreshAllTasks();
+        this.refreshAllProjects();
 
     }
 
@@ -41,6 +44,8 @@ class Database{
             this.findTasks(this.dbFilter);
             //TODO create task while ciewing projects --> projects view is not updated
             this.updateTags();
+            this.refreshAllTasks();
+            this.refreshAllProjects();
         });
     }
 
@@ -48,10 +53,12 @@ class Database{
     findTasks(query,sort){
         console.log("Find tasks with query: ");
         console.log(query);
-        console.log(this.dbFilter);
+        console.log("Sort: ");
+        console.log(sort);
 
         this.taskCollection.find(query).sort(sort).exec((err,docs)=>{
             if (docs.length==0) {
+                console.log("no tasks found");
                 this.tasks = null;
             } else {
                 this.tasks = docs;
@@ -59,11 +66,23 @@ class Database{
         })
     }
 
+    findTaskSynchronous(taskId){
+        console.log("Find a task synchronous: " + taskId);
+        console.log(this.allTasks);
+
+        if (this.allTasks) {
+            return this.allTasks.find(x => x._id === taskId);
+        } else {
+            return null;
+        }
+    }
+
     @action
     updateTask(query, set, previousProjectId){
         this.taskCollection.update(query, set ,(err, numReplaced) => {
             this.findTasks(this.dbFilter);
             this.updateTags();
+            this.refreshAllTasks();
 
             if(set.$set.project){
                 this.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id} });
@@ -84,8 +103,23 @@ class Database{
             this.findTasks(this.dbFilter);
             this.findProjects(this.dbFilter);
             this.updateTags();
+            this.refreshAllTasks();
         });
     }
+
+    @action
+    refreshAllTasks(){
+        this.taskCollection.find({}, (err, docs)=> {
+            if (docs.length==0) {
+                this.allTasks = null;
+            } else {
+                this.allTasks = docs;
+                console.log("all tasks refreshed");
+
+            }
+        })
+    }
+
 
     @action
     insertProject(doc){
@@ -93,6 +127,7 @@ class Database{
         this.projectCollection.insert(doc,(err, newDoc) => {
             this.findProjects(this.dbFilter);
             this.updateTags();
+            this.refreshAllProjects();
         });
     }
 
@@ -111,18 +146,17 @@ class Database{
     }
 
     findProjectSynchronous(projectId){
-        if (this.projects) {
-            return this.projects.find(x => x._id === projectId);
+        if (this.allProjects) {
+            return this.allProjects.find(x => x._id === projectId);
         } else {
             return null;
         }
-
     }
 
     findProjectSynchronousWithName(projectName){
         console.log("find project with name " + projectName);
-        if (this.projects) {
-            return this.projects.find(x => x.title === projectName);
+        if (this.allProjects) {
+            return this.allProjects.find(x => x.title === projectName);
         } else {
             return null;
         }
@@ -138,15 +172,32 @@ class Database{
 
             this.findProjects(this.dbFilter);
             this.updateTags();
+            this.refreshAllProjects();
         });
     }
 
     @action
     deleteProject(query){
         this.projectCollection.remove(query, {}, (err, numRemoved) => {
+            console.log("projekt deleted");
+
             this.findProjects(this.dbFilter);
             this.updateTags();
+            this.refreshAllProjects();
         });
+    }
+
+    @action
+    refreshAllProjects(){
+        this.projectCollection.find({}).sort().exec((err,docs)=>{
+            if (docs.length==0) {
+                this.allProjects = null;
+            } else {
+                this.allProjects = docs;
+                console.log("all projects refreshed");
+
+            }
+        })
     }
 
     @action

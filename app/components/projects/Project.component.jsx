@@ -9,33 +9,17 @@ export default class Project extends Component{
         super(props);
         this.state ={
             tasks: new Array(),
-            dueDate: this.props.project.dueDate ? moment(this.props.task.dueDate) : moment(), //needed for react-datepicker
+            dueDate: this.props.project.dueDate ? moment(this.props.project.dueDate) : moment(), //needed for react-datepicker
             projects: null,
         }
     }
 
-
     componentWillMount(){
-        console.log("Will Mount project");
     }
-
 
     componentDidMount(){
-        console.log("Mount project");
     }
 
-
-    loadTasks(){
-        this.props.db.taskCollection.find({project: this.props.project._id}).sort({ createdAt: 1 }).exec((err,docs)=>{
-            if (docs.length==0) {
-                //doNothing
-            } else {
-                this.setState({
-                    tasks: docs
-                });
-            }
-        });
-    }
 
     /**
     * Makes this task editable
@@ -86,8 +70,9 @@ export default class Project extends Component{
                 <div className="tile is-child box project">
                     <p className="title">{this.props.project.title}</p>
 
-                        {this.props.project.tasks.map((task)=>{
-                            return <p key={task._id}>{task}</p>
+                        {this.props.project.tasks.map((taskId)=>{
+                            var task = this.props.db.findTaskSynchronous(taskId);
+                            return <p key={task._id}>{task.title}</p>
                         })}
                      <button className="delete" onClick={()=>this.deleteProject()}></button>
                      <button className="btn-round btn-warning" onClick={()=>this.edit()}>

@@ -85,7 +85,6 @@ export default class Navbar extends Component {
         return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
     }
 
-    //TODO fix bug, that displays same content on navbar in the background while scrolling
     render(){
         if(this.props.db.tags){
             return(

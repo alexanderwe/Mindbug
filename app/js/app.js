@@ -104,8 +104,6 @@ var Main = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            console.log(_Database2.default);
-
             return _react2.default.createElement(
                 'div',
                 { className: 'window' },
@@ -320,9 +318,6 @@ var Navbar = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function isActiveState(activeItem, activeChildItem) {
             return this.state.activeItem === activeItem && this.state.activeChildItem === activeChildItem ? true : false;
         }
-
-        //TODO fix bug, that displays same content on navbar in the background while scrolling
-
     }, {
         key: 'render',
         value: function render() {
@@ -1138,7 +1133,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
 
         _this.state = {
             tasks: new Array(),
-            dueDate: _this.props.project.dueDate ? (0, _moment2.default)(_this.props.task.dueDate) : (0, _moment2.default)(), //needed for react-datepicker
+            dueDate: _this.props.project.dueDate ? (0, _moment2.default)(_this.props.project.dueDate) : (0, _moment2.default)(), //needed for react-datepicker
             projects: null
         };
         return _this;
@@ -1146,29 +1141,10 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
 
     _createClass(Project, [{
         key: 'componentWillMount',
-        value: function componentWillMount() {
-            console.log("Will Mount project");
-        }
+        value: function componentWillMount() {}
     }, {
         key: 'componentDidMount',
-        value: function componentDidMount() {
-            console.log("Mount project");
-        }
-    }, {
-        key: 'loadTasks',
-        value: function loadTasks() {
-            var _this2 = this;
-
-            this.props.db.taskCollection.find({ project: this.props.project._id }).sort({ createdAt: 1 }).exec(function (err, docs) {
-                if (docs.length == 0) {
-                    //doNothing
-                } else {
-                    _this2.setState({
-                        tasks: docs
-                    });
-                }
-            });
-        }
+        value: function componentDidMount() {}
 
         /**
         * Makes this task editable
@@ -1204,14 +1180,14 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'deleteProject',
         value: function deleteProject() {
-            var _this3 = this;
+            var _this2 = this;
 
             console.log("deleting project");
             this.props.db.deleteProject({ _id: this.props.project._id });
             if (this.props.project.tasks.length > 0) {
                 this.props.project.tasks.map(function (taskId) {
                     console.log("Removing project field from : " + taskId);
-                    _this3.props.db.updateTask({ _id: taskId }, { $set: { project: '' } });
+                    _this2.props.db.updateTask({ _id: taskId }, { $set: { project: '' } });
                 });
             }
         }
@@ -1228,7 +1204,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this3 = this;
 
             if (!this.state.edit) {
                 return _react2.default.createElement(
@@ -1239,20 +1215,21 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                         { className: 'title' },
                         this.props.project.title
                     ),
-                    this.props.project.tasks.map(function (task) {
+                    this.props.project.tasks.map(function (taskId) {
+                        var task = _this3.props.db.findTaskSynchronous(taskId);
                         return _react2.default.createElement(
                             'p',
                             { key: task._id },
-                            task
+                            task.title
                         );
                     }),
                     _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                            return _this4.deleteProject();
+                            return _this3.deleteProject();
                         } }),
                     _react2.default.createElement(
                         'button',
                         { className: 'btn-round btn-warning', onClick: function onClick() {
-                                return _this4.edit();
+                                return _this3.edit();
                             } },
                         _react2.default.createElement('i', { className: 'fa fa-edit' })
                     )
@@ -1274,12 +1251,12 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                         );
                     }),
                     _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                            return _this4.cancelEdit();
+                            return _this3.cancelEdit();
                         } }),
                     _react2.default.createElement(
                         'button',
                         { className: 'btn-round btn-success', onClick: function onClick() {
-                                return _this4.saveEdit();
+                                return _this3.saveEdit();
                             } },
                         _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
                     )
@@ -1483,7 +1460,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'projectInput',
         value: function projectInput() {
-            if (this.props.db.projects) {
+            if (this.props.db.allProjects) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -1494,7 +1471,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                             'select',
                             { ref: 'projectSelect' },
                             _react2.default.createElement('option', null),
-                            this.props.db.projects.map(function (project) {
+                            this.props.db.allProjects.map(function (project) {
                                 return _react2.default.createElement(
                                     'option',
                                     { key: project._id },
@@ -1545,14 +1522,16 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         * Refreshes tasks and project views to make the changes visible.
         * Refreshes tags in the navbar.
         */
+        //TODO Fix bug when adding a task and no project is selected
 
     }, {
         key: 'addTask',
         value: function addTask() {
+
             var doc = {
                 title: this.refs.taskTitleInput.value,
                 notes: this.refs.taskNotesTextarea.value,
-                project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null,
+                project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null : null,
                 tags: this.generateTags(),
                 dueDate: this.state.dueDate,
                 repeat: this.refs.taskRepeatCheckbox.checked,
@@ -1797,16 +1776,20 @@ var Task = function (_Component) {
         /**
         * Saves the edits and make this task uneditable
         */
+        //TODO Fix bug when adding a task and no project is selected
 
     }, {
         key: 'saveEdit',
         value: function saveEdit() {
+            console.log("Save task with date");
+            console.log(this.state.dueDate);
+
             this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
                     title: this.refs.taskTitleInput.value,
                     notes: this.refs.taskNotesTextarea.value,
                     tags: this.generateTags(),
                     dueDate: this.state.dueDate,
-                    project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null
+                    project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null : null
                 } }, this.props.task.project);
             this.cancelEdit();
         }
@@ -1851,7 +1834,7 @@ var Task = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
+                dueDate: (0, _moment2.default)(date, 'DD-MM-YYYY hh:mm')
             });
         }
 
@@ -1864,7 +1847,7 @@ var Task = function (_Component) {
         value: function projectInput() {
             var _this2 = this;
 
-            if (this.props.db.projects) {
+            if (this.props.db.allProjects) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -1875,7 +1858,7 @@ var Task = function (_Component) {
                             'select',
                             { ref: 'projectSelect' },
                             _react2.default.createElement('option', null),
-                            this.props.db.projects.map(function (project) {
+                            this.props.db.allProjects.map(function (project) {
                                 if (project._id === _this2.props.task.project) {
                                     return _react2.default.createElement(
                                         'option',
@@ -1934,7 +1917,7 @@ var Task = function (_Component) {
                                 _react2.default.createElement(
                                     'small',
                                     null,
-                                    this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null
+                                    this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm') : null
                                 ),
                                 _react2.default.createElement('br', null),
                                 this.props.task.notes,
@@ -2035,7 +2018,7 @@ var Task = function (_Component) {
                                     _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
                                     _react2.default.createElement('br', null),
                                     'Due to:',
-                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null, onChange: function onChange(_, str) {
+                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm') : null, onChange: function onChange(_, str) {
                                             return _this3.handleDateChange(str);
                                         } }),
                                     _react2.default.createElement('br', null),
@@ -2231,7 +2214,6 @@ function _initializerWarningHelper(descriptor, context) {
     throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
 }
 
-//TODO save current dbFilter and active item in this class for reference
 var Database = (_class = function () {
     function Database() {
         _classCallCheck(this, Database);
@@ -2242,6 +2224,8 @@ var Database = (_class = function () {
 
         _initDefineProp(this, 'tags', _descriptor3, this);
 
+        this.allTasks = new Array();
+        this.allProjects = new Array();
         this.dbFilter = null;
 
         this.taskCollection = new _nedb2.default({
@@ -2259,6 +2243,8 @@ var Database = (_class = function () {
         this.findTasks({}, { dueDate: 1 });
         this.findProjects({}, { dueDate: 1 });
         this.updateTags();
+        this.refreshAllTasks();
+        this.refreshAllProjects();
     }
 
     _createClass(Database, [{
@@ -2275,6 +2261,8 @@ var Database = (_class = function () {
                 _this.findTasks(_this.dbFilter);
                 //TODO create task while ciewing projects --> projects view is not updated
                 _this.updateTags();
+                _this.refreshAllTasks();
+                _this.refreshAllProjects();
             });
         }
     }, {
@@ -2284,15 +2272,31 @@ var Database = (_class = function () {
 
             console.log("Find tasks with query: ");
             console.log(query);
-            console.log(this.dbFilter);
+            console.log("Sort: ");
+            console.log(sort);
 
             this.taskCollection.find(query).sort(sort).exec(function (err, docs) {
                 if (docs.length == 0) {
+                    console.log("no tasks found");
                     _this2.tasks = null;
                 } else {
                     _this2.tasks = docs;
                 }
             });
+        }
+    }, {
+        key: 'findTaskSynchronous',
+        value: function findTaskSynchronous(taskId) {
+            console.log("Find a task synchronous: " + taskId);
+            console.log(this.allTasks);
+
+            if (this.allTasks) {
+                return this.allTasks.find(function (x) {
+                    return x._id === taskId;
+                });
+            } else {
+                return null;
+            }
         }
     }, {
         key: 'updateTask',
@@ -2302,6 +2306,7 @@ var Database = (_class = function () {
             this.taskCollection.update(query, set, function (err, numReplaced) {
                 _this3.findTasks(_this3.dbFilter);
                 _this3.updateTags();
+                _this3.refreshAllTasks();
 
                 if (set.$set.project) {
                     _this3.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id } });
@@ -2324,40 +2329,56 @@ var Database = (_class = function () {
                 _this4.findTasks(_this4.dbFilter);
                 _this4.findProjects(_this4.dbFilter);
                 _this4.updateTags();
+                _this4.refreshAllTasks();
+            });
+        }
+    }, {
+        key: 'refreshAllTasks',
+        value: function refreshAllTasks() {
+            var _this5 = this;
+
+            this.taskCollection.find({}, function (err, docs) {
+                if (docs.length == 0) {
+                    _this5.allTasks = null;
+                } else {
+                    _this5.allTasks = docs;
+                    console.log("all tasks refreshed");
+                }
             });
         }
     }, {
         key: 'insertProject',
         value: function insertProject(doc) {
-            var _this5 = this;
+            var _this6 = this;
 
             console.log("inserting project");
             this.projectCollection.insert(doc, function (err, newDoc) {
-                _this5.findProjects(_this5.dbFilter);
-                _this5.updateTags();
+                _this6.findProjects(_this6.dbFilter);
+                _this6.updateTags();
+                _this6.refreshAllProjects();
             });
         }
     }, {
         key: 'findProjects',
         value: function findProjects(query, sort) {
-            var _this6 = this;
+            var _this7 = this;
 
             console.log("find projects with: ");
             console.log(query);
             console.log(sort);
             this.projectCollection.find(query).sort(sort).exec(function (err, docs) {
                 if (docs.length == 0) {
-                    _this6.projects = null;
+                    _this7.projects = null;
                 } else {
-                    _this6.projects = docs;
+                    _this7.projects = docs;
                 }
             });
         }
     }, {
         key: 'findProjectSynchronous',
         value: function findProjectSynchronous(projectId) {
-            if (this.projects) {
-                return this.projects.find(function (x) {
+            if (this.allProjects) {
+                return this.allProjects.find(function (x) {
                     return x._id === projectId;
                 });
             } else {
@@ -2368,8 +2389,8 @@ var Database = (_class = function () {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
             console.log("find project with name " + projectName);
-            if (this.projects) {
-                return this.projects.find(function (x) {
+            if (this.allProjects) {
+                return this.allProjects.find(function (x) {
                     return x.title === projectName;
                 });
             } else {
@@ -2379,30 +2400,48 @@ var Database = (_class = function () {
     }, {
         key: 'updateProject',
         value: function updateProject(query, set) {
-            var _this7 = this;
+            var _this8 = this;
 
             this.projectCollection.update(query, set, function (err, numReplaced) {
                 console.log("Project updated with: ");
                 console.log(query);
 
-                _this7.findProjects(_this7.dbFilter);
-                _this7.updateTags();
+                _this8.findProjects(_this8.dbFilter);
+                _this8.updateTags();
+                _this8.refreshAllProjects();
             });
         }
     }, {
         key: 'deleteProject',
         value: function deleteProject(query) {
-            var _this8 = this;
+            var _this9 = this;
 
             this.projectCollection.remove(query, {}, function (err, numRemoved) {
-                _this8.findProjects(_this8.dbFilter);
-                _this8.updateTags();
+                console.log("projekt deleted");
+
+                _this9.findProjects(_this9.dbFilter);
+                _this9.updateTags();
+                _this9.refreshAllProjects();
+            });
+        }
+    }, {
+        key: 'refreshAllProjects',
+        value: function refreshAllProjects() {
+            var _this10 = this;
+
+            this.projectCollection.find({}).sort().exec(function (err, docs) {
+                if (docs.length == 0) {
+                    _this10.allProjects = null;
+                } else {
+                    _this10.allProjects = docs;
+                    console.log("all projects refreshed");
+                }
             });
         }
     }, {
         key: 'updateTags',
         value: function updateTags() {
-            var _this9 = this;
+            var _this11 = this;
 
             var tagsArray = [];
             this.taskCollection.find({}).sort({ createdAt: 1 }).exec(function (err, docs) {
@@ -2445,7 +2484,7 @@ var Database = (_class = function () {
                         });
                     });
                 }
-                _this9.tags = tagsArray;
+                _this11.tags = tagsArray;
             });
         }
     }, {
@@ -2476,7 +2515,7 @@ var Database = (_class = function () {
     initializer: function initializer() {
         return new Array();
     }
-}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
+}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
 exports.default = new Database();
 
 }).call(this,"/app/data")

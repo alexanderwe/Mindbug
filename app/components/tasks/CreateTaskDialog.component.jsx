@@ -51,13 +51,13 @@ export default class CreateTaskDialog extends Component {
     * Creates the project selection input
     */
     projectInput(){
-        if(this.props.db.projects){
+        if(this.props.db.allProjects){
             return(
                 <p className="control">
                     <span className="select">
                         <select ref="projectSelect">
                             <option></option>
-                            {this.props.db.projects.map((project)=>{
+                            {this.props.db.allProjects.map((project)=>{
                                 return <option key={project._id}>{project.title}</option>
                             })}
                         </select>
@@ -95,11 +95,13 @@ export default class CreateTaskDialog extends Component {
     * Refreshes tasks and project views to make the changes visible.
     * Refreshes tags in the navbar.
     */
+    //TODO Fix bug when adding a task and no project is selected
     addTask(){
+
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
-            project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null,
+            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
             repeat: this.refs.taskRepeatCheckbox.checked,

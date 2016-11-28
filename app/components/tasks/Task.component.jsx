@@ -71,13 +71,18 @@ export default class Task extends Component {
     /**
     * Saves the edits and make this task uneditable
     */
+    //TODO Fix bug when adding a task and no project is selected
     saveEdit(){
+        console.log("Save task with date");
+        console.log(this.state.dueDate);
+
+
         this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
-            project: this.refs.projectSelect ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null
+            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
         }},this.props.task.project);
         this.cancelEdit();
     }
@@ -113,7 +118,7 @@ export default class Task extends Component {
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
+            dueDate: moment(date, 'DD-MM-YYYY hh:mm')
         });
     }
 
@@ -121,13 +126,13 @@ export default class Task extends Component {
     * Creates the project selection input
     */
     projectInput(){
-        if(this.props.db.projects){
+        if(this.props.db.allProjects){
             return(
                 <p className="control">
                     <span className="select">
                         <select ref="projectSelect">
                             <option></option>
-                            {this.props.db.projects.map((project)=>{
+                            {this.props.db.allProjects.map((project)=>{
                                 if(project._id === this.props.task.project){
                                     return <option key={project._id} selected>{project.title}</option>
                                 }else{
@@ -144,6 +149,7 @@ export default class Task extends Component {
         }
     }
 
+    //TODO Bug in moment()
     render(){
         if (!this.state.edit) {
             return (
@@ -152,7 +158,7 @@ export default class Task extends Component {
                         <div className="media-content">
                             <div className="content">
 
-                                    <h3>{this.props.task.title}</h3> <small>Due to: </small> <small>{this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') : null}</small>
+                                    <h3>{this.props.task.title}</h3> <small>Due to: </small> <small>{this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm') : null}</small>
                                     <br />
                                     {this.props.task.notes}<br />
                                 <span>In project: {this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : null}</span>
@@ -204,7 +210,7 @@ export default class Task extends Component {
                                     <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
                                     <br />
                                     Due to:
-                                    <Flatpickr data-enable-time defaultValue={this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD.MM.YYYY hh:mm') :null} onChange={(_, str) => this.handleDateChange(str)} />
+                                    <Flatpickr data-enable-time defaultValue={this.props.task.dueDate ? moment(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm') :null} onChange={(_, str) => this.handleDateChange(str)} />
                                     <br />
                                     <textarea className="textarea" ref="taskNotesTextarea" defaultValue={this.props.task.notes} />
                                     <br />

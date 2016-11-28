@@ -55,8 +55,6 @@ class Main extends Component {
     }
 
     render(){
-        console.log(Database);
-
         return (
             <div className="window">
                 <CreateTaskDialog ref="createTaskDialog" parent={this} db={Database} />
@@ -72,7 +70,7 @@ class Main extends Component {
                             ) : this.state.activeItem === 'projects' ? (
                                 <ProjectList ref="projectsList" parent={this} db={Database} />
                             ) : this.state.activeItem === 'general' ? (
-                                    <Today ref="projectsList" parent={this} db={Database}/>
+                                <Today ref="projectsList" parent={this} db={Database}/>
                             ) : null}
                         </div>
                     </div>
