@@ -123,6 +123,9 @@ a {
 .btn-warning:hover {
   background-color: #ffd83d;
 }
+.btn-danger:hover {
+  background-color: #ff3860;
+}
 /*------------------------------------*    Navbar
 \*------------------------------------*/
 .sidebar {
@@ -173,8 +176,17 @@ a {
 \*------------------------------------*/
 /*------------------------------------*    Task
 \*------------------------------------*/
+.task p {
+  margin-bottom: 5px !important;
+}
 .task .tag {
   margin-right: 5px;
+}
+.task .title {
+  margin-bottom: 5px;
+}
+.task .title small {
+  margin-left: 5px;
 }
 .task .media-right button {
   margin-top: 5px;
@@ -198,4 +210,21 @@ a {
 }
 .modal-close:hover {
   background-color: #ff3860;
+}
+/*------------------------------------*    Project
+\*------------------------------------*/
+.project .menu-label {
+  color: #7a7a7a;
+}
+.project .menu-list {
+  border-left: 1px solid #dbdbdb;
+  margin: 10px;
+  padding-left: 10px;
+}
+.project .icon {
+  margin-left: 5px;
+  display: inline;
+}
+.project .icon .fa-check {
+  color: #20bc56;
 }

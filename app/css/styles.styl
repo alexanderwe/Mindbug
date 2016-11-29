@@ -13,6 +13,9 @@ colors ={
     green: #20bc56,
     yellow: #ffd83d,
     dark-grey: #363636,
+    grey: #dbdbdb,
+    grey-text: #7a7a7a
+
 }
 
 /*------------------------------------*\
@@ -116,6 +119,11 @@ a
     &:hover
         background-color: colors.yellow
 
+.btn-danger
+    &:hover
+        background-color: colors.red
+
+
 /*------------------------------------*\
     Navbar
 \*------------------------------------*/
@@ -174,8 +182,15 @@ a
     Task
 \*------------------------------------*/
 .task
+    p
+        margin-bottom: 5px !important;
     .tag
         margin-right: 5px;
+    .title
+        margin-bottom: 5px;
+        small
+            margin-left: 5px;
+
     .media-right
         button
             margin-top: 5px
@@ -199,3 +214,21 @@ a
 .modal-close
     &:hover
         background-color: colors.red;
+
+
+
+/*------------------------------------*\
+    Project
+\*------------------------------------*/
+.project
+    .menu-label
+        color: colors.grey-text
+    .menu-list
+        border-left: 1px solid colors.grey
+        margin: 10px;
+        padding-left: 10px;
+    .icon
+        margin-left: 5px;
+        display: inline;
+        .fa-check
+            color: colors.green;

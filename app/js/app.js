@@ -123,6 +123,7 @@ var Main = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'pane main-content', id: 'mainPane' },
+                            _react2.default.createElement(_ToolbarHeaderComponent2.default, { parent: this, db: _Database2.default }),
                             this.state.activeItem === 'tasks' ? _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, db: _Database2.default }) : this.state.activeItem === 'projects' ? _react2.default.createElement(_ProjectListComponent2.default, { ref: 'projectsList', parent: this, db: _Database2.default }) : this.state.activeItem === 'general' ? _react2.default.createElement(_TodayComponent2.default, { ref: 'projectsList', parent: this, db: _Database2.default }) : null
                         )
                     )
@@ -799,7 +800,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'title' },
-                        this.props.db.tasks.length
+                        this.props.db.allTasks.length
                     )
                 ),
                 _react2.default.createElement(
@@ -813,35 +814,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
                     _react2.default.createElement(
                         'p',
                         { className: 'title' },
-                        this.props.db.projects.length
-                    )
-                ),
-                _react2.default.createElement(
-                    'div',
-                    { className: 'level-item has-text-centered' },
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'heading' },
-                        'Followers'
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'title' },
-                        '456K'
-                    )
-                ),
-                _react2.default.createElement(
-                    'div',
-                    { className: 'level-item has-text-centered' },
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'heading' },
-                        'Likes'
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'title' },
-                        '789'
+                        this.props.db.allProjects.length
                     )
                 )
             );
@@ -1115,6 +1088,14 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _reactFlatpickr = require('react-flatpickr');
+
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
+
+var _TagComponent = require('../navigation/Tag.component.jsx');
+
+var _TagComponent2 = _interopRequireDefault(_TagComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1140,33 +1121,22 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
     }
 
     _createClass(Project, [{
-        key: 'componentWillMount',
-        value: function componentWillMount() {}
-    }, {
         key: 'componentDidMount',
-        value: function componentDidMount() {}
-
-        /**
-        * Makes this task editable
-        */
-
-    }, {
-        key: 'edit',
-        value: function edit() {
-            this.setState({
-                edit: true
-            });
+        value: function componentDidMount() {
+            console.log("Mounted project");
+            console.log(this.props.project);
         }
 
         /**
-        * Leave edit mode
+        * Saves the currently selected date to the satet
+        + @param {moment} date - date to set
         */
 
     }, {
-        key: 'cancelEdit',
-        value: function cancelEdit() {
+        key: 'handleDateChange',
+        value: function handleDateChange(date) {
             this.setState({
-                edit: false
+                dueDate: (0, _moment2.default)(date).format()
             });
         }
 
@@ -1193,13 +1163,64 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
         }
 
         /**
-        * Refresh the tags in the navbar.
+        * Generating tags from the value of the tagsInput
         */
 
     }, {
-        key: 'refreshTags',
-        value: function refreshTags() {
-            this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
+        key: 'generateTags',
+        value: function generateTags() {
+            return this.refs.projectTagsInput.value.replace(/\s/g, '').split(",").filter(function (str) {
+                return (/\S/.test(str)
+                );
+            });;
+        }
+    }, {
+        key: 'getTagsString',
+        value: function getTagsString() {
+            var tagsString = "";
+            this.props.project.tags.map(function (tag) {
+                tagsString = tagsString.concat("," + tag);
+            });
+            return tagsString.substr(1);
+        }
+
+        /**
+        * Makes this project editable
+        */
+
+    }, {
+        key: 'edit',
+        value: function edit() {
+            this.setState({
+                edit: true
+            });
+        }
+
+        /**
+        * Saves the edits and make this project uneditable
+        */
+
+    }, {
+        key: 'saveEdit',
+        value: function saveEdit() {
+            this.props.db.updateProject({ _id: this.props.project._id }, { $set: {
+                    title: this.refs.projectTitleInput.value,
+                    tags: this.generateTags(),
+                    dueDate: this.state.dueDate
+                } });
+            this.cancelEdit();
+        }
+
+        /**
+        * Leave edit mode
+        */
+
+    }, {
+        key: 'cancelEdit',
+        value: function cancelEdit() {
+            this.setState({
+                edit: false
+            });
         }
     }, {
         key: 'render',
@@ -1215,17 +1236,48 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                         { className: 'title' },
                         this.props.project.title
                     ),
-                    this.props.project.tasks.map(function (taskId) {
-                        var task = _this3.props.db.findTaskSynchronous(taskId);
-                        return _react2.default.createElement(
-                            'p',
-                            { key: task._id },
-                            task.title
-                        );
+                    _react2.default.createElement(
+                        'small',
+                        null,
+                        'Due date ',
+                        this.props.project.dueDate ? (0, _moment2.default)(this.props.project.dueDate).toString() : null
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        { className: 'menu-label' },
+                        'Tasks'
+                    ),
+                    _react2.default.createElement(
+                        'ul',
+                        { className: 'menu-list' },
+                        this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
+                            var task = _this3.props.db.findTaskSynchronous(taskId);
+                            return _react2.default.createElement(
+                                'li',
+                                { key: task._id },
+                                task.title,
+                                task.done ? _react2.default.createElement(
+                                    'span',
+                                    { className: 'icon' },
+                                    _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
+                                ) : null
+                            );
+                        }) : _react2.default.createElement(
+                            'li',
+                            null,
+                            'No tasks assigned to this project'
+                        )
+                    ),
+                    this.props.project.tags.map(function (tag) {
+                        return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
                     }),
-                    _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                            return _this3.deleteProject();
-                        } }),
+                    _react2.default.createElement(
+                        'button',
+                        { className: 'btn-round btn-danger', onClick: function onClick() {
+                                return _this3.deleteProject();
+                            } },
+                        _react2.default.createElement('i', { className: 'fa fa-trash-o' })
+                    ),
                     _react2.default.createElement(
                         'button',
                         { className: 'btn-round btn-warning', onClick: function onClick() {
@@ -1238,18 +1290,28 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                 return _react2.default.createElement(
                     'div',
                     { className: 'tile is-child box project is-edit' },
+                    _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.project.title, ref: 'projectTitleInput' }),
+                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.project.dueDate ? (0, _moment2.default)(this.props.project.dueDate).toString() : null, onChange: function onChange(_, str) {
+                            return _this3.handleDateChange(str);
+                        } }),
+                    _react2.default.createElement(
+                        'ul',
+                        { className: 'menu-list' },
+                        this.props.project.tasks.map(function (taskId) {
+                            var task = _this3.props.db.findTaskSynchronous(taskId);
+                            return _react2.default.createElement(
+                                'p',
+                                { key: task._id },
+                                task.title
+                            );
+                        })
+                    ),
                     _react2.default.createElement(
                         'p',
-                        { className: 'title' },
-                        this.props.project.title
+                        { className: 'menu-label' },
+                        'Tags'
                     ),
-                    this.state.tasks.map(function (task) {
-                        return _react2.default.createElement(
-                            'p',
-                            { key: task._id },
-                            task.title
-                        );
-                    }),
+                    _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'projectTagsInput', defaultValue: this.getTagsString() }),
                     _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
                             return _this3.cancelEdit();
                         } }),
@@ -1276,7 +1338,7 @@ Project.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"mobx-react":43,"moment":45,"react":208}],8:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":4,"mobx-react":43,"moment":45,"react":208,"react-flatpickr":183}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1460,7 +1522,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'projectInput',
         value: function projectInput() {
-            if (this.props.db.allProjects) {
+            if (this.props.db.allProjects.length > 0) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -1499,7 +1561,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
+                dueDate: (0, _moment2.default)(date)
             });
         }
 
@@ -1527,6 +1589,8 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'addTask',
         value: function addTask() {
+            console.log("add task with date");
+            console.log(this.state.dueDate);
 
             var doc = {
                 title: this.refs.taskTitleInput.value,
@@ -1668,13 +1732,13 @@ var _react2 = _interopRequireDefault(_react);
 
 var _mobxReact = require('mobx-react');
 
-var _reactFlatpickr = require('react-flatpickr');
-
-var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
-
 var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
+
+var _reactFlatpickr = require('react-flatpickr');
+
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
 
 var _TagComponent = require('../navigation/Tag.component.jsx');
 
@@ -1710,18 +1774,16 @@ var Task = function (_Component) {
         }
 
         /**
-        * Deletes a task and if this task was related to a project, delete the reference in the project aswell.
+        * Saves the currently selected date to the satet
+        + @param {moment} date - date to set
         */
 
     }, {
-        key: 'deleteTask',
-        value: function deleteTask() {
-            console.log("Deleting task");
-            this.props.db.deleteTask({ _id: this.props.task._id });
-            if (this.props.task.project) {
-                console.log("Task had a project, delete the reference in the project aswell");
-                this.props.db.updateProject({ _id: this.props.task.project }, { $pull: { tasks: this.props.task._id } });
-            }
+        key: 'handleDateChange',
+        value: function handleDateChange(date) {
+            this.setState({
+                dueDate: (0, _moment2.default)(date).format()
+            });
         }
 
         /**
@@ -1746,6 +1808,35 @@ var Task = function (_Component) {
             } else {
                 this.props.db.updateTask({ _id: this.props.task._id }, { $set: { starred: false } });
             }
+        }
+
+        /**
+        * Deletes a task and if this task was related to a project, delete the reference in the project aswell.
+        */
+
+    }, {
+        key: 'deleteTask',
+        value: function deleteTask() {
+            console.log("Deleting task");
+            this.props.db.deleteTask({ _id: this.props.task._id });
+            if (this.props.task.project) {
+                console.log("Task had a project, delete the reference in the project aswell");
+                this.props.db.updateProject({ _id: this.props.task.project }, { $pull: { tasks: this.props.task._id } });
+            }
+        }
+
+        /**
+        * Produce the tags string from the tags saved in the database
+        */
+
+    }, {
+        key: 'getTagsString',
+        value: function getTagsString() {
+            var tagsString = "";
+            this.props.task.tags.map(function (tag) {
+                tagsString = tagsString.concat("," + tag);
+            });
+            return tagsString.substr(1);
         }
 
         /**
@@ -1776,7 +1867,6 @@ var Task = function (_Component) {
         /**
         * Saves the edits and make this task uneditable
         */
-        //TODO Fix bug when adding a task and no project is selected
 
     }, {
         key: 'saveEdit',
@@ -1807,35 +1897,13 @@ var Task = function (_Component) {
         }
 
         /**
-        * Refreshes the tags in the Navbar
+        * Use the mailto option to create a mail with some rudimental information about a task
         */
 
     }, {
-        key: 'refreshTags',
-        value: function refreshTags() {
-            this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
-        }
-    }, {
-        key: 'getTagsString',
-        value: function getTagsString() {
-            var tagsString = "";
-            this.props.task.tags.map(function (tag) {
-                tagsString = tagsString.concat("," + tag);
-            });
-            return tagsString.substr(1);
-        }
-
-        /**
-        * Saves the currently selected date to the satet
-        + @param {moment} date - date to set
-        */
-
-    }, {
-        key: 'handleDateChange',
-        value: function handleDateChange(date) {
-            this.setState({
-                dueDate: (0, _moment2.default)(date, 'DD-MM-YYYY hh:mm')
-            });
+        key: 'shareTaskViaMail',
+        value: function shareTaskViaMail() {
+            location.href = 'mailto:mail@provider.com?Subject=' + this.props.task.title + '&Body=Title: ' + this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + (0, _moment2.default)(this.props.task.dueDate).toString();
         }
 
         /**
@@ -1847,7 +1915,7 @@ var Task = function (_Component) {
         value: function projectInput() {
             var _this2 = this;
 
-            if (this.props.db.allProjects) {
+            if (this.props.db.allProjects.length > 0) {
                 return _react2.default.createElement(
                     'p',
                     { className: 'control' },
@@ -1884,6 +1952,9 @@ var Task = function (_Component) {
                 );
             }
         }
+
+        //TODO Bug in moment()
+
     }, {
         key: 'render',
         value: function render() {
@@ -1903,32 +1974,40 @@ var Task = function (_Component) {
                                 'div',
                                 { className: 'content' },
                                 _react2.default.createElement(
-                                    'h3',
-                                    null,
-                                    this.props.task.title
+                                    'p',
+                                    { className: 'title' },
+                                    this.props.task.title,
+                                    _react2.default.createElement(
+                                        'small',
+                                        null,
+                                        'Due to: ',
+                                        this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : null
+                                    )
                                 ),
-                                ' ',
                                 _react2.default.createElement(
-                                    'small',
+                                    'p',
                                     null,
-                                    'Due to: '
+                                    _react2.default.createElement(
+                                        'span',
+                                        null,
+                                        _react2.default.createElement('i', { className: 'fa fa-sticky-note-o', 'aria-hidden': 'true' })
+                                    ),
+                                    this.props.task.notes
                                 ),
-                                ' ',
                                 _react2.default.createElement(
-                                    'small',
+                                    'p',
                                     null,
-                                    this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).format('DD-MM-YYYY hh:mm') : null
+                                    _react2.default.createElement(
+                                        'span',
+                                        null,
+                                        _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' })
+                                    ),
+                                    this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : _react2.default.createElement(
+                                        'span',
+                                        null,
+                                        'Not assigned'
+                                    )
                                 ),
-                                _react2.default.createElement('br', null),
-                                this.props.task.notes,
-                                _react2.default.createElement('br', null),
-                                _react2.default.createElement(
-                                    'span',
-                                    null,
-                                    'In project: ',
-                                    this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : null
-                                ),
-                                _react2.default.createElement('br', null),
                                 this.props.task.tags.map(function (tag) {
                                     return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
                                 })
@@ -1953,12 +2032,12 @@ var Task = function (_Component) {
                                     _react2.default.createElement(
                                         'a',
                                         { className: 'item-level', onClick: function onClick() {
-                                                return _this3.share();
+                                                return _this3.shareTaskViaMail();
                                             } },
                                         _react2.default.createElement(
                                             'span',
                                             { className: 'icon is-small' },
-                                            _react2.default.createElement('i', { className: 'fa fa-share', 'aria-hidden': 'true' })
+                                            _react2.default.createElement('i', { className: 'fa fa-envelope-o', 'aria-hidden': 'true' })
                                         )
                                     )
                                 )
@@ -1992,9 +2071,13 @@ var Task = function (_Component) {
                             _react2.default.createElement(
                                 'div',
                                 { className: 'media-right' },
-                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this3.deleteTask();
-                                    } })
+                                _react2.default.createElement(
+                                    'button',
+                                    { className: 'btn-round btn-danger', onClick: function onClick() {
+                                            return _this3.deleteTask();
+                                        } },
+                                    _react2.default.createElement('i', { className: 'fa fa-trash-o' })
+                                )
                             )
                         )
                     )
@@ -2018,15 +2101,17 @@ var Task = function (_Component) {
                                     _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
                                     _react2.default.createElement('br', null),
                                     'Due to:',
-                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate._d).format('DD-MM-YYYY hh:mm') : null, onChange: function onChange(_, str) {
+                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, defaultValue: this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : null, onChange: function onChange(_, str) {
                                             return _this3.handleDateChange(str);
                                         } }),
                                     _react2.default.createElement('br', null),
+                                    'Notes:',
                                     _react2.default.createElement('textarea', { className: 'textarea', ref: 'taskNotesTextarea', defaultValue: this.props.task.notes }),
                                     _react2.default.createElement('br', null),
                                     'In project: ',
                                     this.projectInput(),
                                     _react2.default.createElement('br', null),
+                                    'Tags:',
                                     _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'taskTagsInput', defaultValue: this.getTagsString() })
                                 )
                             )
@@ -2159,7 +2244,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3;
+var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5;
 
 var _nedb = require('nedb');
 
@@ -2224,8 +2309,10 @@ var Database = (_class = function () {
 
         _initDefineProp(this, 'tags', _descriptor3, this);
 
-        this.allTasks = new Array();
-        this.allProjects = new Array();
+        _initDefineProp(this, 'allTasks', _descriptor4, this);
+
+        _initDefineProp(this, 'allProjects', _descriptor5, this);
+
         this.dbFilter = null;
 
         this.taskCollection = new _nedb2.default({
@@ -2310,11 +2397,11 @@ var Database = (_class = function () {
 
                 if (set.$set.project) {
                     _this3.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id } });
-                    if (previousProjectId) {
+                    if (previousProjectId != set.$set.project) {
                         console.log("Task had previous project, so remove the refernce from that project");
                         _this3.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id } });
                     }
-                } else if (previousProjectId) {
+                } else if (previousProjectId != set.$set.project) {
                     console.log("Task is no longer assigned to a project but had previous project, so remove the refernce from that project");
                     _this3.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id } });
                 }
@@ -2338,12 +2425,8 @@ var Database = (_class = function () {
             var _this5 = this;
 
             this.taskCollection.find({}, function (err, docs) {
-                if (docs.length == 0) {
-                    _this5.allTasks = null;
-                } else {
-                    _this5.allTasks = docs;
-                    console.log("all tasks refreshed");
-                }
+                _this5.allTasks = docs;
+                console.log("all tasks refreshed");
             });
         }
     }, {
@@ -2430,12 +2513,8 @@ var Database = (_class = function () {
             var _this10 = this;
 
             this.projectCollection.find({}).sort().exec(function (err, docs) {
-                if (docs.length == 0) {
-                    _this10.allProjects = null;
-                } else {
-                    _this10.allProjects = docs;
-                    console.log("all projects refreshed");
-                }
+                _this10.allProjects = docs;
+                console.log("all projects refreshed");
             });
         }
     }, {
@@ -2511,6 +2590,16 @@ var Database = (_class = function () {
         return new Array();
     }
 }), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, 'tags', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return new Array();
+    }
+}), _descriptor4 = _applyDecoratedDescriptor(_class.prototype, 'allTasks', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return new Array();
+    }
+}), _descriptor5 = _applyDecoratedDescriptor(_class.prototype, 'allProjects', [_mobx.observable], {
     enumerable: true,
     initializer: function initializer() {
         return new Array();

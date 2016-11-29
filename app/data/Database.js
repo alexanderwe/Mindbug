@@ -7,8 +7,8 @@ class Database{
     @observable tasks = new Array();
     @observable projects = new Array();
     @observable tags = new Array();
-    allTasks = new Array();
-    allProjects = new Array();
+    @observable allTasks = new Array();
+    @observable allProjects = new Array();
     dbFilter = null;
 
 
@@ -86,11 +86,11 @@ class Database{
 
             if(set.$set.project){
                 this.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id} });
-                if(previousProjectId){
+                if(previousProjectId!=set.$set.project){
                     console.log("Task had previous project, so remove the refernce from that project");
                     this.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id} });
                 }
-            } else if(previousProjectId){
+            } else if(previousProjectId!=set.$set.project){
                 console.log("Task is no longer assigned to a project but had previous project, so remove the refernce from that project");
                 this.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id} });
             }
@@ -110,13 +110,8 @@ class Database{
     @action
     refreshAllTasks(){
         this.taskCollection.find({}, (err, docs)=> {
-            if (docs.length==0) {
-                this.allTasks = null;
-            } else {
-                this.allTasks = docs;
-                console.log("all tasks refreshed");
-
-            }
+            this.allTasks = docs;
+            console.log("all tasks refreshed");
         })
     }
 
@@ -169,7 +164,6 @@ class Database{
             console.log("Project updated with: ");
             console.log(query);
 
-
             this.findProjects(this.dbFilter);
             this.updateTags();
             this.refreshAllProjects();
@@ -190,13 +184,8 @@ class Database{
     @action
     refreshAllProjects(){
         this.projectCollection.find({}).sort().exec((err,docs)=>{
-            if (docs.length==0) {
-                this.allProjects = null;
-            } else {
-                this.allProjects = docs;
-                console.log("all projects refreshed");
-
-            }
+            this.allProjects = docs;
+            console.log("all projects refreshed");
         })
     }
 

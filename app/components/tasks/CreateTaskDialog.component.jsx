@@ -51,7 +51,7 @@ export default class CreateTaskDialog extends Component {
     * Creates the project selection input
     */
     projectInput(){
-        if(this.props.db.allProjects){
+        if(this.props.db.allProjects.length > 0){
             return(
                 <p className="control">
                     <span className="select">
@@ -75,7 +75,7 @@ export default class CreateTaskDialog extends Component {
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
+            dueDate: moment(date)
         });
     }
 
@@ -97,6 +97,9 @@ export default class CreateTaskDialog extends Component {
     */
     //TODO Fix bug when adding a task and no project is selected
     addTask(){
+        console.log("add task with date");
+        console.log(this.state.dueDate);
+
 
         var doc = {
             title: this.refs.taskTitleInput.value,

@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import moment from 'moment';
+import Flatpickr from 'react-flatpickr'
+
+import Tag from '../navigation/Tag.component.jsx';
 
 @observer
 export default class Project extends Component{
@@ -14,28 +17,18 @@ export default class Project extends Component{
         }
     }
 
-    componentWillMount(){
-    }
-
     componentDidMount(){
-    }
-
-
-    /**
-    * Makes this task editable
-    */
-    edit(){
-        this.setState({
-            edit:true,
-        });
+        console.log("Mounted project");
+        console.log(this.props.project);
     }
 
     /**
-    * Leave edit mode
+    * Saves the currently selected date to the satet
+    + @param {moment} date - date to set
     */
-    cancelEdit(){
+    handleDateChange(date){
         this.setState({
-            edit:false,
+            dueDate: moment(date).format()
         });
     }
 
@@ -56,12 +49,52 @@ export default class Project extends Component{
         }
     }
 
+    /**
+    * Generating tags from the value of the tagsInput
+    */
+    generateTags() {
+        return this.refs.projectTagsInput.value.replace(/\s/g,'').split(",").filter(function(str) {
+            return /\S/.test(str);
+        });;
+    }
+
+    getTagsString(){
+        var tagsString = "";
+        this.props.project.tags.map((tag)=>{
+            tagsString = tagsString.concat(","+tag);
+
+        });
+        return tagsString.substr(1);
+    }
 
     /**
-    * Refresh the tags in the navbar.
+    * Makes this project editable
     */
-    refreshTags(){
-        this.props.parent.props.parent.refs.navbar.refreshTags(); //Navbar.refreshTags()
+    edit(){
+        this.setState({
+            edit:true,
+        });
+    }
+
+    /**
+    * Saves the edits and make this project uneditable
+    */
+    saveEdit(){
+        this.props.db.updateProject({ _id: this.props.project._id }, { $set: {
+            title: this.refs.projectTitleInput.value,
+            tags: this.generateTags(),
+            dueDate: this.state.dueDate,
+        }});
+        this.cancelEdit();
+    }
+
+    /**
+    * Leave edit mode
+    */
+    cancelEdit(){
+        this.setState({
+            edit:false,
+        });
     }
 
     render(){
@@ -69,33 +102,52 @@ export default class Project extends Component{
             return(
                 <div className="tile is-child box project">
                     <p className="title">{this.props.project.title}</p>
-
-                        {this.props.project.tasks.map((taskId)=>{
+                     <small>Due date {this.props.project.dueDate ? moment(this.props.project.dueDate).toString() : null}</small>
+                    <p className="menu-label">
+                        Tasks
+                    </p>
+                    <ul className="menu-list">
+                        {this.props.project.tasks.length > 0 ? this.props.project.tasks.map((taskId)=>{
                             var task = this.props.db.findTaskSynchronous(taskId);
-                            return <p key={task._id}>{task.title}</p>
-                        })}
-                     <button className="delete" onClick={()=>this.deleteProject()}></button>
-                     <button className="btn-round btn-warning" onClick={()=>this.edit()}>
-                         <i className="fa fa-edit" />
+                            return <li key={task._id}>
+                                        {task.title}
+                                        {task.done ? (<span className="icon"><i className="fa fa-check" aria-hidden="true"></i></span>):null}
+                                   </li>}): <li>No tasks assigned to this project</li>
+                        }
+                    </ul>
+                    {this.props.project.tags.map((tag)=>{
+                        return <Tag name={tag} key={tag} parent={this}/>
+                    })}
+                     <button className="btn-round btn-danger" onClick={()=>this.deleteProject()}>
+                         <i className="fa fa-trash-o" />
                      </button>
+                    <button className="btn-round btn-warning" onClick={()=>this.edit()}>
+                        <i className="fa fa-edit" />
+                    </button>
                 </div>
             )
         } else {
             return(
                 <div className="tile is-child box project is-edit">
-                    <p className="title">{this.props.project.title}</p>
-
-                        {this.state.tasks.map((task)=>{
+                    <input className="input" type="text" defaultValue={this.props.project.title} ref="projectTitleInput" />
+                    <Flatpickr data-enable-time defaultValue={this.props.project.dueDate ? moment(this.props.project.dueDate).toString() :null} onChange={(_, str) => this.handleDateChange(str)} />
+                    <ul className="menu-list">
+                        {this.props.project.tasks.map((taskId)=>{
+                            var task = this.props.db.findTaskSynchronous(taskId);
                             return <p key={task._id}>{task.title}</p>
                         })}
-                        <button className="delete" onClick={()=>this.cancelEdit()} />
-                        <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
-                            <i className="fa fa-floppy-o" />
-                        </button>
+                    </ul>
+                    <p className="menu-label">
+                        Tags
+                    </p>
+                    <input className="input" type="text"ref="projectTagsInput" defaultValue={this.getTagsString()}/>
+                    <button className="delete" onClick={()=>this.cancelEdit()} />
+                    <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
+                        <i className="fa fa-floppy-o" />
+                    </button>
                 </div>
             )
         }
-
     }
 }
 

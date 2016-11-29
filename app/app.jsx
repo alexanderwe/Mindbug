@@ -65,6 +65,7 @@ class Main extends Component {
                             <Navbar ref="navbar" parent={this} db={Database}/>
                         </div>
                         <div className="pane main-content" id="mainPane">
+                            <ToolbarHeader parent={this} db={Database}/>
                             {this.state.activeItem === 'tasks' ? (
                                 <TaskList ref="taskList" parent={this} db={Database} />
                             ) : this.state.activeItem === 'projects' ? (
