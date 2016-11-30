@@ -93,7 +93,6 @@ export default class Navbar extends Component {
                         General
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('general', 'overview')} className={this.isActiveState('general', 'overview') ? 'is-active': null }><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
                         <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">

@@ -1,5 +1,6 @@
 import Datastore from 'nedb';
 import {observable,action} from 'mobx';
+import moment from 'moment';
 
 
 class Database{
@@ -72,6 +73,14 @@ class Database{
 
         if (this.allTasks) {
             return this.allTasks.find(x => x._id === taskId);
+        } else {
+            return null;
+        }
+    }
+
+    findTaskByNow(date){
+        if (this.allTasks) {
+            return this.allTasks.find(x => x.dueDate === moment() || moment.diff(x.dueDate) > 0  );
         } else {
             return null;
         }
@@ -189,8 +198,9 @@ class Database{
         })
     }
 
+    //TODO also include project tags
     @action
-     updateTags(){
+    updateTags(){
         var tagsArray = [];
         this.taskCollection.find({}).sort({ createdAt: 1 }).exec((err,docs)=>{
             if(docs.length==0){

@@ -41,8 +41,6 @@ class Main extends Component {
             Database.findProjects(this.state.dbFilter);
         }
     }
-
-
     /**
     * Create a desktop notification
     * @param {String} title - notification title

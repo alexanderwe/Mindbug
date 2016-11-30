@@ -162,7 +162,7 @@ export default class Task extends Component {
                             <div className="content">
                                 <p className="title">
                                     {this.props.task.title}
-                                    <small>Due to: {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : null}</small>
+                                    <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : null}</small>
                                 </p>
                                 <p>
                                     <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>

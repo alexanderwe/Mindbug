@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "browserify -t [ babelify --presets [ react es2015 stage-1] --plugins [transform-decorators-legacy] ] app/app.jsx -o app/js/app.js && stylus app/css/styles.styl -o app/css/styles.css && electron app/main.js",
+    "start": "browserify -t [ babelify --presets [ react es2015 stage-1] --plugins [transform-decorators-legacy] ] app/app.jsx -o app/js/app.js && browserify -t [ babelify --presets [ react es2015 stage-1] --plugins [transform-decorators-legacy] ] app/windows/CreateTaskWindow.jsx -o app/js/CreateTaskWindow.js&& stylus app/css/styles.styl -o app/css/styles.css && electron app/main.js",
     "dev": "NODE_ENV='development' npm run start",
     "dist": "build -mwl --x64 --ia32"
   },

@@ -1,5 +1,7 @@
 const electron = require('electron')
 const {Menu} = require('electron')
+const {globalShortcut} = require('electron')
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -8,15 +10,18 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
+
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let taskWindow
 
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-      width: 1000,
-      height: 800,
+      width: 800,
+      height: 600,
       minHeight: 300,
       minWidth: 520,
       titleBarStyle: 'hidden',
@@ -45,10 +50,44 @@ function createWindow () {
   require('./mainmenu')
 }
 
+
+//Create the task window
+function createTaskWindow(){
+    taskWindow = new BrowserWindow({
+        width: 520,
+        height: 300,
+        minHeight: 300,
+        minWidth: 520,
+        titleBarStyle: 'hidden',
+        title: 'Mindbug - Create a task',
+        vibrancy: 'dark'
+    });
+
+    // and load the index.html of the app.
+    taskWindow.loadURL(url.format({
+      pathname: path.join(__dirname, './windows/createTask.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+
+    taskWindow.on('closed', function () {
+       // Dereference the window object, usually you would store windows
+       // in an array if your app supports multi windows, this is the time
+       // when you should delete the corresponding element.
+       taskWindow = null;
+    })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', ()=>{
+    createWindow();
+    const ret = globalShortcut.register('CommandOrControl+X', () => {
+        console.log('CommandOrControl+X is pressed')
+        createTaskWindow()
+    });
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
