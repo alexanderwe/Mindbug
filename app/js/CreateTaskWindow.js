@@ -159,7 +159,6 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         * Refreshes tasks and project views to make the changes visible.
         * Refreshes tags in the navbar.
         */
-        //TODO Fix bug when adding a task and no project is selected
 
     }, {
         key: 'addTask',
@@ -176,7 +175,8 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                 repeat: this.refs.taskRepeatCheckbox.checked,
                 done: false,
                 starred: false,
-                deleted: false
+                deleted: false,
+                notified: false
             };
 
             //Insert doc
@@ -237,7 +237,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                     _react2.default.createElement(
                         'label',
                         { className: 'label' },
-                        'Task'
+                        'Tags'
                     ),
                     _react2.default.createElement(
                         'p',
@@ -262,7 +262,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                             { className: 'button is-primary', onClick: function onClick() {
                                     return _this2.addTask();
                                 } },
-                            'Submit'
+                            'Add'
                         ),
                         _react2.default.createElement(
                             'button',
@@ -407,7 +407,6 @@ var Database = (_class = function () {
                     _this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id } });
                 }
                 _this.findTasks(_this.dbFilter);
-                //TODO create task while ciewing projects --> projects view is not updated
                 _this.updateTags();
                 _this.refreshAllTasks();
                 _this.refreshAllProjects();
@@ -451,7 +450,7 @@ var Database = (_class = function () {
         value: function findTaskByNow(date) {
             if (this.allTasks) {
                 return this.allTasks.find(function (x) {
-                    return x.dueDate === (0, _moment2.default)() || _moment2.default.diff(x.dueDate) > 0;
+                    return x.dueDate === (0, _moment2.default)() && x.notified == false || (0, _moment2.default)().diff(x.dueDate) > 0 && x.notified == false;
                 });
             } else {
                 return null;
@@ -461,6 +460,9 @@ var Database = (_class = function () {
         key: 'updateTask',
         value: function updateTask(query, set, previousProjectId) {
             var _this3 = this;
+
+            console.log("update task with ");
+            console.log(set);
 
             this.taskCollection.update(query, set, function (err, numReplaced) {
                 _this3.findTasks(_this3.dbFilter);
@@ -38809,6 +38811,8 @@ module.exports = require('./lib/React');
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _class;
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -38816,6 +38820,16 @@ var _react2 = _interopRequireDefault(_react);
 var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _reactFlatpickr = require('react-flatpickr');
+
+var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var _mobxReact = require('mobx-react');
 
 var _CreateTaskDialogComponent = require('../components/tasks/CreateTaskDialog.component.jsx');
 
@@ -38833,10 +38847,13 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
+
 /**
-* Used for creating a task with a separate window
+* Used for creating a task with a separate window //TODO need to make connection between the two windows database ?
 */
-var CreateTaskWindow = function (_Component) {
+
+var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(CreateTaskWindow, _Component);
 
     function CreateTaskWindow(props) {
@@ -38845,24 +38862,158 @@ var CreateTaskWindow = function (_Component) {
         return _possibleConstructorReturn(this, (CreateTaskWindow.__proto__ || Object.getPrototypeOf(CreateTaskWindow)).call(this, props));
     }
 
+    /**
+    * Creates the project selection input
+    */
+
+
     _createClass(CreateTaskWindow, [{
+        key: 'projectInput',
+        value: function projectInput() {
+            if (_Database2.default.allProjects.length > 0) {
+                return _react2.default.createElement(
+                    'p',
+                    { className: 'control' },
+                    _react2.default.createElement(
+                        'span',
+                        { className: 'select' },
+                        _react2.default.createElement(
+                            'select',
+                            { ref: 'projectSelect' },
+                            _react2.default.createElement('option', null),
+                            _Database2.default.allProjects.map(function (project) {
+                                return _react2.default.createElement(
+                                    'option',
+                                    { key: project._id },
+                                    project.title
+                                );
+                            })
+                        )
+                    )
+                );
+            } else {
+                return _react2.default.createElement(
+                    'p',
+                    null,
+                    'No open projects'
+                );
+            }
+        }
+
+        /**
+        * Generating tags from the value of the tagsInput
+        */
+
+    }, {
+        key: 'generateTags',
+        value: function generateTags() {
+            return this.refs.taskTagsInput.value.replace(/\s/g, '').split(",").filter(function (str) {
+                return (/\S/.test(str)
+                );
+            });
+        }
+    }, {
+        key: 'addTaskAndClose',
+        value: function addTaskAndClose() {
+            var doc = {
+                title: this.refs.taskTitleInput.value,
+                notes: this.refs.taskNotesInput.value,
+                project: this.refs.projectSelect ? this.refs.projectSelect.value ? _Database2.default.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null : null,
+                tags: this.generateTags(),
+                dueDate: null,
+                repeat: null,
+                done: false,
+                starred: false,
+                deleted: false
+            };
+
+            //Insert doc
+            _Database2.default.insertTask(doc);
+
+            //Clean inputs
+            this.clearForm();
+
+            //ipcRenderer.send('close-taskWindow', 'ping')
+        }
+
+        /**
+        * Clears the values of each input in the form
+        */
+
+    }, {
+        key: 'clearForm',
+        value: function clearForm() {
+            this.refs.taskTitleInput.value = "";
+            this.refs.taskNotesInput.value = "";
+            this.refs.taskTagsInput.value = "";
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             return _react2.default.createElement(
                 'div',
-                { className: 'window' },
-                'hi'
+                { className: 'window create-task-window' },
+                _react2.default.createElement(
+                    'label',
+                    { className: 'label' },
+                    'Task'
+                ),
+                _react2.default.createElement(
+                    'p',
+                    { className: 'control' },
+                    _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'taskTitleInput' })
+                ),
+                _react2.default.createElement(
+                    'label',
+                    { className: 'label' },
+                    'Notes'
+                ),
+                _react2.default.createElement(
+                    'p',
+                    { className: 'control' },
+                    _react2.default.createElement('input', { className: 'input', placeholder: 'Notes', type: 'text', ref: 'taskNotesInput' })
+                ),
+                _react2.default.createElement(
+                    'label',
+                    { className: 'label' },
+                    'Due to'
+                ),
+                _react2.default.createElement(
+                    'label',
+                    { className: 'label' },
+                    'Add to project'
+                ),
+                this.projectInput(),
+                _react2.default.createElement(
+                    'label',
+                    { className: 'label' },
+                    'Tags'
+                ),
+                _react2.default.createElement(
+                    'p',
+                    { className: 'control' },
+                    _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Tags', ref: 'taskTagsInput' })
+                ),
+                _react2.default.createElement(
+                    'button',
+                    { className: 'button is-primary', onClick: function onClick() {
+                            return _this2.addTaskAndClose();
+                        } },
+                    'Add and close'
+                )
             );
         }
     }]);
 
     return CreateTaskWindow;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(CreateTaskWindow, null), main);
 
-},{"../components/tasks/CreateTaskDialog.component.jsx":1,"../data/Database.js":2,"react":198,"react-dom":46}],201:[function(require,module,exports){
+},{"../components/tasks/CreateTaskDialog.component.jsx":1,"../data/Database.js":2,"mobx-react":33,"moment":35,"react":198,"react-dom":46,"react-flatpickr":173}],201:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

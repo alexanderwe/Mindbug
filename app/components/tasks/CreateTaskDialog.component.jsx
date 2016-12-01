@@ -95,7 +95,6 @@ export default class CreateTaskDialog extends Component {
     * Refreshes tasks and project views to make the changes visible.
     * Refreshes tags in the navbar.
     */
-    //TODO Fix bug when adding a task and no project is selected
     addTask(){
         console.log("add task with date");
         console.log(this.state.dueDate);
@@ -111,6 +110,7 @@ export default class CreateTaskDialog extends Component {
             done: false,
             starred: false,
             deleted: false,
+            notified:false,
         };
 
         //Insert doc
@@ -142,7 +142,7 @@ export default class CreateTaskDialog extends Component {
                     <Flatpickr data-enable-time   onChange={(_, str) => this.handleDateChange(str)} />
                     <label className="label">Add to project</label>
                     {this.projectInput()}
-                    <label className="label">Task</label>
+                    <label className="label">Tags</label>
                     <p className="control">
                         <input className="input" type="text" placeholder="Tags" ref="taskTagsInput"/>
                     </p>
@@ -153,7 +153,7 @@ export default class CreateTaskDialog extends Component {
                         </label>
                     </p>
                     <p className="control">
-                        <button className="button is-primary" onClick={()=>this.addTask()}>Submit</button>
+                        <button className="button is-primary" onClick={()=>this.addTask()}>Add</button>
                         <button className="button is-link" onClick={()=>this.closeModal()}>Cancel</button>
                     </p>
                 </div>

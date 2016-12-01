@@ -11,6 +11,10 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
 var _Database = require('./data/Database.js');
 
 var _Database2 = _interopRequireDefault(_Database);
@@ -77,6 +81,19 @@ var Main = function (_Component) {
             this.refreshDatabase();
         }
     }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var _this2 = this;
+
+            setInterval(function () {
+                var task = _Database2.default.findTaskByNow((0, _moment2.default)());
+                if (task) {
+                    _this2.notify(task.title, task.notes + "\n" + task.dueDate.toString());
+                    _Database2.default.updateTask({ _id: task._id }, { $set: { notified: true } });
+                }
+            }, 3000);
+        }
+    }, {
         key: 'refreshDatabase',
         value: function refreshDatabase() {
             if (this.state.activeItem === "tasks") {
@@ -137,7 +154,7 @@ var Main = function (_Component) {
 var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(Main, null), main);
 
-},{"./components/general/Today.component.jsx":2,"./components/navigation/Navbar.component.jsx":3,"./components/navigation/ToolbarHeader.component.jsx":5,"./components/projects/CreateProjectDialog.component.jsx":6,"./components/projects/ProjectList.component.jsx":8,"./components/tasks/CreateTaskDialog.component.jsx":9,"./components/tasks/TaskList.component.jsx":11,"./data/Database.js":12,"react":208,"react-dom":56}],2:[function(require,module,exports){
+},{"./components/general/Today.component.jsx":2,"./components/navigation/Navbar.component.jsx":3,"./components/navigation/ToolbarHeader.component.jsx":5,"./components/projects/CreateProjectDialog.component.jsx":6,"./components/projects/ProjectList.component.jsx":8,"./components/tasks/CreateTaskDialog.component.jsx":9,"./components/tasks/TaskList.component.jsx":11,"./data/Database.js":12,"moment":45,"react":208,"react-dom":56}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1323,6 +1340,11 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                         return _this3.handleDateChange(str);
                                     } }),
                                 _react2.default.createElement(
+                                    'p',
+                                    { className: 'menu-label' },
+                                    'Tasks'
+                                ),
+                                _react2.default.createElement(
                                     'ul',
                                     { className: 'menu-list' },
                                     this.props.project.tasks.map(function (taskId) {
@@ -1627,7 +1649,6 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         * Refreshes tasks and project views to make the changes visible.
         * Refreshes tags in the navbar.
         */
-        //TODO Fix bug when adding a task and no project is selected
 
     }, {
         key: 'addTask',
@@ -1644,7 +1665,8 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                 repeat: this.refs.taskRepeatCheckbox.checked,
                 done: false,
                 starred: false,
-                deleted: false
+                deleted: false,
+                notified: false
             };
 
             //Insert doc
@@ -1705,7 +1727,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                     _react2.default.createElement(
                         'label',
                         { className: 'label' },
-                        'Task'
+                        'Tags'
                     ),
                     _react2.default.createElement(
                         'p',
@@ -1730,7 +1752,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                             { className: 'button is-primary', onClick: function onClick() {
                                     return _this2.addTask();
                                 } },
-                            'Submit'
+                            'Add'
                         ),
                         _react2.default.createElement(
                             'button',
@@ -1916,13 +1938,21 @@ var Task = function (_Component) {
         value: function saveEdit() {
             console.log("Save task with date");
             console.log(this.state.dueDate);
+            var notified = true;
+            if (this.state.dueDate) {
+                if ((0, _moment2.default)().diff(this.state.dueDate) < 0) {
+                    notified = false;
+                    console.log("notify");
+                }
+            }
 
             this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
                     title: this.refs.taskTitleInput.value,
                     notes: this.refs.taskNotesTextarea.value,
                     tags: this.generateTags(),
                     dueDate: this.state.dueDate,
-                    project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null : null
+                    project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id : null : null,
+                    notified: notified
                 } }, this.props.task.project);
             this.cancelEdit();
         }
@@ -2398,7 +2428,6 @@ var Database = (_class = function () {
                     _this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id } });
                 }
                 _this.findTasks(_this.dbFilter);
-                //TODO create task while ciewing projects --> projects view is not updated
                 _this.updateTags();
                 _this.refreshAllTasks();
                 _this.refreshAllProjects();
@@ -2442,7 +2471,7 @@ var Database = (_class = function () {
         value: function findTaskByNow(date) {
             if (this.allTasks) {
                 return this.allTasks.find(function (x) {
-                    return x.dueDate === (0, _moment2.default)() || _moment2.default.diff(x.dueDate) > 0;
+                    return x.dueDate === (0, _moment2.default)() && x.notified == false || (0, _moment2.default)().diff(x.dueDate) > 0 && x.notified == false;
                 });
             } else {
                 return null;
@@ -2452,6 +2481,9 @@ var Database = (_class = function () {
         key: 'updateTask',
         value: function updateTask(query, set, previousProjectId) {
             var _this3 = this;
+
+            console.log("update task with ");
+            console.log(set);
 
             this.taskCollection.update(query, set, function (err, numReplaced) {
                 _this3.findTasks(_this3.dbFilter);

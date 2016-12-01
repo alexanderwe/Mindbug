@@ -150,6 +150,9 @@ export default class Project extends Component{
                             <div className="content">
                                 <input className="input" type="text" defaultValue={this.props.project.title} ref="projectTitleInput" />
                                 <Flatpickr data-enable-time defaultValue={this.props.project.dueDate ? moment(this.props.project.dueDate).toString() :null} onChange={(_, str) => this.handleDateChange(str)} />
+                                <p className="menu-label">
+                                    Tasks
+                                </p>
                                 <ul className="menu-list">
                                     {this.props.project.tasks.map((taskId)=>{
                                         var task = this.props.db.findTaskSynchronous(taskId);

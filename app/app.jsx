@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 
 import Database from './data/Database.js'
 
@@ -30,6 +31,17 @@ class Main extends Component {
 
     componentDidUpdate(){
         this.refreshDatabase();
+    }
+
+    componentDidMount(){
+        setInterval(()=>{
+            var task = Database.findTaskByNow(moment());
+            if (task){
+                this.notify(task.title, task.notes + "\n" + task.dueDate.toString());
+                Database.updateTask({ _id: task._id }, {$set: {notified: true}})
+            }
+        },3000);
+
     }
 
     refreshDatabase(){

@@ -98,13 +98,20 @@ export default class Task extends Component {
     saveEdit(){
         console.log("Save task with date");
         console.log(this.state.dueDate);
-
+        var notified = true;
+        if(this.state.dueDate){
+            if(moment().diff(this.state.dueDate) < 0 ){
+                notified = false;
+            }
+        }
+        
         this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
             project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
+            notified: notified,
         }},this.props.task.project);
         this.cancelEdit();
     }

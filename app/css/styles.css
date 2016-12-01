@@ -246,3 +246,9 @@ a {
 .project .media-right button {
   margin-top: 5px;
 }
+/*------------------------------------*    CreateTaskWindow
+\*------------------------------------*/
+.create-task-window {
+  background-color: #fff;
+  padding: 20px;
+}

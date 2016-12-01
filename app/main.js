@@ -1,7 +1,7 @@
 const electron = require('electron')
 const {Menu} = require('electron')
 const {globalShortcut} = require('electron')
-
+const {ipcMain} = require('electron')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -78,15 +78,22 @@ function createTaskWindow(){
     })
 }
 
+ipcMain.on('close-taskWindow', (event, arg) => {
+    taskWindow.close();
+})
+
+
+
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', ()=>{
     createWindow();
-    const ret = globalShortcut.register('CommandOrControl+X', () => {
+    /*const ret = globalShortcut.register('CommandOrControl+.+T', () => {
         console.log('CommandOrControl+X is pressed')
         createTaskWindow()
-    });
+    });*/
 });
 
 // Quit when all windows are closed.

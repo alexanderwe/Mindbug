@@ -43,7 +43,6 @@ class Database{
                 this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id} });
             }
             this.findTasks(this.dbFilter);
-            //TODO create task while ciewing projects --> projects view is not updated
             this.updateTags();
             this.refreshAllTasks();
             this.refreshAllProjects();
@@ -80,7 +79,7 @@ class Database{
 
     findTaskByNow(date){
         if (this.allTasks) {
-            return this.allTasks.find(x => x.dueDate === moment() || moment.diff(x.dueDate) > 0  );
+            return this.allTasks.find(x => x.dueDate === moment() && x.notified==false|| moment().diff(x.dueDate) > 0 && x.notified==false );
         } else {
             return null;
         }
@@ -88,6 +87,10 @@ class Database{
 
     @action
     updateTask(query, set, previousProjectId){
+        console.log("update task with ");
+        console.log(set);
+
+
         this.taskCollection.update(query, set ,(err, numReplaced) => {
             this.findTasks(this.dbFilter);
             this.updateTags();
