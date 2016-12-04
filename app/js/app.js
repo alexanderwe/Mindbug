@@ -55,6 +55,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
+
 var Main = function (_Component) {
     _inherits(Main, _Component);
 
@@ -92,6 +94,9 @@ var Main = function (_Component) {
                     _Database2.default.updateTask({ _id: task._id }, { $set: { notified: true } });
                 }
             }, 3000);
+            ipcRenderer.on('insert-task', function (event, data) {
+                _Database2.default.insertTask(data.msg);
+            });
         }
     }, {
         key: 'refreshDatabase',
@@ -792,7 +797,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             return _react2.default.createElement(
                 'nav',
-                { className: 'level' },
+                { className: 'level draggable' },
                 _react2.default.createElement(
                     'div',
                     { className: 'level-item has-text-centered' },
@@ -1942,7 +1947,6 @@ var Task = function (_Component) {
             if (this.state.dueDate) {
                 if ((0, _moment2.default)().diff(this.state.dueDate) < 0) {
                     notified = false;
-                    console.log("notify");
                 }
             }
 

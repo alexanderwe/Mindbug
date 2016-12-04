@@ -38927,13 +38927,10 @@ var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
                 deleted: false
             };
 
-            //Insert doc
-            _Database2.default.insertTask(doc);
-
             //Clean inputs
             this.clearForm();
 
-            //ipcRenderer.send('close-taskWindow', 'ping')
+            ipcRenderer.send('created-task', doc);
         }
 
         /**
@@ -38954,7 +38951,7 @@ var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
 
             return _react2.default.createElement(
                 'div',
-                { className: 'window create-task-window' },
+                { className: 'window create-task-window draggable' },
                 _react2.default.createElement(
                     'label',
                     { className: 'label' },
@@ -38974,11 +38971,6 @@ var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
                     'p',
                     { className: 'control' },
                     _react2.default.createElement('input', { className: 'input', placeholder: 'Notes', type: 'text', ref: 'taskNotesInput' })
-                ),
-                _react2.default.createElement(
-                    'label',
-                    { className: 'label' },
-                    'Due to'
                 ),
                 _react2.default.createElement(
                     'label',

@@ -55,8 +55,8 @@ function createWindow () {
 function createTaskWindow(){
     taskWindow = new BrowserWindow({
         width: 520,
-        height: 300,
-        minHeight: 300,
+        height: 350,
+        minHeight: 350,
         minWidth: 520,
         titleBarStyle: 'hidden',
         title: 'Mindbug - Create a task',
@@ -78,7 +78,8 @@ function createTaskWindow(){
     })
 }
 
-ipcMain.on('close-taskWindow', (event, arg) => {
+ipcMain.on('created-task', (event, arg) => {
+    mainWindow.webContents.send('insert-task' , {msg:arg});
     taskWindow.close();
 })
 
@@ -90,10 +91,9 @@ ipcMain.on('close-taskWindow', (event, arg) => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', ()=>{
     createWindow();
-    /*const ret = globalShortcut.register('CommandOrControl+.+T', () => {
-        console.log('CommandOrControl+X is pressed')
+    const ret = globalShortcut.register('CommandOrControl+Shift+T', () => {
         createTaskWindow()
-    });*/
+    });
 });
 
 // Quit when all windows are closed.

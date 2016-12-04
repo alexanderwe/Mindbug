@@ -10,7 +10,7 @@ export default class ToolbarHeader extends Component{
 
     render(){
         return(
-            <nav className="level">
+            <nav className="level draggable">
                 <div className="level-item has-text-centered">
                     <p className="heading">Tasks</p>
                     <p className="title">{this.props.db.allTasks.length}</p>

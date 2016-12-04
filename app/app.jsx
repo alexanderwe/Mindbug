@@ -14,6 +14,7 @@ import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx'
 import ProjectList from './components/projects/ProjectList.component.jsx';
 import CreateProjectDialog from './components/projects/CreateProjectDialog.component.jsx';
 
+var ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
 
 class Main extends Component {
 
@@ -41,7 +42,9 @@ class Main extends Component {
                 Database.updateTask({ _id: task._id }, {$set: {notified: true}})
             }
         },3000);
-
+        ipcRenderer.on('insert-task' ,(event , data)=>{
+             Database.insertTask(data.msg);
+         });
     }
 
     refreshDatabase(){

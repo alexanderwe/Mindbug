@@ -63,13 +63,11 @@ class CreateTaskWindow extends Component {
             deleted: false,
         };
 
-        //Insert doc
-        Database.insertTask(doc);
 
         //Clean inputs
         this.clearForm();
 
-        //ipcRenderer.send('close-taskWindow', 'ping')
+        ipcRenderer.send('created-task', doc)
     }
 
     /**
@@ -85,7 +83,7 @@ class CreateTaskWindow extends Component {
 
     render(){
         return(
-            <div className="window create-task-window">
+            <div className="window create-task-window draggable">
                     <label className="label">Task</label>
                     <p className="control">
                         <input className="input" type="text" placeholder="Task" ref="taskTitleInput" />
@@ -95,7 +93,6 @@ class CreateTaskWindow extends Component {
                     <p className="control">
                         <input className="input" placeholder="Notes"  type="text" ref="taskNotesInput"></input>
                     </p>
-                    <label className="label">Due to</label>
                     <label className="label">Add to project</label>
                     {this.projectInput()}
                     <label className="label">Tags</label>
