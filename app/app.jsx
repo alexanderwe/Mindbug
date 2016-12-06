@@ -38,7 +38,7 @@ class Main extends Component {
         setInterval(()=>{
             var task = Database.findTaskByNow(moment());
             if (task){
-                this.notify(task.title, task.notes + "\n" + task.dueDate.toString());
+                this.notify("\u1F558 "+task.title, moment(task.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
                 Database.updateTask({ _id: task._id }, {$set: {notified: true}})
             }
         },3000);

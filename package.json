@@ -4,10 +4,11 @@
     "dev": "NODE_ENV='development' npm run start",
     "dist": "build -mwl --x64 --ia32"
   },
-  "repository": "https://github.com/gr4h4n/Mindbug",
+  "repository": "https://github.com/alexanderwe/Mindbug",
   "keywords": [
     "Electron",
     "React",
+    "mobx",
     "GTD"
   ],
   "author": "Alexander Weiß",

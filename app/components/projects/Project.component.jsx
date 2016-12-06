@@ -144,7 +144,7 @@ export default class Project extends Component{
             )
         } else {
             return(
-                <div className="box project">
+                <div className="box project is-edit">
                     <article className="media">
                         <div className="media-content">
                             <div className="content">

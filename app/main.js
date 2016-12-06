@@ -10,12 +10,12 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
-
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 let taskWindow
+
+
 
 function createWindow () {
   // Create the browser window.
@@ -46,8 +46,102 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null;
   })
+  const template = [
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Toggle Developer Tools',
+          accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+          click (item, focusedWindow) {
+            if (focusedWindow) focusedWindow.webContents.toggleDevTools()
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'resetzoom'
+        },
+        {
+          role: 'zoomin'
+        },
+        {
+          role: 'zoomout'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'togglefullscreen'
+        }
+      ]
+    },
+    {
+      role: 'window',
+      submenu: [
+        {
+          role: 'minimize'
+        },
+        {
+          role: 'close'
+        }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu : [
+          {
+              label: 'Add a task',
+              accelerator: 'CommandOrControl+Shift+T',
+              click (){createTaskWindow()}
+          }
+      ]
+    },
+    {
+      role: 'help',
+      submenu: [
+        {
+          label: 'Visit at github',
+          click () { require('electron').shell.openExternal('https://github.com/alexanderwe/mindbug') }
+        }
+      ]
+    }
+  ]
 
-  require('./mainmenu')
+  if (process.platform === 'darwin') {
+    const name = app.getName()
+    template.unshift({
+      label: name,
+      submenu: [
+        {
+          role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'hide'
+        },
+        {
+          role: 'hideothers'
+        },
+        {
+          role: 'unhide'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'quit'
+        }
+      ]
+    })
+  }
+
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+
 }
 
 
