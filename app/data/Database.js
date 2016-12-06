@@ -97,7 +97,7 @@ class Database{
             this.refreshAllTasks();
 
             if(set.$set.project){
-                this.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id} });
+                this.updateProject({ _id: set.$set.project }, { $addToSet: { tasks: query._id} });
                 if(previousProjectId!=set.$set.project){
                     console.log("Task had previous project, so remove the refernce from that project");
                     this.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id} });

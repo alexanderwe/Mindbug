@@ -154,10 +154,13 @@ export default class Project extends Component{
                                     Tasks
                                 </p>
                                 <ul className="menu-list">
-                                    {this.props.project.tasks.map((taskId)=>{
+                                    {this.props.project.tasks.length > 0 ? this.props.project.tasks.map((taskId)=>{
                                         var task = this.props.db.findTaskSynchronous(taskId);
-                                        return <p key={task._id}>{task.title}</p>
-                                    })}
+                                        return <li key={task._id}>
+                                                    {task.title}
+                                                    {task.done ? (<span className="icon"><i className="fa fa-check" aria-hidden="true"></i></span>):null}
+                                               </li>}): <li>No tasks assigned to this project</li>
+                                    }
                                 </ul>
                                 <p className="menu-label">
                                     Tags

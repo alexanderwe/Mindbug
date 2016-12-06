@@ -1352,14 +1352,23 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 _react2.default.createElement(
                                     'ul',
                                     { className: 'menu-list' },
-                                    this.props.project.tasks.map(function (taskId) {
+                                    this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
                                         var task = _this3.props.db.findTaskSynchronous(taskId);
                                         return _react2.default.createElement(
-                                            'p',
+                                            'li',
                                             { key: task._id },
-                                            task.title
+                                            task.title,
+                                            task.done ? _react2.default.createElement(
+                                                'span',
+                                                { className: 'icon' },
+                                                _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
+                                            ) : null
                                         );
-                                    })
+                                    }) : _react2.default.createElement(
+                                        'li',
+                                        null,
+                                        'No tasks assigned to this project'
+                                    )
                                 ),
                                 _react2.default.createElement(
                                     'p',
@@ -2495,7 +2504,7 @@ var Database = (_class = function () {
                 _this3.refreshAllTasks();
 
                 if (set.$set.project) {
-                    _this3.updateProject({ _id: set.$set.project }, { $push: { tasks: query._id } });
+                    _this3.updateProject({ _id: set.$set.project }, { $addToSet: { tasks: query._id } });
                     if (previousProjectId != set.$set.project) {
                         console.log("Task had previous project, so remove the refernce from that project");
                         _this3.updateProject({ _id: previousProjectId }, { $pull: { tasks: query._id } });
