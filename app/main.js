@@ -121,6 +121,14 @@ function createWindow () {
           type: 'separator'
         },
         {
+          label: 'Preferences',
+          accelerator: 'CommandOrControl+,',
+          click(){console.log("preferences");}
+        },
+        {
+          type: 'separator'
+        },
+        {
           role: 'hide'
         },
         {
@@ -159,7 +167,7 @@ function createTaskWindow(){
 
     // and load the index.html of the app.
     taskWindow.loadURL(url.format({
-      pathname: path.join(__dirname, './windows/createTask.html'),
+      pathname: path.join(__dirname, './windows/createTasks/createTask.html'),
       protocol: 'file:',
       slashes: true
     }))

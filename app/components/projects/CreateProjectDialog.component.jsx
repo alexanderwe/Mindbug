@@ -56,6 +56,15 @@ export default class CreateProjectDialog extends Component {
     }
 
     /**
+    * Removes the due date
+    */
+    removeDueDate(){
+        this.setState({
+            dueDate: null
+        });
+    }
+
+    /**
     * Generating tags from the value of the tagsInput
     */
     generateTags() {
@@ -108,7 +117,8 @@ export default class CreateProjectDialog extends Component {
                         <textarea className="textarea" placeholder="Notes" ref="projectNotesTextarea"></textarea>
                     </p>
                     <label className="label">Due to</label>
-                    <Flatpickr data-enable-time   onChange={(_, str) => this.handleDateChange(str)} />
+                    <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""}  onChange={(_, str) => this.handleDateChange(str)} />
+                    <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
                     <label className="label">Task</label>
                     <p className="control">
                         <input className="input" type="text" placeholder="Tags" ref="projectTagsInput"/>

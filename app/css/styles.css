@@ -29,6 +29,15 @@
   width: 100%;
   margin-bottom: 5px;
 }
+.arrowUp {
+  top: 0;
+  border-bottom: 0;
+}
+.arrowUp:after {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid rgba(255,0,0,0.6);
+}
 /*------------------------------------*    Colors
 \*------------------------------------*/
 /*------------------------------------*    Base styles and utilities

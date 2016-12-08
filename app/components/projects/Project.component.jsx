@@ -11,9 +11,7 @@ export default class Project extends Component{
     constructor(props){
         super(props);
         this.state ={
-            tasks: new Array(),
             dueDate: this.props.project.dueDate ? moment(this.props.project.dueDate) : moment(), //needed for react-datepicker
-            projects: null,
         }
     }
 
@@ -89,6 +87,15 @@ export default class Project extends Component{
     }
 
     /**
+    * Removes the due date
+    */
+    removeDueDate(){
+        this.setState({
+            dueDate: null
+        });
+    }
+
+    /**
     * Leave edit mode
     */
     cancelEdit(){
@@ -97,7 +104,7 @@ export default class Project extends Component{
         });
     }
 
-    //TODO make date deleteable
+    //TODO make date deleteable and add color coding for projects
     render(){
         if (!this.state.edit) {
             return(
@@ -149,7 +156,8 @@ export default class Project extends Component{
                         <div className="media-content">
                             <div className="content">
                                 <input className="input" type="text" defaultValue={this.props.project.title} ref="projectTitleInput" />
-                                <Flatpickr data-enable-time defaultValue={this.props.project.dueDate ? moment(this.props.project.dueDate).toString() :null} onChange={(_, str) => this.handleDateChange(str)} />
+                                <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} />
+                                <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
                                 <p className="menu-label">
                                     Tasks
                                 </p>

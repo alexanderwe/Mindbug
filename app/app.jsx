@@ -34,6 +34,7 @@ class Main extends Component {
         this.refreshDatabase();
     }
 
+    //Add project title, icon does not work
     componentDidMount(){
         setInterval(()=>{
             var task = Database.findTaskByNow(moment());

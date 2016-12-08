@@ -4,8 +4,8 @@ import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 import { observer } from 'mobx-react';
 
-import CreateTaskDialog from '../components/tasks/CreateTaskDialog.component.jsx';
-import Database from '../data/Database.js';
+import CreateTaskDialog from '../../components/tasks/CreateTaskDialog.component.jsx';
+import Database from '../../data/Database.js';
 
 var ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
 

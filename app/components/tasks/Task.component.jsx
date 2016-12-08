@@ -104,7 +104,7 @@ export default class Task extends Component {
                 notified = false;
             }
         }
-        
+
         this.props.db.updateTask({ _id: this.props.task._id }, { $set: {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
@@ -114,6 +114,15 @@ export default class Task extends Component {
             notified: notified,
         }},this.props.task.project);
         this.cancelEdit();
+    }
+
+    /**
+    * Removes the due date
+    */
+    removeDueDate(){
+        this.setState({
+            dueDate: null
+        });
     }
 
     /**
@@ -159,7 +168,6 @@ export default class Task extends Component {
         }
     }
 
-    //TODO Bug in moment()
     render(){
         if (!this.state.edit) {
             return (
@@ -218,6 +226,8 @@ export default class Task extends Component {
                 </div>
             )
         } else {
+            console.log("in edit mode: " + this.state.dueDate);
+
             return (
                 <div className="box task is-edit">
                     <article className="media">
@@ -227,7 +237,8 @@ export default class Task extends Component {
                                     <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
                                     <br />
                                     Due to:
-                                    <Flatpickr data-enable-time defaultValue={this.props.task.dueDate ? moment(this.props.task.dueDate).toString() :null} onChange={(_, str) => this.handleDateChange(str)} />
+                                    {console.log(this.state.dueDate?"due date is set":"due date is not set")}
+                                    <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} /> <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
                                     <br />
                                     Notes:
                                     <textarea className="textarea" ref="taskNotesTextarea" defaultValue={this.props.task.notes} />
