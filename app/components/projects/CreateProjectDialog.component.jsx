@@ -51,7 +51,7 @@ export default class CreateProjectDialog extends Component {
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date, 'YYYY-MM-DD hh:mm')
+            dueDate: moment(date).toDate()
         });
     }
 
@@ -109,7 +109,7 @@ export default class CreateProjectDialog extends Component {
                 <div className="modal-content">
                     <label className="label">Project</label>
                     <p className="control">
-                        <input className="input" type="text" placeholder="Task" ref="projectTitleInput" />
+                        <input className="input" type="text" placeholder="Project" ref="projectTitleInput" />
                     </p>
 
                     <label className="label">Notes</label>

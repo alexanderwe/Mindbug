@@ -11,7 +11,7 @@ export default class Project extends Component{
     constructor(props){
         super(props);
         this.state ={
-            dueDate: this.props.project.dueDate ? moment(this.props.project.dueDate) : moment(), //needed for react-datepicker
+            dueDate: this.props.project.dueDate ? this.props.project.dueDate : moment(), //needed for react-datepicker
         }
     }
 
@@ -26,7 +26,7 @@ export default class Project extends Component{
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date).format()
+            dueDate: moment(date).toDate()
         });
     }
 
@@ -114,7 +114,7 @@ export default class Project extends Component{
                             <div className="content">
                                 <p className="title">
                                     {this.props.project.title}
-                                    <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? moment(this.props.project.dueDate).toString() : null}</small>
+                                    <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? this.props.project.dueDate.toString() : null}</small>
                                 </p>
 
                                 <p className="menu-label">

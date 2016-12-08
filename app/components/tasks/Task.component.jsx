@@ -12,7 +12,7 @@ export default class Task extends Component {
         super(props);
         this.state={
             edit:false,
-            dueDate: this.props.task.dueDate ? moment(this.props.task.dueDate) : null, //needed for react-datepicker
+            dueDate: this.props.task.dueDate ? this.props.task.dueDate : null, //needed for react-datepicker
         }
     }
 
@@ -27,7 +27,7 @@ export default class Task extends Component {
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date).format()
+            dueDate: moment(date).toDate()
         });
     }
 
@@ -138,7 +138,7 @@ export default class Task extends Component {
     * Use the mailto option to create a mail with some rudimental information about a task
     */
     shareTaskViaMail(){
-        location.href = 'mailto:mail@provider.com?Subject='+this.props.task.title+'&Body=Title: '+this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + moment(this.props.task.dueDate).toString();
+        location.href = 'mailto:mail@provider.com?Subject='+this.props.task.title+'&Body=Title: '+this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.props.task.dueDate.toString();
     }
 
     /**
@@ -226,8 +226,6 @@ export default class Task extends Component {
                 </div>
             )
         } else {
-            console.log("in edit mode: " + this.state.dueDate);
-
             return (
                 <div className="box task is-edit">
                     <article className="media">
@@ -237,7 +235,6 @@ export default class Task extends Component {
                                     <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
                                     <br />
                                     Due to:
-                                    {console.log(this.state.dueDate?"due date is set":"due date is not set")}
                                     <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} /> <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
                                     <br />
                                     Notes:

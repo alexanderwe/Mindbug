@@ -136,7 +136,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date)
+                dueDate: (0, _moment2.default)(date).toDate()
             });
         }
 
@@ -446,6 +446,8 @@ var Database = (_class = function () {
                     console.log("no tasks found");
                     _this2.tasks = null;
                 } else {
+                    console.log(docs);
+
                     _this2.tasks = docs;
                 }
             });
@@ -564,8 +566,14 @@ var Database = (_class = function () {
     }, {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
-            console.log("find project with name " + projectName);
+            console.log("find project with name " + projectName + "in");
+            console.log(this.allProjects);
+
             if (this.allProjects) {
+                console.log(this.allProjects.find(function (x) {
+                    return x.title === projectName;
+                }));
+
                 return this.allProjects.find(function (x) {
                     return x.title === projectName;
                 });

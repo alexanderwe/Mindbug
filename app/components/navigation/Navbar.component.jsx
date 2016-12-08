@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
+import moment from 'moment';
 
 import Tag from './Tag.component.jsx';
 
@@ -28,6 +29,11 @@ export default class Navbar extends Component {
 
         var filterToSet;
         switch (pageName){
+            case 'general':
+                if(dbFilter === 'today'){
+                    filterToSet = {dueDate: {$gte:  moment().startOf('day').toDate(), $lt: moment().endOf('day').toDate()}}
+                }
+                break;
             case 'tasks':
                 if(dbFilter === 'all'){
                     filterToSet = {done:false};

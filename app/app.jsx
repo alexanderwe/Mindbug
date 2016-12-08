@@ -55,6 +55,10 @@ class Main extends Component {
         } else if (this.state.activeItem === "projects") {
             Database.setDbFilter(this.state.dbFilter);
             Database.findProjects(this.state.dbFilter);
+        } else if (this.state.activeItem === "general"){
+            Database.setDbFilter(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter);
+            Database.findProjects(this.state.dbFilter);
         }
     }
     /**

@@ -110,6 +110,10 @@ var Main = function (_Component) {
             } else if (this.state.activeItem === "projects") {
                 _Database2.default.setDbFilter(this.state.dbFilter);
                 _Database2.default.findProjects(this.state.dbFilter);
+            } else if (this.state.activeItem === "general") {
+                _Database2.default.setDbFilter(this.state.dbFilter);
+                _Database2.default.findTasks(this.state.dbFilter);
+                _Database2.default.findProjects(this.state.dbFilter);
             }
         }
         /**
@@ -180,6 +184,14 @@ var _react2 = _interopRequireDefault(_react);
 
 var _mobxReact = require('mobx-react');
 
+var _TaskListComponent = require('../tasks/TaskList.component.jsx');
+
+var _TaskListComponent2 = _interopRequireDefault(_TaskListComponent);
+
+var _ProjectListComponent = require('../projects/ProjectList.component.jsx');
+
+var _ProjectListComponent2 = _interopRequireDefault(_ProjectListComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -201,9 +213,28 @@ var Today = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
-                'h1',
-                null,
-                'Today'
+                'div',
+                { className: 'columns' },
+                _react2.default.createElement(
+                    'div',
+                    { className: 'column' },
+                    _react2.default.createElement(
+                        'h1',
+                        { className: 'title' },
+                        'Tasks'
+                    ),
+                    _react2.default.createElement(_TaskListComponent2.default, { ref: 'taskList', parent: this, db: this.props.db })
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'column' },
+                    _react2.default.createElement(
+                        'h1',
+                        { className: 'title' },
+                        'Projects'
+                    ),
+                    _react2.default.createElement(_ProjectListComponent2.default, { ref: 'projectsList', parent: this, db: this.props.db })
+                )
             );
         }
     }]);
@@ -213,7 +244,7 @@ var Today = (0, _mobxReact.observer)(_class = function (_Component) {
 
 exports.default = Today;
 
-},{"mobx-react":43,"react":208}],3:[function(require,module,exports){
+},{"../projects/ProjectList.component.jsx":8,"../tasks/TaskList.component.jsx":11,"mobx-react":43,"react":208}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -230,6 +261,10 @@ var _react = require('react');
 var _react2 = _interopRequireDefault(_react);
 
 var _mobxReact = require('mobx-react');
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
 
 var _TagComponent = require('./Tag.component.jsx');
 
@@ -278,6 +313,11 @@ var Navbar = (0, _mobxReact.observer)(_class = function (_Component) {
 
             var filterToSet;
             switch (pageName) {
+                case 'general':
+                    if (dbFilter === 'today') {
+                        filterToSet = { dueDate: { $gte: (0, _moment2.default)().startOf('day').toDate(), $lt: (0, _moment2.default)().endOf('day').toDate() } };
+                    }
+                    break;
                 case 'tasks':
                     if (dbFilter === 'all') {
                         filterToSet = { done: false };
@@ -694,7 +734,7 @@ Navbar.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Tag.component.jsx":4,"mobx-react":43,"react":208}],4:[function(require,module,exports){
+},{"./Tag.component.jsx":4,"mobx-react":43,"moment":45,"react":208}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -943,7 +983,7 @@ var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date, 'YYYY-MM-DD hh:mm')
+                dueDate: (0, _moment2.default)(date).toDate()
             });
         }
 
@@ -1023,7 +1063,7 @@ var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component
                     _react2.default.createElement(
                         'p',
                         { className: 'control' },
-                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Task', ref: 'projectTitleInput' })
+                        _react2.default.createElement('input', { className: 'input', type: 'text', placeholder: 'Project', ref: 'projectTitleInput' })
                     ),
                     _react2.default.createElement(
                         'label',
@@ -1144,7 +1184,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Project.__proto__ || Object.getPrototypeOf(Project)).call(this, props));
 
         _this.state = {
-            dueDate: _this.props.project.dueDate ? (0, _moment2.default)(_this.props.project.dueDate) : (0, _moment2.default)() };
+            dueDate: _this.props.project.dueDate ? _this.props.project.dueDate : (0, _moment2.default)() };
         return _this;
     }
 
@@ -1164,7 +1204,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date).format()
+                dueDate: (0, _moment2.default)(date).toDate()
             });
         }
 
@@ -1296,7 +1336,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                             _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
                                         ),
                                         ' ',
-                                        this.props.project.dueDate ? (0, _moment2.default)(this.props.project.dueDate).toString() : null
+                                        this.props.project.dueDate ? this.props.project.dueDate.toString() : null
                                     )
                                 ),
                                 _react2.default.createElement(
@@ -1678,7 +1718,7 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date)
+                dueDate: (0, _moment2.default)(date).toDate()
             });
         }
 
@@ -1898,7 +1938,7 @@ var Task = function (_Component) {
 
         _this.state = {
             edit: false,
-            dueDate: _this.props.task.dueDate ? (0, _moment2.default)(_this.props.task.dueDate) : null };
+            dueDate: _this.props.task.dueDate ? _this.props.task.dueDate : null };
         return _this;
     }
 
@@ -1918,7 +1958,7 @@ var Task = function (_Component) {
         key: 'handleDateChange',
         value: function handleDateChange(date) {
             this.setState({
-                dueDate: (0, _moment2.default)(date).format()
+                dueDate: (0, _moment2.default)(date).toDate()
             });
         }
 
@@ -2058,7 +2098,7 @@ var Task = function (_Component) {
     }, {
         key: 'shareTaskViaMail',
         value: function shareTaskViaMail() {
-            location.href = 'mailto:mail@provider.com?Subject=' + this.props.task.title + '&Body=Title: ' + this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + (0, _moment2.default)(this.props.task.dueDate).toString();
+            location.href = 'mailto:mail@provider.com?Subject=' + this.props.task.title + '&Body=Title: ' + this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.props.task.dueDate.toString();
         }
 
         /**
@@ -2240,8 +2280,6 @@ var Task = function (_Component) {
                     )
                 );
             } else {
-                console.log("in edit mode: " + this.state.dueDate);
-
                 return _react2.default.createElement(
                     'div',
                     { className: 'box task is-edit' },
@@ -2260,7 +2298,6 @@ var Task = function (_Component) {
                                     _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
                                     _react2.default.createElement('br', null),
                                     'Due to:',
-                                    console.log(this.state.dueDate ? "due date is set" : "due date is not set"),
                                     _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
                                             return _this3.handleDateChange(str);
                                         } }),
@@ -2538,6 +2575,8 @@ var Database = (_class = function () {
                     console.log("no tasks found");
                     _this2.tasks = null;
                 } else {
+                    console.log(docs);
+
                     _this2.tasks = docs;
                 }
             });
@@ -2656,8 +2695,14 @@ var Database = (_class = function () {
     }, {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
-            console.log("find project with name " + projectName);
+            console.log("find project with name " + projectName + "in");
+            console.log(this.allProjects);
+
             if (this.allProjects) {
+                console.log(this.allProjects.find(function (x) {
+                    return x.title === projectName;
+                }));
+
                 return this.allProjects.find(function (x) {
                     return x.title === projectName;
                 });

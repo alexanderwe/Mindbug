@@ -61,6 +61,8 @@ class Database{
                 console.log("no tasks found");
                 this.tasks = null;
             } else {
+                console.log(docs);
+
                 this.tasks = docs;
             }
         })
@@ -162,7 +164,10 @@ class Database{
 
     findProjectSynchronousWithName(projectName){
         console.log("find project with name " + projectName);
+
         if (this.allProjects) {
+            console.log( this.allProjects.find(x => x.title === projectName));
+
             return this.allProjects.find(x => x.title === projectName);
         } else {
             return null;

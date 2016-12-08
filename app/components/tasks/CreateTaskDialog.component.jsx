@@ -75,7 +75,7 @@ export default class CreateTaskDialog extends Component {
     */
     handleDateChange(date){
         this.setState({
-            dueDate: moment(date)
+            dueDate: moment(date).toDate()
         });
     }
 
