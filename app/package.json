@@ -1,7 +1,7 @@
 {
   "name": "Mindbug",
   "description": "Simple GTD app for everyone made with Electron and React.",
-  "version": "0.1.0a",
+  "version": "0.1.1a",
   "author": "Alexander Weiß",
   "main": "main.js",
   "dependencies": {
