@@ -8,13 +8,14 @@ import ToolbarHeader from './components/navigation/ToolbarHeader.component.jsx';
 import Navbar from './components/navigation/Navbar.component.jsx';
 
 import Today from './components/general/Today.component.jsx';
+import Inbox from './components/general/Inbox.component.jsx';
 
 import TaskList from './components/tasks/TaskList.component.jsx';
 import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx';
 import ProjectList from './components/projects/ProjectList.component.jsx';
 import CreateProjectDialog from './components/projects/CreateProjectDialog.component.jsx';
 
-var ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
+const ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
 
 class Main extends Component {
 
@@ -37,9 +38,9 @@ class Main extends Component {
     //Add project title, icon does not work
     componentDidMount(){
         setInterval(()=>{
-            var task = Database.findTaskByNow(moment());
+            let task = Database.findTaskByNow(moment());
             if (task){
-                this.notify("\u1F558 "+task.title, moment(task.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
+                this.notify("\u23F0 "+task.title, moment(task.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
                 Database.updateTask({ _id: task._id }, {$set: {notified: true}})
             }
         },3000);
@@ -55,10 +56,13 @@ class Main extends Component {
         } else if (this.state.activeItem === "projects") {
             Database.setDbFilter(this.state.dbFilter);
             Database.findProjects(this.state.dbFilter);
-        } else if (this.state.activeItem === "general"){
+        } else if (this.state.activeItem === "today"){
             Database.setDbFilter(this.state.dbFilter);
             Database.findTasks(this.state.dbFilter);
             Database.findProjects(this.state.dbFilter);
+        } else if (this.state.activeItem === "inbox") {
+            Database.setDbFilter(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter);
         }
     }
     /**
@@ -88,9 +92,11 @@ class Main extends Component {
                                 <TaskList ref="taskList" parent={this} db={Database} />
                             ) : this.state.activeItem === 'projects' ? (
                                 <ProjectList ref="projectsList" parent={this} db={Database} />
-                            ) : this.state.activeItem === 'general' ? (
+                            ) : this.state.activeItem === 'today' ? (
                                 <Today ref="projectsList" parent={this} db={Database}/>
-                            ) : null}
+                            ) : this.state.activeItem === 'inbox' ? (
+                                <Inbox ref="inbox" parent={this} db={Database}/>
+                            ) :null}
                         </div>
                     </div>
                 </div>

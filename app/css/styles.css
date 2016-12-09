@@ -167,6 +167,13 @@ a {
   color: #fff !important;
   background-color: #00d1b2 !important;
 }
+.menu-list .inbox-tag {
+  vertical-align: middle;
+  height: 12px;
+}
+.menu-list .inbox-tag:hover {
+  background-color: #f5f5f5;
+}
 .tag-list .tag {
   margin-top: 10px;
 }

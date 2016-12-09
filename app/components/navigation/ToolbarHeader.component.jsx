@@ -12,12 +12,12 @@ export default class ToolbarHeader extends Component{
         return(
             <nav className="level draggable">
                 <div className="level-item has-text-centered">
-                    <p className="heading">Tasks</p>
-                    <p className="title">{this.props.db.allTasks.length}</p>
+                    <p className="heading">Undone Tasks</p>
+                    <p className="title">{this.props.db.totalUndoneTasks}</p>
                 </div>
                 <div className="level-item has-text-centered">
-                    <p className="heading">Projects</p>
-                    <p className="title">{this.props.db.allProjects.length}</p>
+                    <p className="heading">Open Projects</p>
+                    <p className="title">{this.props.db.totalOpenProjects}</p>
                 </div>
             </nav>
         )

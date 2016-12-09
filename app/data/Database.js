@@ -1,5 +1,5 @@
 import Datastore from 'nedb';
-import {observable,action} from 'mobx';
+import {observable,action,computed} from 'mobx';
 import moment from 'moment';
 
 
@@ -82,6 +82,26 @@ class Database{
     findTaskByNow(date){
         if (this.allTasks) {
             return this.allTasks.find(x => x.dueDate === moment() && x.notified==false|| moment().diff(x.dueDate) > 0 && x.notified==false );
+        } else {
+            return null;
+        }
+    }
+
+    @computed get totalUndoneTasks() {
+        if (this.allTasks) {
+            return this.allTasks.filter(function( task ) {
+                return task.done == false;
+            }).length;
+        } else {
+            return null;
+        }
+    }
+
+    @computed get totalInbox() {
+        if (this.allTasks) {
+            return this.allTasks.filter(function( task ) {
+                return task.inbox == true;
+            }).length;
         } else {
             return null;
         }
@@ -172,7 +192,16 @@ class Database{
         } else {
             return null;
         }
+    }
 
+    @computed get totalOpenProjects() {
+        if (this.allProjects) {
+            return this.allProjects.filter(function( project ) {
+                return project.open == true;
+            }).length;
+        } else {
+            return null;
+        }
     }
 
     @action

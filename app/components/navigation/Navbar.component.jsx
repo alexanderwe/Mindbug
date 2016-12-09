@@ -28,10 +28,16 @@ export default class Navbar extends Component {
         });
 
         var filterToSet;
+        var activeItem = pageName; //used to
         switch (pageName){
             case 'general':
                 if(dbFilter === 'today'){
-                    filterToSet = {dueDate: {$gte:  moment().startOf('day').toDate(), $lt: moment().endOf('day').toDate()}}
+                    //Find all undone tasks and open projects which due date is today
+                    activeItem = 'today';
+                    filterToSet = {$or: [{$and: [{dueDate: {$gte:  moment().startOf('day').toDate(), $lt: moment().endOf('day').toDate()}}, {done:false}]},{$and: [{dueDate: {$gte:  moment().startOf('day').toDate(), $lt: moment().endOf('day').toDate()}}, {open:true}]}]};
+                } else if (dbFilter === 'inbox'){
+                    activeItem = 'inbox'; //Overwrite activeItem when inbox is seletected
+                    filterToSet = {inbox:true};
                 }
                 break;
             case 'tasks':
@@ -62,7 +68,7 @@ export default class Navbar extends Component {
 
         //Set active item in the main component
         this.props.parent.setState({ //app
-            activeItem: pageName,
+            activeItem: activeItem,
             dbFilter: filterToSet,
         });
     }
@@ -99,6 +105,7 @@ export default class Navbar extends Component {
                         General
                     </p>
                     <ul className="menu-list">
+                        <li><a href="#" onClick={()=>this.goTo('general', 'inbox')} className={this.isActiveState('general', 'inbox') ? 'is-active': null }><i className="fa fa-inbox" aria-hidden="true"></i>Inbox <span className="tag inbox-tag">{this.props.db.totalInbox}</span></a></li>
                         <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">
@@ -135,7 +142,7 @@ export default class Navbar extends Component {
                         General
                     </p>
                     <ul className="menu-list">
-                        <li><a href="#" onClick={()=>this.goTo('general', 'overview')} className={this.isActiveState('general', 'overview') ? 'is-active': null }><i className="fa fa-tachometer" aria-hidden="true"></i>Overview</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'inbox')} className={this.isActiveState('general', 'inbox') ? 'is-active': null }><i className="fa fa-inbox" aria-hidden="true"></i>Inbox <span className="tag inbox-tag"></span></a></li>
                         <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
                     </ul>
                     <p className="menu-label">

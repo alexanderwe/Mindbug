@@ -566,8 +566,7 @@ var Database = (_class = function () {
     }, {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
-            console.log("find project with name " + projectName + "in");
-            console.log(this.allProjects);
+            console.log("find project with name " + projectName);
 
             if (this.allProjects) {
                 console.log(this.allProjects.find(function (x) {
@@ -680,6 +679,39 @@ var Database = (_class = function () {
         value: function setDbFilter(dbFilter) {
             this.dbFilter = dbFilter;
         }
+    }, {
+        key: 'totalUndoneTasks',
+        get: function get() {
+            if (this.allTasks) {
+                return this.allTasks.filter(function (task) {
+                    return task.done == false;
+                }).length;
+            } else {
+                return null;
+            }
+        }
+    }, {
+        key: 'totalInbox',
+        get: function get() {
+            if (this.allTasks) {
+                return this.allTasks.filter(function (task) {
+                    return task.inbox == true;
+                }).length;
+            } else {
+                return null;
+            }
+        }
+    }, {
+        key: 'totalOpenProjects',
+        get: function get() {
+            if (this.allProjects) {
+                return this.allProjects.filter(function (project) {
+                    return project.open == true;
+                }).length;
+            } else {
+                return null;
+            }
+        }
     }]);
 
     return Database;
@@ -708,7 +740,7 @@ var Database = (_class = function () {
     initializer: function initializer() {
         return new Array();
     }
-}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
+}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
 exports.default = new Database();
 
 }).call(this,"/app/data")
@@ -39083,6 +39115,7 @@ var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
                 repeat: null,
                 done: false,
                 starred: false,
+                inbox: true, //only set when creating a task through the task window
                 deleted: false
             };
 

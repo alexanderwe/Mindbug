@@ -60,6 +60,7 @@ class CreateTaskWindow extends Component {
             repeat: null,
             done: false,
             starred: false,
+            inbox:true, //only set when creating a task through the task window
             deleted: false,
         };
 

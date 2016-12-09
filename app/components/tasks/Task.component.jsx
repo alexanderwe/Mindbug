@@ -112,6 +112,7 @@ export default class Task extends Component {
             dueDate: this.state.dueDate,
             project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
             notified: notified,
+            inbox: false, //set to false, because when its edited, the user has looked at it 
         }},this.props.task.project);
         this.cancelEdit();
     }
