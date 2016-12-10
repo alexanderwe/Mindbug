@@ -48,7 +48,7 @@ export default class Navbar extends Component {
                 } else if(dbFilter === 'starred') {
                     filterToSet = {starred:true};
                 } else if(dbFilter === 'deleted') {
-                    filterToSet = {deleted:true};
+                    filterToSet = {$$deleted:true};
                 }
                 break;
             case 'projects':

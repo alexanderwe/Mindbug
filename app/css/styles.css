@@ -43,6 +43,9 @@ a {
 ::-webkit-scrollbar {
   display: none;
 }
+hr {
+  margin: 10px 0;
+}
 .draggable {
   -webkit-app-region: drag;
 }
@@ -230,7 +233,7 @@ a {
   list-style: none !important;
 }
 .project .title {
-  margin-bottom: 5px;
+  margin-bottom: 5px !important;
 }
 .project .title small {
   margin-left: 20px;

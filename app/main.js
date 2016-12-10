@@ -185,6 +185,10 @@ ipcMain.on('created-task', (event, arg) => {
     taskWindow.close();
 })
 
+ipcMain.on('set-app-badge',(event,arg)=>{
+    app.dock.setBadge(arg.toString());
+
+})
 
 
 

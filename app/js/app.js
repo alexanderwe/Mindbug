@@ -403,7 +403,7 @@ var Navbar = (0, _mobxReact.observer)(_class = function (_Component) {
                     } else if (dbFilter === 'starred') {
                         filterToSet = { starred: true };
                     } else if (dbFilter === 'deleted') {
-                        filterToSet = { deleted: true };
+                        filterToSet = { $$deleted: true };
                     }
                     break;
                 case 'projects':
@@ -1240,6 +1240,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _class;
@@ -1397,13 +1399,49 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                 edit: false
             });
         }
+    }, {
+        key: 'tasksDonePercentage',
+        value: function tasksDonePercentage() {
+            var _this3 = this;
+
+            if (this.props.project.tasks.length > 0) {
+                var _ret = function () {
+                    var doneCounter = 0;
+                    _this3.props.project.tasks.map(function (taskId) {
+                        if (_this3.props.db.findTaskSynchronous(taskId).done) {
+                            doneCounter++;
+                        };
+                    });
+                    return {
+                        v: doneCounter / _this3.props.project.tasks.length * 100
+                    };
+                }();
+
+                if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+            } else {
+                return 0;
+            }
+        }
+    }, {
+        key: 'getProgessClass',
+        value: function getProgessClass() {
+            var taskDone = this.tasksDonePercentage();
+
+            if (taskDone <= 34) {
+                return "progress is-danger";
+            } else if (taskDone >= 33 && taskDone <= 67) {
+                return "progress is-warning";
+            } else if (taskDone >= 68) {
+                return "progress is-success";
+            }
+        }
 
         //TODO make date deleteable and add color coding for projects
 
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this4 = this;
 
             if (!this.state.edit) {
                 return _react2.default.createElement(
@@ -1431,11 +1469,22 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                             _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
                                         ),
                                         ' ',
-                                        this.props.project.dueDate ? this.props.project.dueDate.toString() : null
+                                        this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"
                                     )
                                 ),
+                                _react2.default.createElement('hr', null),
                                 _react2.default.createElement(
-                                    'p',
+                                    'span',
+                                    { className: 'menu-label' },
+                                    'Progess'
+                                ),
+                                _react2.default.createElement(
+                                    'progress',
+                                    { className: this.getProgessClass(), value: this.tasksDonePercentage(), max: '100' },
+                                    this.tasksDonePercentage()
+                                ),
+                                _react2.default.createElement(
+                                    'span',
                                     { className: 'menu-label' },
                                     'Tasks'
                                 ),
@@ -1443,7 +1492,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                     'ul',
                                     { className: 'menu-list' },
                                     this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
-                                        var task = _this3.props.db.findTaskSynchronous(taskId);
+                                        var task = _this4.props.db.findTaskSynchronous(taskId);
                                         return _react2.default.createElement(
                                             'li',
                                             { key: task._id },
@@ -1461,7 +1510,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                     )
                                 ),
                                 this.props.project.tags.map(function (tag) {
-                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
+                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this4 });
                                 })
                             )
                         ),
@@ -1474,7 +1523,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-warning', onClick: function onClick() {
-                                            return _this3.edit();
+                                            return _this4.edit();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-edit' })
                                 )
@@ -1485,7 +1534,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-danger', onClick: function onClick() {
-                                            return _this3.deleteProject();
+                                            return _this4.deleteProject();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-trash-o' })
                                 )
@@ -1508,12 +1557,12 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 { className: 'content' },
                                 _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.project.title, ref: 'projectTitleInput' }),
                                 _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
-                                        return _this3.handleDateChange(str);
+                                        return _this4.handleDateChange(str);
                                     } }),
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'button is-danger', onClick: function onClick() {
-                                            return _this3.removeDueDate();
+                                            return _this4.removeDueDate();
                                         } },
                                     'Remove due date'
                                 ),
@@ -1526,7 +1575,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                     'ul',
                                     { className: 'menu-list' },
                                     this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
-                                        var task = _this3.props.db.findTaskSynchronous(taskId);
+                                        var task = _this4.props.db.findTaskSynchronous(taskId);
                                         return _react2.default.createElement(
                                             'li',
                                             { key: task._id },
@@ -1560,7 +1609,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 _react2.default.createElement(
                                     'button',
                                     { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this3.saveEdit();
+                                            return _this4.saveEdit();
                                         } },
                                     _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
                                 )
@@ -1569,7 +1618,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                                 'div',
                                 { className: 'media-right' },
                                 _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this3.cancelEdit();
+                                        return _this4.cancelEdit();
                                     } })
                             )
                         )
@@ -2273,7 +2322,7 @@ var Task = function (_Component) {
                                             _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
                                         ),
                                         ' ',
-                                        this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : null
+                                        this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : "No due date"
                                     )
                                 ),
                                 _react2.default.createElement(
@@ -2603,6 +2652,8 @@ function _initializerWarningHelper(descriptor, context) {
     throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
 }
 
+var ipcRenderer = window.require('electron').ipcRenderer;
+
 var Database = (_class = function () {
     function Database() {
         _classCallCheck(this, Database);
@@ -2746,6 +2797,7 @@ var Database = (_class = function () {
             this.taskCollection.find({}, function (err, docs) {
                 _this5.allTasks = docs;
                 console.log("all tasks refreshed");
+                ipcRenderer.send('set-app-badge', _this5.totalUndoneTasks);
             });
         }
     }, {

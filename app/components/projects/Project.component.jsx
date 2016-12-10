@@ -104,6 +104,34 @@ export default class Project extends Component{
         });
     }
 
+
+    tasksDonePercentage(){
+        if(this.props.project.tasks.length > 0){
+            let doneCounter = 0;
+            this.props.project.tasks.map((taskId)=>{
+                if(this.props.db.findTaskSynchronous(taskId).done){
+                    doneCounter++;
+                };
+            });
+            return (doneCounter/this.props.project.tasks.length)*100;
+        } else{
+            return 0;
+        }
+    }
+
+
+    getProgessClass(){
+        var taskDone = this.tasksDonePercentage();
+
+        if (taskDone <=34 ) {
+            return "progress is-danger";
+        }  else if (taskDone>=33 && taskDone <= 67 ) {
+            return "progress is-warning";
+        } else if (taskDone >=68) {
+            return "progress is-success";
+        }
+    }
+
     //TODO make date deleteable and add color coding for projects
     render(){
         if (!this.state.edit) {
@@ -114,12 +142,12 @@ export default class Project extends Component{
                             <div className="content">
                                 <p className="title">
                                     {this.props.project.title}
-                                    <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? this.props.project.dueDate.toString() : null}</small>
+                                    <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"}</small>
                                 </p>
-
-                                <p className="menu-label">
-                                    Tasks
-                                </p>
+                                <hr />
+                                <span className="menu-label">Progess</span>
+                                <progress className={this.getProgessClass()} value={this.tasksDonePercentage()} max="100">{this.tasksDonePercentage()}</progress>
+                                <span className="menu-label">Tasks</span>
                                 <ul className="menu-list">
                                     {this.props.project.tasks.length > 0 ? this.props.project.tasks.map((taskId)=>{
                                         var task = this.props.db.findTaskSynchronous(taskId);

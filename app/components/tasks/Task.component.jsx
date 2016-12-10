@@ -112,7 +112,7 @@ export default class Task extends Component {
             dueDate: this.state.dueDate,
             project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
             notified: notified,
-            inbox: false, //set to false, because when its edited, the user has looked at it 
+            inbox: false, //set to false, because when its edited, the user has looked at it
         }},this.props.task.project);
         this.cancelEdit();
     }
@@ -178,7 +178,7 @@ export default class Task extends Component {
                             <div className="content">
                                 <p className="title">
                                     {this.props.task.title}
-                                    <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : null}</small>
+                                    <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : "No due date"}</small>
                                 </p>
                                 <p>
                                     <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>

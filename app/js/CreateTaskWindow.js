@@ -379,6 +379,8 @@ function _initializerWarningHelper(descriptor, context) {
     throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
 }
 
+var ipcRenderer = window.require('electron').ipcRenderer;
+
 var Database = (_class = function () {
     function Database() {
         _classCallCheck(this, Database);
@@ -522,6 +524,7 @@ var Database = (_class = function () {
             this.taskCollection.find({}, function (err, docs) {
                 _this5.allTasks = docs;
                 console.log("all tasks refreshed");
+                ipcRenderer.send('set-app-badge', _this5.totalUndoneTasks);
             });
         }
     }, {

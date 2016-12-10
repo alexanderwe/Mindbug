@@ -2,6 +2,8 @@ import Datastore from 'nedb';
 import {observable,action,computed} from 'mobx';
 import moment from 'moment';
 
+const ipcRenderer = window.require('electron').ipcRenderer;
+
 
 class Database{
 
@@ -146,6 +148,7 @@ class Database{
         this.taskCollection.find({}, (err, docs)=> {
             this.allTasks = docs;
             console.log("all tasks refreshed");
+            ipcRenderer.send('set-app-badge', this.totalUndoneTasks);
         })
     }
 
