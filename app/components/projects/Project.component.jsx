@@ -78,10 +78,17 @@ export default class Project extends Component{
     * Saves the edits and make this project uneditable
     */
     saveEdit(){
+        var notified = true;
+        if(this.state.dueDate){
+            if(moment().diff(this.state.dueDate) < 0 ){
+                notified = false;
+            }
+        }
         this.props.db.updateProject({ _id: this.props.project._id }, { $set: {
             title: this.refs.projectTitleInput.value,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
+            notified: notified,
         }});
         this.cancelEdit();
     }

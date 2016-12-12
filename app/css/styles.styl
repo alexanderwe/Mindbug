@@ -191,7 +191,7 @@ hr
 /*------------------------------------*\
     Task
 \*------------------------------------*/
-.task
+/*.task
     p
         margin-bottom: 5px !important;
     .tag
@@ -209,7 +209,28 @@ hr
     .active
         color: colors.yellow;
         &:hover
-            color: colors.dark-grey;
+            color: colors.dark-grey;*/
+
+.task
+    margin-bottom: 20px;
+    .card-header-title
+        small
+            margin-top: 2px;
+            margin-left: 10px;
+    .hidden-content
+        max-height: 0px;
+        opacity: 0;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+        .content
+            display: none;
+    .card-content
+        padding-bottom: 10px;
+        padding-top: 10px;
+        .content
+            margin-bottom: 10px !important;
+            p
+                margin-bottom: 5px !important
 
 .is-edit
     border: 1px solid colors.primary

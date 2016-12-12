@@ -89,6 +89,7 @@ export default class CreateProjectDialog extends Component {
             dueDate: this.state.dueDate,
             open: true,
             starred: false,
+            notified: false,
             deleted: false,
         };
 

@@ -12,7 +12,8 @@ export default class Task extends Component {
         super(props);
         this.state={
             edit:false,
-            dueDate: this.props.task.dueDate ? this.props.task.dueDate : null, //needed for react-datepicker
+            dueDate: this.props.task.dueDate ? this.props.task.dueDate : null, //needed for react-datepicker,
+            contentOpened: false,
         }
     }
 
@@ -169,96 +170,95 @@ export default class Task extends Component {
         }
     }
 
+    toggleContent(){
+        if (this.state.contentOpened) {
+            console.log("close content");
+
+            this.setState({
+                contentOpened: false
+            });
+        } else {
+            console.log("show content");
+            this.setState({
+                contentOpened: true
+            });
+        }
+    }
+
     render(){
         if (!this.state.edit) {
             return (
-                <div className="box task">
-                    <article className="media">
-                        <div className="media-content">
-                            <div className="content">
-                                <p className="title">
-                                    {this.props.task.title}
-                                    <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : "No due date"}</small>
-                                </p>
-                                <p>
-                                    <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>
-                                    {this.props.task.notes}
-                                </p>
-                                <p>
-                                    <span><i className="fa fa-briefcase" aria-hidden="true"></i></span>
-                                    {this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title :<span>Not assigned</span>}
-                                </p>
-                                {this.props.task.tags.map((tag)=>{
-                                    return <Tag name={tag} key={tag} parent={this}/>
-                                })}
-                            </div>
-                            <nav className="level">
-                                <div className="level-left">
-                                    <a className={this.props.task.starred ? 'item-level active': 'item-level'} onClick={()=>this.starTask()}>
-                                        <span className="icon is-small"><i className="fa fa-star"></i></span>
-                                    </a>
-                                    <a className="item-level" onClick={()=>this.shareTaskViaMail()}>
-                                        <span className="icon is-small"><i className="fa fa-envelope-o" aria-hidden="true"></i></span>
-                                    </a>
+                <div className="card is-fullwidth task">
+                    <header className="card-header">
+                        <p className="card-header-title">
+                            {this.props.task.title}
+                            <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : "No due date"}</small>
+                        </p>
+                        <a className="card-header-icon" onClick={()=>this.toggleContent()}>
+                            <i className={this.state.contentOpened ? "fa fa-angle-up" :"fa fa-angle-down"}></i>
+                        </a>
+                    </header>
+                    <div className={this.state.contentOpened ? "card-content": "card-content hidden-content"}>
+                        <div className="content">
+                        <p>
+                            <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>
+                            {this.props.task.notes}
+                        </p>
+                        <p>
+                            <span><i className="fa fa-briefcase" aria-hidden="true"></i></span>
+                            {this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title :<span>Not assigned</span>}
+                        </p>
+                        {this.props.task.tags.map((tag)=>{
+                            return <Tag name={tag} key={tag} parent={this}/>
+                        })}
+                        </div>
+                        <nav className="level">
+                            <div className="level-left">
+                                <a className={this.props.task.starred ? 'item-level active': 'item-level'} onClick={()=>this.starTask()}>
+                                    <span className="icon is-small"><i className="fa fa-star"></i></span>
+                                </a>
+                                <a className="item-level" onClick={()=>this.shareTaskViaMail()}>
+                                    <span className="icon is-small"><i className="fa fa-envelope-o" aria-hidden="true"></i></span>
+                                </a>
 
-                                </div>
-                            </nav>
-                        </div>
-                        <div className="media-right">
-                            {this.props.task.done ? null: (
-                                 <div className="media-right">
-                                     <button className="btn-round btn-success" onClick={()=>this.finishTask()}>
-                                         <i className="fa fa-check" />
-                                     </button>
-                                 </div>
-                            ) }
-                            <div className="media-right">
-                                <button className="btn-round btn-warning" onClick={()=>this.edit()}>
-                                    <i className="fa fa-edit" />
-                                </button>
                             </div>
-                             <div className="media-right">
-                                 <button className="btn-round btn-danger" onClick={()=>this.deleteTask()}>
-                                     <i className="fa fa-trash-o" />
-                                 </button>
-                             </div>
-                        </div>
-                    </article>
+                        </nav>
+                    </div>
+                    <footer className="card-footer">
+                        {this.props.task.done ?  null : <a className="card-footer-item" onClick={()=>this.finishTask()}>Finish</a> }
+                        <a className="card-footer-item" onClick={()=>this.edit()}>Edit</a>
+                        <a className="card-footer-item" onClick={()=>this.deleteTask()}>Delete</a>
+                    </footer>
                 </div>
             )
         } else {
             return (
-                <div className="box task is-edit">
-                    <article className="media">
-                        <div className="media-content">
-                            <div className="content">
-                                <p>
-                                    <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
-                                    <br />
-                                    Due to:
-                                    <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} /> <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
-                                    <br />
-                                    Notes:
-                                    <textarea className="textarea" ref="taskNotesTextarea" defaultValue={this.props.task.notes} />
-                                    <br />
-                                    In project: {this.projectInput()}
-                                    <br />
-                                    Tags:
-                                    <input className="input" type="text"ref="taskTagsInput" defaultValue={this.getTagsString()}/>
-                                </p>
-                            </div>
+                <div className="card is-fullwidth task is-edit">
+                    <header className="card-header">
+                        <p className="card-header-title">
+                            <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
+                            <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} />
+                            <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
+
+                        </p>
+                    </header>
+                    <div className="card-content">
+                        <div className="content">
+                            <p>
+                                Notes:
+                                <textarea className="textarea" ref="taskNotesTextarea" defaultValue={this.props.task.notes} />
+                            </p>
+                            <p>
+                                In project: {this.projectInput()}
+                            </p>
+                            Tags:
+                            <input className="input" type="text"ref="taskTagsInput" defaultValue={this.getTagsString()}/>
                         </div>
-                        <div className="media-right">
-                            <div className="media-right">
-                                <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
-                                    <i className="fa fa-floppy-o" />
-                                </button>
-                            </div>
-                            <div className="media-right">
-                                <button className="delete" onClick={()=>this.cancelEdit()} />
-                            </div>
-                        </div>
-                    </article>
+                    </div>
+                    <footer className="card-footer">
+                        <a className="card-footer-item" onClick={()=>this.saveEdit()}>Save</a>
+                        <a className="card-footer-item" onClick={()=>this.cancelEdit()}>Cancel</a>
+                    </footer>
                 </div>
             )
         }

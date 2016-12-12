@@ -39,9 +39,15 @@ class Main extends Component {
     componentDidMount(){
         setInterval(()=>{
             let task = Database.findTaskByNow(moment());
+            let project = Database.findProjectByNow(moment());
             if (task){
                 this.notify("\u23F0 "+task.title, moment(task.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
                 Database.updateTask({ _id: task._id }, {$set: {notified: true}})
+            }
+
+            if(project){
+                this.notify("\u23F0 "+project.title, moment(project.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
+                Database.updateProject({ _id: project._id }, {$set: {notified: true}})
             }
         },3000);
         ipcRenderer.on('insert-task' ,(event , data)=>{

@@ -584,6 +584,17 @@ var Database = (_class = function () {
             }
         }
     }, {
+        key: 'findProjectByNow',
+        value: function findProjectByNow(date) {
+            if (this.allProjects) {
+                return this.allProjects.find(function (x) {
+                    return x.dueDate === (0, _moment2.default)() && x.notified == false || (0, _moment2.default)().diff(x.dueDate) > 0 && x.notified == false;
+                });
+            } else {
+                return null;
+            }
+        }
+    }, {
         key: 'updateProject',
         value: function updateProject(query, set) {
             var _this8 = this;

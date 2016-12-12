@@ -96,9 +96,15 @@ var Main = function (_Component) {
 
             setInterval(function () {
                 var task = _Database2.default.findTaskByNow((0, _moment2.default)());
+                var project = _Database2.default.findProjectByNow((0, _moment2.default)());
                 if (task) {
                     _this2.notify('\u23F0 ' + task.title, (0, _moment2.default)(task.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
                     _Database2.default.updateTask({ _id: task._id }, { $set: { notified: true } });
+                }
+
+                if (project) {
+                    _this2.notify('\u23F0 ' + project.title, (0, _moment2.default)(project.dueDate.toString()).format('MMMM Do YYYY, h:mm:ss a'));
+                    _Database2.default.updateProject({ _id: project._id }, { $set: { notified: true } });
                 }
             }, 3000);
             ipcRenderer.on('insert-task', function (event, data) {
@@ -1126,6 +1132,7 @@ var CreateProjectDialog = (0, _mobxReact.observer)(_class = function (_Component
                 dueDate: this.state.dueDate,
                 open: true,
                 starred: false,
+                notified: false,
                 deleted: false
             };
 
@@ -1368,10 +1375,17 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
     }, {
         key: 'saveEdit',
         value: function saveEdit() {
+            var notified = true;
+            if (this.state.dueDate) {
+                if ((0, _moment2.default)().diff(this.state.dueDate) < 0) {
+                    notified = false;
+                }
+            }
             this.props.db.updateProject({ _id: this.props.project._id }, { $set: {
                     title: this.refs.projectTitleInput.value,
                     tags: this.generateTags(),
-                    dueDate: this.state.dueDate
+                    dueDate: this.state.dueDate,
+                    notified: notified
                 } });
             this.cancelEdit();
         }
@@ -2082,7 +2096,9 @@ var Task = function (_Component) {
 
         _this.state = {
             edit: false,
-            dueDate: _this.props.task.dueDate ? _this.props.task.dueDate : null };
+            dueDate: _this.props.task.dueDate ? _this.props.task.dueDate : null, //needed for react-datepicker,
+            contentOpened: false
+        };
         return _this;
     }
 
@@ -2292,6 +2308,22 @@ var Task = function (_Component) {
             }
         }
     }, {
+        key: 'toggleContent',
+        value: function toggleContent() {
+            if (this.state.contentOpened) {
+                console.log("close content");
+
+                this.setState({
+                    contentOpened: false
+                });
+            } else {
+                console.log("show content");
+                this.setState({
+                    contentOpened: true
+                });
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this3 = this;
@@ -2299,193 +2331,186 @@ var Task = function (_Component) {
             if (!this.state.edit) {
                 return _react2.default.createElement(
                     'div',
-                    { className: 'box task' },
+                    { className: 'card is-fullwidth task' },
                     _react2.default.createElement(
-                        'article',
-                        { className: 'media' },
+                        'header',
+                        { className: 'card-header' },
                         _react2.default.createElement(
-                            'div',
-                            { className: 'media-content' },
+                            'p',
+                            { className: 'card-header-title' },
+                            this.props.task.title,
                             _react2.default.createElement(
-                                'div',
-                                { className: 'content' },
+                                'small',
+                                null,
                                 _react2.default.createElement(
-                                    'p',
-                                    { className: 'title' },
-                                    this.props.task.title,
-                                    _react2.default.createElement(
-                                        'small',
-                                        null,
-                                        _react2.default.createElement(
-                                            'span',
-                                            { className: 'task-due-icon' },
-                                            _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
-                                        ),
-                                        ' ',
-                                        this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : "No due date"
-                                    )
+                                    'span',
+                                    { className: 'task-due-icon' },
+                                    _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
                                 ),
-                                _react2.default.createElement(
-                                    'p',
-                                    null,
-                                    _react2.default.createElement(
-                                        'span',
-                                        null,
-                                        _react2.default.createElement('i', { className: 'fa fa-sticky-note-o', 'aria-hidden': 'true' })
-                                    ),
-                                    this.props.task.notes
-                                ),
-                                _react2.default.createElement(
-                                    'p',
-                                    null,
-                                    _react2.default.createElement(
-                                        'span',
-                                        null,
-                                        _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' })
-                                    ),
-                                    this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : _react2.default.createElement(
-                                        'span',
-                                        null,
-                                        'Not assigned'
-                                    )
-                                ),
-                                this.props.task.tags.map(function (tag) {
-                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
-                                })
-                            ),
-                            _react2.default.createElement(
-                                'nav',
-                                { className: 'level' },
-                                _react2.default.createElement(
-                                    'div',
-                                    { className: 'level-left' },
-                                    _react2.default.createElement(
-                                        'a',
-                                        { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
-                                                return _this3.starTask();
-                                            } },
-                                        _react2.default.createElement(
-                                            'span',
-                                            { className: 'icon is-small' },
-                                            _react2.default.createElement('i', { className: 'fa fa-star' })
-                                        )
-                                    ),
-                                    _react2.default.createElement(
-                                        'a',
-                                        { className: 'item-level', onClick: function onClick() {
-                                                return _this3.shareTaskViaMail();
-                                            } },
-                                        _react2.default.createElement(
-                                            'span',
-                                            { className: 'icon is-small' },
-                                            _react2.default.createElement('i', { className: 'fa fa-envelope-o', 'aria-hidden': 'true' })
-                                        )
-                                    )
-                                )
+                                ' ',
+                                this.props.task.dueDate ? (0, _moment2.default)(this.props.task.dueDate).toString() : "No due date"
                             )
                         ),
                         _react2.default.createElement(
+                            'a',
+                            { className: 'card-header-icon', onClick: function onClick() {
+                                    return _this3.toggleContent();
+                                } },
+                            _react2.default.createElement('i', { className: this.state.contentOpened ? "fa fa-angle-up" : "fa fa-angle-down" })
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: this.state.contentOpened ? "card-content" : "card-content hidden-content" },
+                        _react2.default.createElement(
                             'div',
-                            { className: 'media-right' },
-                            this.props.task.done ? null : _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
+                            { className: 'content' },
+                            _react2.default.createElement(
+                                'p',
+                                null,
                                 _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this3.finishTask();
-                                        } },
-                                    _react2.default.createElement('i', { className: 'fa fa-check' })
-                                )
+                                    'span',
+                                    null,
+                                    _react2.default.createElement('i', { className: 'fa fa-sticky-note-o', 'aria-hidden': 'true' })
+                                ),
+                                this.props.task.notes
                             ),
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
+                                'p',
+                                null,
                                 _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-warning', onClick: function onClick() {
-                                            return _this3.edit();
-                                        } },
-                                    _react2.default.createElement('i', { className: 'fa fa-edit' })
+                                    'span',
+                                    null,
+                                    _react2.default.createElement('i', { className: 'fa fa-briefcase', 'aria-hidden': 'true' })
+                                ),
+                                this.props.db.findProjectSynchronous(this.props.task.project) ? this.props.db.findProjectSynchronous(this.props.task.project).title : _react2.default.createElement(
+                                    'span',
+                                    null,
+                                    'Not assigned'
                                 )
                             ),
+                            this.props.task.tags.map(function (tag) {
+                                return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this3 });
+                            })
+                        ),
+                        _react2.default.createElement(
+                            'nav',
+                            { className: 'level' },
                             _react2.default.createElement(
                                 'div',
-                                { className: 'media-right' },
+                                { className: 'level-left' },
                                 _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-danger', onClick: function onClick() {
-                                            return _this3.deleteTask();
+                                    'a',
+                                    { className: this.props.task.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
+                                            return _this3.starTask();
                                         } },
-                                    _react2.default.createElement('i', { className: 'fa fa-trash-o' })
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-star' })
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'a',
+                                    { className: 'item-level', onClick: function onClick() {
+                                            return _this3.shareTaskViaMail();
+                                        } },
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-envelope-o', 'aria-hidden': 'true' })
+                                    )
                                 )
                             )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'footer',
+                        { className: 'card-footer' },
+                        this.props.task.done ? null : _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.finishTask();
+                                } },
+                            'Finish'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.edit();
+                                } },
+                            'Edit'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.deleteTask();
+                                } },
+                            'Delete'
                         )
                     )
                 );
             } else {
                 return _react2.default.createElement(
                     'div',
-                    { className: 'box task is-edit' },
+                    { className: 'card is-fullwidth task is-edit' },
                     _react2.default.createElement(
-                        'article',
-                        { className: 'media' },
+                        'header',
+                        { className: 'card-header' },
                         _react2.default.createElement(
-                            'div',
-                            { className: 'media-content' },
+                            'p',
+                            { className: 'card-header-title' },
+                            _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
+                            _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
+                                    return _this3.handleDateChange(str);
+                                } }),
                             _react2.default.createElement(
-                                'div',
-                                { className: 'content' },
-                                _react2.default.createElement(
-                                    'p',
-                                    null,
-                                    _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.task.title, ref: 'taskTitleInput' }),
-                                    _react2.default.createElement('br', null),
-                                    'Due to:',
-                                    _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
-                                            return _this3.handleDateChange(str);
-                                        } }),
-                                    ' ',
-                                    _react2.default.createElement(
-                                        'button',
-                                        { className: 'button is-danger', onClick: function onClick() {
-                                                return _this3.removeDueDate();
-                                            } },
-                                        'Remove due date'
-                                    ),
-                                    _react2.default.createElement('br', null),
-                                    'Notes:',
-                                    _react2.default.createElement('textarea', { className: 'textarea', ref: 'taskNotesTextarea', defaultValue: this.props.task.notes }),
-                                    _react2.default.createElement('br', null),
-                                    'In project: ',
-                                    this.projectInput(),
-                                    _react2.default.createElement('br', null),
-                                    'Tags:',
-                                    _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'taskTagsInput', defaultValue: this.getTagsString() })
-                                )
+                                'button',
+                                { className: 'button is-danger', onClick: function onClick() {
+                                        return _this3.removeDueDate();
+                                    } },
+                                'Remove due date'
                             )
-                        ),
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'card-content' },
                         _react2.default.createElement(
                             'div',
-                            { className: 'media-right' },
+                            { className: 'content' },
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
-                                _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this3.saveEdit();
-                                        } },
-                                    _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
-                                )
+                                'p',
+                                null,
+                                'Notes:',
+                                _react2.default.createElement('textarea', { className: 'textarea', ref: 'taskNotesTextarea', defaultValue: this.props.task.notes })
                             ),
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
-                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this3.cancelEdit();
-                                    } })
-                            )
+                                'p',
+                                null,
+                                'In project: ',
+                                this.projectInput()
+                            ),
+                            'Tags:',
+                            _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'taskTagsInput', defaultValue: this.getTagsString() })
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'footer',
+                        { className: 'card-footer' },
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.saveEdit();
+                                } },
+                            'Save'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.cancelEdit();
+                                } },
+                            'Cancel'
                         )
                     )
                 );
@@ -2851,6 +2876,17 @@ var Database = (_class = function () {
 
                 return this.allProjects.find(function (x) {
                     return x.title === projectName;
+                });
+            } else {
+                return null;
+            }
+        }
+    }, {
+        key: 'findProjectByNow',
+        value: function findProjectByNow(date) {
+            if (this.allProjects) {
+                return this.allProjects.find(function (x) {
+                    return x.dueDate === (0, _moment2.default)() && x.notified == false || (0, _moment2.default)().diff(x.dueDate) > 0 && x.notified == false;
                 });
             } else {
                 return null;

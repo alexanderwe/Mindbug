@@ -197,6 +197,14 @@ class Database{
         }
     }
 
+    findProjectByNow(date){
+        if (this.allProjects) {
+            return this.allProjects.find(x => x.dueDate === moment() && x.notified==false|| moment().diff(x.dueDate) > 0 && x.notified==false );
+        } else {
+            return null;
+        }
+    }
+
     @computed get totalOpenProjects() {
         if (this.allProjects) {
             return this.allProjects.filter(function( project ) {
