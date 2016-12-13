@@ -1,5 +1,6 @@
 @import '../node_modules/bulma/css/bulma.css';
 @import '../node_modules/font-awesome/css/font-awesome.css';
+@import '../node_modules/react-big-calendar/lib/css/react-big-calendar.css';
 @import './flatpickr_green.min.css';
 .flatpickr-input {
   width: 100%;
@@ -189,27 +190,13 @@ hr {
 \*------------------------------------*/
 /*------------------------------------*    Task
 \*------------------------------------*/
-/*.task
-    p
-        margin-bottom: 5px !important;
-    .tag
-        margin-right: 5px;
-    .title
-        margin-bottom: 5px;
-        small
-            margin-left: 20px;
-            .due-icon
-                margin-right: -5px;
-
-    .media-right
-        button
-            margin-top: 5px
-    .active
-        color: colors.yellow;
-        &:hover
-            color: colors.dark-grey;*/
 .task {
   margin-bottom: 20px;
+}
+.task .card-header-title .btn-round {
+  margin-top: 5px;
+  margin-left: 5px;
+  width: 10%;
 }
 .task .card-header-title small {
   margin-top: 2px;
@@ -227,6 +214,12 @@ hr {
 .task .card-content {
   padding-bottom: 10px;
   padding-top: 10px;
+}
+.task .card-content .active {
+  color: #ffd83d;
+}
+.task .card-content .active:hover {
+  color: #363636;
 }
 .task .card-content .content {
   margin-bottom: 10px !important;
@@ -250,17 +243,18 @@ hr {
 }
 /*------------------------------------*    Project
 \*------------------------------------*/
+.project {
+  margin-bottom: 20px;
+}
+.project .card-header-title small {
+  margin-top: 2px;
+  margin-left: 10px;
+}
+.project .card-content .active {
+  color: #ffd83d;
+}
 .project .content ul {
   list-style: none !important;
-}
-.project .title {
-  margin-bottom: 5px !important;
-}
-.project .title small {
-  margin-left: 20px;
-}
-.project .title small .due-icon {
-  margin-right: -5px;
 }
 .project .menu-label {
   color: #7a7a7a;

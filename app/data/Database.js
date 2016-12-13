@@ -7,13 +7,14 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 
 class Database{
 
-    @observable tasks = new Array();
-    @observable projects = new Array();
-    @observable tags = new Array();
-    @observable allTasks = new Array();
-    @observable allProjects = new Array();
+    @observable tasks = new Array(); //representation for the task visible in the view
+    @observable projects = new Array();//representation for the projects visible in the view
+    @observable tags = new Array(); //representation for the tags visible in the navView
+    @observable allTasks = new Array(); //representation for all tasks in db
+    @observable allProjects = new Array(); //representation for all project in db
+    @observable taskSort = {dueDate :1}; //representation for the tasksSort in the view
+    @observable projectSort = {dueDate :1}; //representation for the projectSort in the view
     dbFilter = null;
-
 
     constructor(){
         this.taskCollection = new Datastore({
@@ -28,7 +29,7 @@ class Database{
             timestampData: true,
         });
 
-        this.findTasks({}, { dueDate:1 });
+        this.findTasks({}, this.taskSort);
         this.findProjects({},{dueDate: 1});
         this.updateTags();
         this.refreshAllTasks();
@@ -44,7 +45,7 @@ class Database{
             if(newDoc.project != '' ){
                 this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id} });
             }
-            this.findTasks(this.dbFilter);
+            this.findTasks(this.dbFilter,this.taskSort);
             this.updateTags();
             this.refreshAllTasks();
             this.refreshAllProjects();
@@ -116,7 +117,7 @@ class Database{
 
 
         this.taskCollection.update(query, set ,(err, numReplaced) => {
-            this.findTasks(this.dbFilter);
+            this.findTasks(this.dbFilter, this.taskSort);
             this.updateTags();
             this.refreshAllTasks();
 
@@ -136,8 +137,8 @@ class Database{
     @action
     deleteTask(query){
         this.taskCollection.remove(query, {}, (err, numRemoved) => {
-            this.findTasks(this.dbFilter);
-            this.findProjects(this.dbFilter);
+            this.findTasks(this.dbFilter,this.taskSort);
+            this.findProjects(this.dbFilter, this.projectSort);
             this.updateTags();
             this.refreshAllTasks();
         });
@@ -157,7 +158,7 @@ class Database{
     insertProject(doc){
         console.log("inserting project");
         this.projectCollection.insert(doc,(err, newDoc) => {
-            this.findProjects(this.dbFilter);
+            this.findProjects(this.dbFilter,this.projectSort);
             this.updateTags();
             this.refreshAllProjects();
         });
@@ -221,7 +222,7 @@ class Database{
             console.log("Project updated with: ");
             console.log(query);
 
-            this.findProjects(this.dbFilter);
+            this.findProjects(this.dbFilter,this.projectSort);
             this.updateTags();
             this.refreshAllProjects();
         });
@@ -232,7 +233,7 @@ class Database{
         this.projectCollection.remove(query, {}, (err, numRemoved) => {
             console.log("projekt deleted");
 
-            this.findProjects(this.dbFilter);
+            this.findProjects(this.dbFilter,this.projectSort);
             this.updateTags();
             this.refreshAllProjects();
         });
@@ -277,6 +278,16 @@ class Database{
     @action
     setActiveItem(activeItem){
         this.activeItem = activeItem;
+    }
+
+    @action
+    setTaskSort(taskSort){
+        this.taskSort = taskSort;
+    }
+
+    @action
+    setProjectSort(projectSort){
+        this.projectSort = projectSort;
     }
 
     @action

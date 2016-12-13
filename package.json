@@ -33,5 +33,9 @@
     "electron": "^1.4.7",
     "electron-builder": "^8.6.0",
     "stylus": "^0.54.5"
+  },
+  "dependencies": {
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
   }
 }

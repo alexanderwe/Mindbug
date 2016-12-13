@@ -15,6 +15,10 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _later = require('later');
+
+var _later2 = _interopRequireDefault(_later);
+
 var _Database = require('./data/Database.js');
 
 var _Database2 = _interopRequireDefault(_Database);
@@ -80,6 +84,10 @@ var Main = function (_Component) {
         key: 'componentWillMount',
         value: function componentWillMount() {
             this.refreshDatabase();
+            var text = 'every 5 mins';
+            var s = _later2.default.parse.text(text);
+
+            console.log(_later2.default.schedule(s).next(10));
         }
     }, {
         key: 'componentDidUpdate',
@@ -116,17 +124,17 @@ var Main = function (_Component) {
         value: function refreshDatabase() {
             if (this.state.activeItem === "tasks") {
                 _Database2.default.setDbFilter(this.state.dbFilter);
-                _Database2.default.findTasks(this.state.dbFilter);
+                _Database2.default.findTasks(this.state.dbFilter, { dueDate: 1 });
             } else if (this.state.activeItem === "projects") {
                 _Database2.default.setDbFilter(this.state.dbFilter);
-                _Database2.default.findProjects(this.state.dbFilter);
+                _Database2.default.findProjects(this.state.dbFilter, { dueDate: 1 });
             } else if (this.state.activeItem === "today") {
                 _Database2.default.setDbFilter(this.state.dbFilter);
-                _Database2.default.findTasks(this.state.dbFilter);
-                _Database2.default.findProjects(this.state.dbFilter);
+                _Database2.default.findTasks(this.state.dbFilter, { dueDate: 1 });
+                _Database2.default.findProjects(this.state.dbFilter, { dueDate: 1 });
             } else if (this.state.activeItem === "inbox") {
                 _Database2.default.setDbFilter(this.state.dbFilter);
-                _Database2.default.findTasks(this.state.dbFilter);
+                _Database2.default.findTasks(this.state.dbFilter, { dueDate: 1 });
             }
         }
         /**
@@ -179,7 +187,7 @@ var Main = function (_Component) {
 var main = document.getElementById('main');
 _reactDom2.default.render(_react2.default.createElement(Main, null), main);
 
-},{"./components/general/Inbox.component.jsx":2,"./components/general/Today.component.jsx":3,"./components/navigation/Navbar.component.jsx":4,"./components/navigation/ToolbarHeader.component.jsx":6,"./components/projects/CreateProjectDialog.component.jsx":7,"./components/projects/ProjectList.component.jsx":9,"./components/tasks/CreateTaskDialog.component.jsx":10,"./components/tasks/TaskList.component.jsx":12,"./data/Database.js":13,"moment":46,"react":209,"react-dom":57}],2:[function(require,module,exports){
+},{"./components/general/Inbox.component.jsx":2,"./components/general/Today.component.jsx":3,"./components/navigation/Navbar.component.jsx":4,"./components/navigation/ToolbarHeader.component.jsx":6,"./components/projects/CreateProjectDialog.component.jsx":7,"./components/projects/ProjectList.component.jsx":9,"./components/tasks/CreateTaskDialog.component.jsx":10,"./components/tasks/TaskList.component.jsx":12,"./data/Database.js":13,"later":43,"moment":48,"react":212,"react-dom":59}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -243,7 +251,7 @@ var Inbox = (0, _mobxReact.observer)(_class = function (_Component) {
 
 exports.default = Inbox;
 
-},{"../tasks/TaskList.component.jsx":12,"mobx-react":44,"react":209}],3:[function(require,module,exports){
+},{"../tasks/TaskList.component.jsx":12,"mobx-react":46,"react":212}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -321,7 +329,7 @@ var Today = (0, _mobxReact.observer)(_class = function (_Component) {
 
 exports.default = Today;
 
-},{"../projects/ProjectList.component.jsx":9,"../tasks/TaskList.component.jsx":12,"mobx-react":44,"react":209}],4:[function(require,module,exports){
+},{"../projects/ProjectList.component.jsx":9,"../tasks/TaskList.component.jsx":12,"mobx-react":46,"react":212}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -835,7 +843,7 @@ Navbar.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Tag.component.jsx":5,"mobx-react":44,"moment":46,"react":209}],5:[function(require,module,exports){
+},{"./Tag.component.jsx":5,"mobx-react":46,"moment":48,"react":212}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -901,7 +909,7 @@ var Tag = function (_Component) {
 
 exports.default = Tag;
 
-},{"react":209}],6:[function(require,module,exports){
+},{"react":212}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -941,7 +949,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             return _react2.default.createElement(
                 'nav',
-                { className: 'level draggable' },
+                { className: 'level is-mobile draggable' },
                 _react2.default.createElement(
                     'div',
                     { className: 'level-item has-text-centered' },
@@ -969,6 +977,15 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
                         { className: 'title' },
                         this.props.db.totalOpenProjects
                     )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'level-left' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'level-item' },
+                        _react2.default.createElement('i', { className: 'fa fa-sort', 'aria-hidden': 'true' })
+                    )
                 )
             );
         }
@@ -985,7 +1002,7 @@ ToolbarHeader.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"mobx-react":44,"react":209}],7:[function(require,module,exports){
+},{"mobx-react":46,"react":212}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1239,7 +1256,7 @@ CreateProjectDialog.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"mobx-react":44,"moment":46,"react":209,"react-flatpickr":184}],8:[function(require,module,exports){
+},{"mobx-react":46,"moment":48,"react":212,"react-flatpickr":187}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1413,6 +1430,32 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                 edit: false
             });
         }
+
+        /**
+        * Sets project.starred = true or false
+        */
+
+    }, {
+        key: 'starProject',
+        value: function starProject() {
+            if (!this.props.project.starred) {
+                console.log("star project");
+                this.props.db.updateProject({ _id: this.props.project._id }, { $set: { starred: true } });
+            } else {
+                console.log("unstar project");
+                this.props.db.updateProject({ _id: this.props.project._id }, { $set: { starred: false } });
+            }
+        }
+
+        /**
+        * Use the mailto option to create a mail with some rudimental information about a project
+        */
+
+    }, {
+        key: 'shareProjectViaMail',
+        value: function shareProjectViaMail() {
+            location.href = 'mailto:mail@provider.com?Subject=' + this.props.project.title + '&Body=Title: ' + 'Project ' + this.props.project.title + '%0D%0ADue date: ' + this.state.dueDate.toString();
+        }
     }, {
         key: 'tasksDonePercentage',
         value: function tasksDonePercentage() {
@@ -1457,184 +1500,208 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             var _this4 = this;
 
+            var halfWidth = {
+                width: '50%'
+            };
             if (!this.state.edit) {
                 return _react2.default.createElement(
                     'div',
-                    { className: 'box project' },
+                    { className: 'card is-fullwidth project' },
                     _react2.default.createElement(
-                        'article',
-                        { className: 'media' },
+                        'header',
+                        { className: 'card-header' },
                         _react2.default.createElement(
-                            'div',
-                            { className: 'media-content' },
+                            'p',
+                            { className: 'card-header-title' },
+                            this.props.project.title,
                             _react2.default.createElement(
-                                'div',
-                                { className: 'content' },
-                                _react2.default.createElement(
-                                    'p',
-                                    { className: 'title' },
-                                    this.props.project.title,
-                                    _react2.default.createElement(
-                                        'small',
-                                        null,
-                                        _react2.default.createElement(
-                                            'span',
-                                            { className: 'due-icon' },
-                                            _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
-                                        ),
-                                        ' ',
-                                        this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"
-                                    )
-                                ),
-                                _react2.default.createElement('hr', null),
+                                'small',
+                                null,
                                 _react2.default.createElement(
                                     'span',
-                                    { className: 'menu-label' },
-                                    'Progess'
+                                    { className: 'due-icon' },
+                                    _react2.default.createElement('i', { className: 'fa fa-clock-o', 'aria-hidden': 'true' })
                                 ),
-                                _react2.default.createElement(
-                                    'progress',
-                                    { className: this.getProgessClass(), value: this.tasksDonePercentage(), max: '100' },
-                                    this.tasksDonePercentage()
-                                ),
-                                _react2.default.createElement(
-                                    'span',
-                                    { className: 'menu-label' },
-                                    'Tasks'
-                                ),
-                                _react2.default.createElement(
-                                    'ul',
-                                    { className: 'menu-list' },
-                                    this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
-                                        var task = _this4.props.db.findTaskSynchronous(taskId);
-                                        return _react2.default.createElement(
-                                            'li',
-                                            { key: task._id },
-                                            task.title,
-                                            task.done ? _react2.default.createElement(
-                                                'span',
-                                                { className: 'icon' },
-                                                _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
-                                            ) : null
-                                        );
-                                    }) : _react2.default.createElement(
-                                        'li',
-                                        null,
-                                        'No tasks assigned to this project'
-                                    )
-                                ),
-                                this.props.project.tags.map(function (tag) {
-                                    return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this4 });
-                                })
+                                ' ',
+                                this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"
                             )
-                        ),
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'card-content' },
                         _react2.default.createElement(
                             'div',
-                            { className: 'media-right' },
+                            { className: 'content' },
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
-                                _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-warning', onClick: function onClick() {
-                                            return _this4.edit();
-                                        } },
-                                    _react2.default.createElement('i', { className: 'fa fa-edit' })
-                                )
+                                'span',
+                                { className: 'menu-label' },
+                                'Progess'
                             ),
                             _react2.default.createElement(
+                                'progress',
+                                { className: this.getProgessClass(), value: this.tasksDonePercentage(), max: '100' },
+                                this.tasksDonePercentage()
+                            ),
+                            _react2.default.createElement(
+                                'span',
+                                { className: 'menu-label' },
+                                'Tasks'
+                            ),
+                            _react2.default.createElement(
+                                'ul',
+                                { className: 'menu-list' },
+                                this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
+                                    var task = _this4.props.db.findTaskSynchronous(taskId);
+                                    return _react2.default.createElement(
+                                        'li',
+                                        { key: task._id },
+                                        task.title,
+                                        task.done ? _react2.default.createElement(
+                                            'span',
+                                            { className: 'icon' },
+                                            _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
+                                        ) : null
+                                    );
+                                }) : _react2.default.createElement(
+                                    'li',
+                                    null,
+                                    'No tasks assigned to this project'
+                                )
+                            ),
+                            this.props.project.tags.map(function (tag) {
+                                return _react2.default.createElement(_TagComponent2.default, { name: tag, key: tag, parent: _this4 });
+                            })
+                        ),
+                        _react2.default.createElement(
+                            'nav',
+                            { className: 'level' },
+                            _react2.default.createElement(
                                 'div',
-                                { className: 'media-right' },
+                                { className: 'level-left' },
                                 _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-danger', onClick: function onClick() {
-                                            return _this4.deleteProject();
+                                    'a',
+                                    { className: this.props.project.starred ? 'item-level active' : 'item-level', onClick: function onClick() {
+                                            return _this4.starProject();
                                         } },
-                                    _react2.default.createElement('i', { className: 'fa fa-trash-o' })
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-star' })
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'a',
+                                    { className: 'item-level', onClick: function onClick() {
+                                            return _this4.shareProjectViaMail();
+                                        } },
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'icon is-small' },
+                                        _react2.default.createElement('i', { className: 'fa fa-envelope-o', 'aria-hidden': 'true' })
+                                    )
                                 )
                             )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'footer',
+                        { className: 'card-footer' },
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this4.edit();
+                                } },
+                            'Edit'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this4.deleteProject();
+                                } },
+                            'Delete'
                         )
                     )
                 );
             } else {
                 return _react2.default.createElement(
                     'div',
-                    { className: 'box project is-edit' },
+                    { className: 'card is-fullwidth project is-edit' },
                     _react2.default.createElement(
-                        'article',
-                        { className: 'media' },
+                        'header',
+                        { className: 'card-header' },
                         _react2.default.createElement(
-                            'div',
-                            { className: 'media-content' },
+                            'p',
+                            { className: 'card-header-title' },
+                            _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.project.title, ref: 'projectTitleInput', style: halfWidth }),
+                            _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
+                                    return _this4.handleDateChange(str);
+                                }, style: halfWidth }),
                             _react2.default.createElement(
-                                'div',
-                                { className: 'content' },
-                                _react2.default.createElement('input', { className: 'input', type: 'text', defaultValue: this.props.project.title, ref: 'projectTitleInput' }),
-                                _react2.default.createElement(_reactFlatpickr2.default, { 'data-enable-time': true, value: this.state.dueDate ? (0, _moment2.default)(this.state.dueDate).toString() : "", onChange: function onChange(_, str) {
-                                        return _this4.handleDateChange(str);
-                                    } }),
-                                _react2.default.createElement(
-                                    'button',
-                                    { className: 'button is-danger', onClick: function onClick() {
-                                            return _this4.removeDueDate();
-                                        } },
-                                    'Remove due date'
-                                ),
-                                _react2.default.createElement(
-                                    'p',
-                                    { className: 'menu-label' },
-                                    'Tasks'
-                                ),
-                                _react2.default.createElement(
-                                    'ul',
-                                    { className: 'menu-list' },
-                                    this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
-                                        var task = _this4.props.db.findTaskSynchronous(taskId);
-                                        return _react2.default.createElement(
-                                            'li',
-                                            { key: task._id },
-                                            task.title,
-                                            task.done ? _react2.default.createElement(
-                                                'span',
-                                                { className: 'icon' },
-                                                _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
-                                            ) : null
-                                        );
-                                    }) : _react2.default.createElement(
-                                        'li',
-                                        null,
-                                        'No tasks assigned to this project'
-                                    )
-                                ),
-                                _react2.default.createElement(
-                                    'p',
-                                    { className: 'menu-label' },
-                                    'Tags'
-                                ),
-                                _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'projectTagsInput', defaultValue: this.getTagsString() })
+                                'button',
+                                { className: 'button is-danger', onClick: function onClick() {
+                                        return _this4.removeDueDate();
+                                    } },
+                                'Remove due date'
                             )
-                        ),
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'card-content' },
                         _react2.default.createElement(
                             'div',
-                            { className: 'media-right' },
+                            { className: 'content' },
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
-                                _react2.default.createElement(
-                                    'button',
-                                    { className: 'btn-round btn-success', onClick: function onClick() {
-                                            return _this4.saveEdit();
-                                        } },
-                                    _react2.default.createElement('i', { className: 'fa fa-floppy-o' })
+                                'p',
+                                { className: 'menu-label' },
+                                'Tasks'
+                            ),
+                            _react2.default.createElement(
+                                'ul',
+                                { className: 'menu-list' },
+                                this.props.project.tasks.length > 0 ? this.props.project.tasks.map(function (taskId) {
+                                    var task = _this4.props.db.findTaskSynchronous(taskId);
+                                    return _react2.default.createElement(
+                                        'li',
+                                        { key: task._id },
+                                        task.title,
+                                        task.done ? _react2.default.createElement(
+                                            'span',
+                                            { className: 'icon' },
+                                            _react2.default.createElement('i', { className: 'fa fa-check', 'aria-hidden': 'true' })
+                                        ) : null
+                                    );
+                                }) : _react2.default.createElement(
+                                    'li',
+                                    null,
+                                    'No tasks assigned to this project'
                                 )
                             ),
                             _react2.default.createElement(
-                                'div',
-                                { className: 'media-right' },
-                                _react2.default.createElement('button', { className: 'delete', onClick: function onClick() {
-                                        return _this4.cancelEdit();
-                                    } })
-                            )
+                                'p',
+                                { className: 'menu-label' },
+                                'Tags'
+                            ),
+                            _react2.default.createElement('input', { className: 'input', type: 'text', ref: 'projectTagsInput', defaultValue: this.getTagsString() })
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'footer',
+                        { className: 'card-footer' },
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this4.saveEdit();
+                                } },
+                            'Save'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this4.cancelEdit();
+                                } },
+                            'Cancel'
                         )
                     )
                 );
@@ -1653,7 +1720,7 @@ Project.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"../navigation/Tag.component.jsx":5,"mobx-react":44,"moment":46,"react":209,"react-flatpickr":184}],9:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":5,"mobx-react":46,"moment":48,"react":212,"react-flatpickr":187}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1738,7 +1805,7 @@ ProjectList.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Project.component.jsx":8,"mobx-react":44,"react":209}],10:[function(require,module,exports){
+},{"./Project.component.jsx":8,"mobx-react":46,"react":212}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2050,7 +2117,7 @@ CreateTaskDialog.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"mobx-react":44,"moment":46,"react":209,"react-flatpickr":184}],11:[function(require,module,exports){
+},{"mobx-react":46,"moment":48,"react":212,"react-flatpickr":187}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2073,6 +2140,10 @@ var _moment2 = _interopRequireDefault(_moment);
 var _reactFlatpickr = require('react-flatpickr');
 
 var _reactFlatpickr2 = _interopRequireDefault(_reactFlatpickr);
+
+var _reactDraggable = require('react-draggable');
+
+var _reactDraggable2 = _interopRequireDefault(_reactDraggable);
 
 var _TagComponent = require('../navigation/Tag.component.jsx');
 
@@ -2130,6 +2201,16 @@ var Task = function (_Component) {
         key: 'finishTask',
         value: function finishTask() {
             this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+        }
+
+        /**
+        * Sets task.done = false
+        */
+
+    }, {
+        key: 'undoneTask',
+        value: function undoneTask() {
+            this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: false } });
         }
 
         /**
@@ -2258,7 +2339,7 @@ var Task = function (_Component) {
     }, {
         key: 'shareTaskViaMail',
         value: function shareTaskViaMail() {
-            location.href = 'mailto:mail@provider.com?Subject=' + this.props.task.title + '&Body=Title: ' + this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.props.task.dueDate.toString();
+            location.href = 'mailto:mail@provider.com?Subject=' + this.props.task.title + '&Body=Title: ' + 'Task ' + this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.state.dueDate.toString();
         }
 
         /**
@@ -2311,18 +2392,18 @@ var Task = function (_Component) {
         key: 'toggleContent',
         value: function toggleContent() {
             if (this.state.contentOpened) {
-                console.log("close content");
-
                 this.setState({
                     contentOpened: false
                 });
             } else {
-                console.log("show content");
                 this.setState({
                     contentOpened: true
                 });
             }
         }
+
+        //TODO make task draggable ?
+
     }, {
         key: 'render',
         value: function render() {
@@ -2373,7 +2454,7 @@ var Task = function (_Component) {
                                     null,
                                     _react2.default.createElement('i', { className: 'fa fa-sticky-note-o', 'aria-hidden': 'true' })
                                 ),
-                                this.props.task.notes
+                                this.props.task.notes ? this.props.task.notes : "No notes"
                             ),
                             _react2.default.createElement(
                                 'p',
@@ -2427,7 +2508,13 @@ var Task = function (_Component) {
                     _react2.default.createElement(
                         'footer',
                         { className: 'card-footer' },
-                        this.props.task.done ? null : _react2.default.createElement(
+                        this.props.task.done ? _react2.default.createElement(
+                            'a',
+                            { className: 'card-footer-item', onClick: function onClick() {
+                                    return _this3.undoneTask();
+                                } },
+                            'Undone'
+                        ) : _react2.default.createElement(
                             'a',
                             { className: 'card-footer-item', onClick: function onClick() {
                                     return _this3.finishTask();
@@ -2466,10 +2553,10 @@ var Task = function (_Component) {
                                 } }),
                             _react2.default.createElement(
                                 'button',
-                                { className: 'button is-danger', onClick: function onClick() {
+                                { className: 'btn-round btn-danger', onClick: function onClick() {
                                         return _this3.removeDueDate();
                                     } },
-                                'Remove due date'
+                                _react2.default.createElement('i', { className: 'fa fa-trash-o' })
                             )
                         )
                     ),
@@ -2531,7 +2618,7 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"../navigation/Tag.component.jsx":5,"mobx-react":44,"moment":46,"react":209,"react-flatpickr":184}],12:[function(require,module,exports){
+},{"../navigation/Tag.component.jsx":5,"mobx-react":46,"moment":48,"react":212,"react-draggable":186,"react-flatpickr":187}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2608,7 +2695,7 @@ TaskList.propTypes = {
     db: _react2.default.PropTypes.object.isRequired
 };
 
-},{"./Task.component.jsx":11,"mobx-react":44,"react":209}],13:[function(require,module,exports){
+},{"./Task.component.jsx":11,"mobx-react":46,"react":212}],13:[function(require,module,exports){
 (function (__dirname){
 'use strict';
 
@@ -2618,7 +2705,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5;
+var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5, _descriptor6, _descriptor7;
 
 var _nedb = require('nedb');
 
@@ -2680,6 +2767,9 @@ function _initializerWarningHelper(descriptor, context) {
 var ipcRenderer = window.require('electron').ipcRenderer;
 
 var Database = (_class = function () {
+    //representation for the tasksSort in the view
+    //representation for all tasks in db
+    //representation for the projects visible in the view
     function Database() {
         _classCallCheck(this, Database);
 
@@ -2692,6 +2782,10 @@ var Database = (_class = function () {
         _initDefineProp(this, 'allTasks', _descriptor4, this);
 
         _initDefineProp(this, 'allProjects', _descriptor5, this);
+
+        _initDefineProp(this, 'taskSort', _descriptor6, this);
+
+        _initDefineProp(this, 'projectSort', _descriptor7, this);
 
         this.dbFilter = null;
 
@@ -2707,12 +2801,16 @@ var Database = (_class = function () {
             timestampData: true
         });
 
-        this.findTasks({}, { dueDate: 1 });
+        this.findTasks({}, this.taskSort);
         this.findProjects({}, { dueDate: 1 });
         this.updateTags();
         this.refreshAllTasks();
         this.refreshAllProjects();
-    }
+    } //representation for the projectSort in the view
+    //representation for all project in db
+    //representation for the tags visible in the navView
+    //representation for the task visible in the view
+
 
     _createClass(Database, [{
         key: 'insertTask',
@@ -2725,7 +2823,7 @@ var Database = (_class = function () {
                 if (newDoc.project != '') {
                     _this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id } });
                 }
-                _this.findTasks(_this.dbFilter);
+                _this.findTasks(_this.dbFilter, _this.taskSort);
                 _this.updateTags();
                 _this.refreshAllTasks();
                 _this.refreshAllProjects();
@@ -2786,7 +2884,7 @@ var Database = (_class = function () {
             console.log(set);
 
             this.taskCollection.update(query, set, function (err, numReplaced) {
-                _this3.findTasks(_this3.dbFilter);
+                _this3.findTasks(_this3.dbFilter, _this3.taskSort);
                 _this3.updateTags();
                 _this3.refreshAllTasks();
 
@@ -2808,8 +2906,8 @@ var Database = (_class = function () {
             var _this4 = this;
 
             this.taskCollection.remove(query, {}, function (err, numRemoved) {
-                _this4.findTasks(_this4.dbFilter);
-                _this4.findProjects(_this4.dbFilter);
+                _this4.findTasks(_this4.dbFilter, _this4.taskSort);
+                _this4.findProjects(_this4.dbFilter, _this4.projectSort);
                 _this4.updateTags();
                 _this4.refreshAllTasks();
             });
@@ -2832,7 +2930,7 @@ var Database = (_class = function () {
 
             console.log("inserting project");
             this.projectCollection.insert(doc, function (err, newDoc) {
-                _this6.findProjects(_this6.dbFilter);
+                _this6.findProjects(_this6.dbFilter, _this6.projectSort);
                 _this6.updateTags();
                 _this6.refreshAllProjects();
             });
@@ -2901,7 +2999,7 @@ var Database = (_class = function () {
                 console.log("Project updated with: ");
                 console.log(query);
 
-                _this8.findProjects(_this8.dbFilter);
+                _this8.findProjects(_this8.dbFilter, _this8.projectSort);
                 _this8.updateTags();
                 _this8.refreshAllProjects();
             });
@@ -2914,7 +3012,7 @@ var Database = (_class = function () {
             this.projectCollection.remove(query, {}, function (err, numRemoved) {
                 console.log("projekt deleted");
 
-                _this9.findProjects(_this9.dbFilter);
+                _this9.findProjects(_this9.dbFilter, _this9.projectSort);
                 _this9.updateTags();
                 _this9.refreshAllProjects();
             });
@@ -2987,6 +3085,16 @@ var Database = (_class = function () {
             this.activeItem = activeItem;
         }
     }, {
+        key: 'setTaskSort',
+        value: function setTaskSort(taskSort) {
+            this.taskSort = taskSort;
+        }
+    }, {
+        key: 'setProjectSort',
+        value: function setProjectSort(projectSort) {
+            this.projectSort = projectSort;
+        }
+    }, {
         key: 'setDbFilter',
         value: function setDbFilter(dbFilter) {
             this.dbFilter = dbFilter;
@@ -3052,11 +3160,21 @@ var Database = (_class = function () {
     initializer: function initializer() {
         return new Array();
     }
-}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
+}), _descriptor6 = _applyDecoratedDescriptor(_class.prototype, 'taskSort', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return { dueDate: 1 };
+    }
+}), _descriptor7 = _applyDecoratedDescriptor(_class.prototype, 'projectSort', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return { dueDate: 1 };
+    }
+}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setTaskSort', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setTaskSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setProjectSort', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setProjectSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
 exports.default = new Database();
 
 }).call(this,"/app/data")
-},{"mobx":45,"moment":46,"nedb":49}],14:[function(require,module,exports){
+},{"mobx":47,"moment":48,"nedb":51}],14:[function(require,module,exports){
 (function (process){
 /*global setImmediate: false, setTimeout: false, console: false */
 (function () {
@@ -4018,7 +4136,7 @@ exports.default = new Database();
 }());
 
 }).call(this,require('_process'))
-},{"_process":213}],15:[function(require,module,exports){
+},{"_process":216}],15:[function(require,module,exports){
 module.exports.BinarySearchTree = require('./lib/bst');
 module.exports.AVLTree = require('./lib/avltree');
 
@@ -4479,7 +4597,7 @@ AVLTree.prototype.delete = function (key, value) {
 // Interface
 module.exports = AVLTree;
 
-},{"./bst":17,"./customUtils":18,"underscore":210,"util":216}],17:[function(require,module,exports){
+},{"./bst":17,"./customUtils":18,"underscore":213,"util":219}],17:[function(require,module,exports){
 /**
  * Simple binary search tree
  */
@@ -5153,7 +5271,7 @@ var EventListener = {
 
 module.exports = EventListener;
 }).call(this,require('_process'))
-},{"./emptyFunction":26,"_process":213}],20:[function(require,module,exports){
+},{"./emptyFunction":26,"_process":216}],20:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -5430,7 +5548,7 @@ function createArrayFromMixed(obj) {
 
 module.exports = createArrayFromMixed;
 }).call(this,require('_process'))
-},{"./invariant":34,"_process":213}],25:[function(require,module,exports){
+},{"./invariant":34,"_process":216}],25:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -5516,7 +5634,7 @@ function createNodesFromMarkup(markup, handleScript) {
 
 module.exports = createNodesFromMarkup;
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":20,"./createArrayFromMixed":24,"./getMarkupWrap":30,"./invariant":34,"_process":213}],26:[function(require,module,exports){
+},{"./ExecutionEnvironment":20,"./createArrayFromMixed":24,"./getMarkupWrap":30,"./invariant":34,"_process":216}],26:[function(require,module,exports){
 "use strict";
 
 /**
@@ -5577,7 +5695,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = emptyObject;
 }).call(this,require('_process'))
-},{"_process":213}],28:[function(require,module,exports){
+},{"_process":216}],28:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -5736,7 +5854,7 @@ function getMarkupWrap(nodeName) {
 
 module.exports = getMarkupWrap;
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":20,"./invariant":34,"_process":213}],31:[function(require,module,exports){
+},{"./ExecutionEnvironment":20,"./invariant":34,"_process":216}],31:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -5899,7 +6017,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 }).call(this,require('_process'))
-},{"_process":213}],35:[function(require,module,exports){
+},{"_process":216}],35:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6171,7 +6289,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = warning;
 }).call(this,require('_process'))
-},{"./emptyFunction":26,"_process":213}],42:[function(require,module,exports){
+},{"./emptyFunction":26,"_process":216}],42:[function(require,module,exports){
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -7792,6 +7910,1559 @@ if (!("classList" in document.documentElement) && Object.defineProperty && typeo
 if (typeof module !== "undefined") module.exports = Flatpickr;
 
 },{}],43:[function(require,module,exports){
+require("./later");
+module.exports = later;
+},{"./later":44}],44:[function(require,module,exports){
+later = function() {
+  "use strict";
+  var later = {
+    version: "1.2.0"
+  };
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(searchElement) {
+      "use strict";
+      if (this == null) {
+        throw new TypeError();
+      }
+      var t = Object(this);
+      var len = t.length >>> 0;
+      if (len === 0) {
+        return -1;
+      }
+      var n = 0;
+      if (arguments.length > 1) {
+        n = Number(arguments[1]);
+        if (n != n) {
+          n = 0;
+        } else if (n != 0 && n != Infinity && n != -Infinity) {
+          n = (n > 0 || -1) * Math.floor(Math.abs(n));
+        }
+      }
+      if (n >= len) {
+        return -1;
+      }
+      var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+      for (;k < len; k++) {
+        if (k in t && t[k] === searchElement) {
+          return k;
+        }
+      }
+      return -1;
+    };
+  }
+  if (!String.prototype.trim) {
+    String.prototype.trim = function() {
+      return this.replace(/^\s+|\s+$/g, "");
+    };
+  }
+  later.array = {};
+  later.array.sort = function(arr, zeroIsLast) {
+    arr.sort(function(a, b) {
+      return +a - +b;
+    });
+    if (zeroIsLast && arr[0] === 0) {
+      arr.push(arr.shift());
+    }
+  };
+  later.array.next = function(val, values, extent) {
+    var cur, zeroIsLargest = extent[0] !== 0, nextIdx = 0;
+    for (var i = values.length - 1; i > -1; --i) {
+      cur = values[i];
+      if (cur === val) {
+        return cur;
+      }
+      if (cur > val || cur === 0 && zeroIsLargest && extent[1] > val) {
+        nextIdx = i;
+        continue;
+      }
+      break;
+    }
+    return values[nextIdx];
+  };
+  later.array.nextInvalid = function(val, values, extent) {
+    var min = extent[0], max = extent[1], len = values.length, zeroVal = values[len - 1] === 0 && min !== 0 ? max : 0, next = val, i = values.indexOf(val), start = next;
+    while (next === (values[i] || zeroVal)) {
+      next++;
+      if (next > max) {
+        next = min;
+      }
+      i++;
+      if (i === len) {
+        i = 0;
+      }
+      if (next === start) {
+        return undefined;
+      }
+    }
+    return next;
+  };
+  later.array.prev = function(val, values, extent) {
+    var cur, len = values.length, zeroIsLargest = extent[0] !== 0, prevIdx = len - 1;
+    for (var i = 0; i < len; i++) {
+      cur = values[i];
+      if (cur === val) {
+        return cur;
+      }
+      if (cur < val || cur === 0 && zeroIsLargest && extent[1] < val) {
+        prevIdx = i;
+        continue;
+      }
+      break;
+    }
+    return values[prevIdx];
+  };
+  later.array.prevInvalid = function(val, values, extent) {
+    var min = extent[0], max = extent[1], len = values.length, zeroVal = values[len - 1] === 0 && min !== 0 ? max : 0, next = val, i = values.indexOf(val), start = next;
+    while (next === (values[i] || zeroVal)) {
+      next--;
+      if (next < min) {
+        next = max;
+      }
+      i--;
+      if (i === -1) {
+        i = len - 1;
+      }
+      if (next === start) {
+        return undefined;
+      }
+    }
+    return next;
+  };
+  later.day = later.D = {
+    name: "day",
+    range: 86400,
+    val: function(d) {
+      return d.D || (d.D = later.date.getDate.call(d));
+    },
+    isValid: function(d, val) {
+      return later.D.val(d) === (val || later.D.extent(d)[1]);
+    },
+    extent: function(d) {
+      if (d.DExtent) return d.DExtent;
+      var month = later.M.val(d), max = later.DAYS_IN_MONTH[month - 1];
+      if (month === 2 && later.dy.extent(d)[1] === 366) {
+        max = max + 1;
+      }
+      return d.DExtent = [ 1, max ];
+    },
+    start: function(d) {
+      return d.DStart || (d.DStart = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d)));
+    },
+    end: function(d) {
+      return d.DEnd || (d.DEnd = later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d)));
+    },
+    next: function(d, val) {
+      val = val > later.D.extent(d)[1] ? 1 : val;
+      var month = later.date.nextRollover(d, val, later.D, later.M), DMax = later.D.extent(month)[1];
+      val = val > DMax ? 1 : val || DMax;
+      return later.date.next(later.Y.val(month), later.M.val(month), val);
+    },
+    prev: function(d, val) {
+      var month = later.date.prevRollover(d, val, later.D, later.M), DMax = later.D.extent(month)[1];
+      return later.date.prev(later.Y.val(month), later.M.val(month), val > DMax ? DMax : val || DMax);
+    }
+  };
+  later.dayOfWeekCount = later.dc = {
+    name: "day of week count",
+    range: 604800,
+    val: function(d) {
+      return d.dc || (d.dc = Math.floor((later.D.val(d) - 1) / 7) + 1);
+    },
+    isValid: function(d, val) {
+      return later.dc.val(d) === val || val === 0 && later.D.val(d) > later.D.extent(d)[1] - 7;
+    },
+    extent: function(d) {
+      return d.dcExtent || (d.dcExtent = [ 1, Math.ceil(later.D.extent(d)[1] / 7) ]);
+    },
+    start: function(d) {
+      return d.dcStart || (d.dcStart = later.date.next(later.Y.val(d), later.M.val(d), Math.max(1, (later.dc.val(d) - 1) * 7 + 1 || 1)));
+    },
+    end: function(d) {
+      return d.dcEnd || (d.dcEnd = later.date.prev(later.Y.val(d), later.M.val(d), Math.min(later.dc.val(d) * 7, later.D.extent(d)[1])));
+    },
+    next: function(d, val) {
+      val = val > later.dc.extent(d)[1] ? 1 : val;
+      var month = later.date.nextRollover(d, val, later.dc, later.M), dcMax = later.dc.extent(month)[1];
+      val = val > dcMax ? 1 : val;
+      var next = later.date.next(later.Y.val(month), later.M.val(month), val === 0 ? later.D.extent(month)[1] - 6 : 1 + 7 * (val - 1));
+      if (next.getTime() <= d.getTime()) {
+        month = later.M.next(d, later.M.val(d) + 1);
+        return later.date.next(later.Y.val(month), later.M.val(month), val === 0 ? later.D.extent(month)[1] - 6 : 1 + 7 * (val - 1));
+      }
+      return next;
+    },
+    prev: function(d, val) {
+      var month = later.date.prevRollover(d, val, later.dc, later.M), dcMax = later.dc.extent(month)[1];
+      val = val > dcMax ? dcMax : val || dcMax;
+      return later.dc.end(later.date.prev(later.Y.val(month), later.M.val(month), 1 + 7 * (val - 1)));
+    }
+  };
+  later.dayOfWeek = later.dw = later.d = {
+    name: "day of week",
+    range: 86400,
+    val: function(d) {
+      return d.dw || (d.dw = later.date.getDay.call(d) + 1);
+    },
+    isValid: function(d, val) {
+      return later.dw.val(d) === (val || 7);
+    },
+    extent: function() {
+      return [ 1, 7 ];
+    },
+    start: function(d) {
+      return later.D.start(d);
+    },
+    end: function(d) {
+      return later.D.end(d);
+    },
+    next: function(d, val) {
+      val = val > 7 ? 1 : val || 7;
+      return later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d) + (val - later.dw.val(d)) + (val <= later.dw.val(d) ? 7 : 0));
+    },
+    prev: function(d, val) {
+      val = val > 7 ? 7 : val || 7;
+      return later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d) + (val - later.dw.val(d)) + (val >= later.dw.val(d) ? -7 : 0));
+    }
+  };
+  later.dayOfYear = later.dy = {
+    name: "day of year",
+    range: 86400,
+    val: function(d) {
+      return d.dy || (d.dy = Math.ceil(1 + (later.D.start(d).getTime() - later.Y.start(d).getTime()) / later.DAY));
+    },
+    isValid: function(d, val) {
+      return later.dy.val(d) === (val || later.dy.extent(d)[1]);
+    },
+    extent: function(d) {
+      var year = later.Y.val(d);
+      return d.dyExtent || (d.dyExtent = [ 1, year % 4 ? 365 : 366 ]);
+    },
+    start: function(d) {
+      return later.D.start(d);
+    },
+    end: function(d) {
+      return later.D.end(d);
+    },
+    next: function(d, val) {
+      val = val > later.dy.extent(d)[1] ? 1 : val;
+      var year = later.date.nextRollover(d, val, later.dy, later.Y), dyMax = later.dy.extent(year)[1];
+      val = val > dyMax ? 1 : val || dyMax;
+      return later.date.next(later.Y.val(year), later.M.val(year), val);
+    },
+    prev: function(d, val) {
+      var year = later.date.prevRollover(d, val, later.dy, later.Y), dyMax = later.dy.extent(year)[1];
+      val = val > dyMax ? dyMax : val || dyMax;
+      return later.date.prev(later.Y.val(year), later.M.val(year), val);
+    }
+  };
+  later.hour = later.h = {
+    name: "hour",
+    range: 3600,
+    val: function(d) {
+      return d.h || (d.h = later.date.getHour.call(d));
+    },
+    isValid: function(d, val) {
+      return later.h.val(d) === val;
+    },
+    extent: function() {
+      return [ 0, 23 ];
+    },
+    start: function(d) {
+      return d.hStart || (d.hStart = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d)));
+    },
+    end: function(d) {
+      return d.hEnd || (d.hEnd = later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d)));
+    },
+    next: function(d, val) {
+      val = val > 23 ? 0 : val;
+      var next = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d) + (val <= later.h.val(d) ? 1 : 0), val);
+      if (!later.date.isUTC && next.getTime() <= d.getTime()) {
+        next = later.date.next(later.Y.val(next), later.M.val(next), later.D.val(next), val + 1);
+      }
+      return next;
+    },
+    prev: function(d, val) {
+      val = val > 23 ? 23 : val;
+      return later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d) + (val >= later.h.val(d) ? -1 : 0), val);
+    }
+  };
+  later.minute = later.m = {
+    name: "minute",
+    range: 60,
+    val: function(d) {
+      return d.m || (d.m = later.date.getMin.call(d));
+    },
+    isValid: function(d, val) {
+      return later.m.val(d) === val;
+    },
+    extent: function(d) {
+      return [ 0, 59 ];
+    },
+    start: function(d) {
+      return d.mStart || (d.mStart = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d), later.m.val(d)));
+    },
+    end: function(d) {
+      return d.mEnd || (d.mEnd = later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d), later.m.val(d)));
+    },
+    next: function(d, val) {
+      var m = later.m.val(d), s = later.s.val(d), inc = val > 59 ? 60 - m : val <= m ? 60 - m + val : val - m, next = new Date(d.getTime() + inc * later.MIN - s * later.SEC);
+      if (!later.date.isUTC && next.getTime() <= d.getTime()) {
+        next = new Date(d.getTime() + (inc + 120) * later.MIN - s * later.SEC);
+      }
+      return next;
+    },
+    prev: function(d, val) {
+      val = val > 59 ? 59 : val;
+      return later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d) + (val >= later.m.val(d) ? -1 : 0), val);
+    }
+  };
+  later.month = later.M = {
+    name: "month",
+    range: 2629740,
+    val: function(d) {
+      return d.M || (d.M = later.date.getMonth.call(d) + 1);
+    },
+    isValid: function(d, val) {
+      return later.M.val(d) === (val || 12);
+    },
+    extent: function() {
+      return [ 1, 12 ];
+    },
+    start: function(d) {
+      return d.MStart || (d.MStart = later.date.next(later.Y.val(d), later.M.val(d)));
+    },
+    end: function(d) {
+      return d.MEnd || (d.MEnd = later.date.prev(later.Y.val(d), later.M.val(d)));
+    },
+    next: function(d, val) {
+      val = val > 12 ? 1 : val || 12;
+      return later.date.next(later.Y.val(d) + (val > later.M.val(d) ? 0 : 1), val);
+    },
+    prev: function(d, val) {
+      val = val > 12 ? 12 : val || 12;
+      return later.date.prev(later.Y.val(d) - (val >= later.M.val(d) ? 1 : 0), val);
+    }
+  };
+  later.second = later.s = {
+    name: "second",
+    range: 1,
+    val: function(d) {
+      return d.s || (d.s = later.date.getSec.call(d));
+    },
+    isValid: function(d, val) {
+      return later.s.val(d) === val;
+    },
+    extent: function() {
+      return [ 0, 59 ];
+    },
+    start: function(d) {
+      return d;
+    },
+    end: function(d) {
+      return d;
+    },
+    next: function(d, val) {
+      var s = later.s.val(d), inc = val > 59 ? 60 - s : val <= s ? 60 - s + val : val - s, next = new Date(d.getTime() + inc * later.SEC);
+      if (!later.date.isUTC && next.getTime() <= d.getTime()) {
+        next = new Date(d.getTime() + (inc + 7200) * later.SEC);
+      }
+      return next;
+    },
+    prev: function(d, val, cache) {
+      val = val > 59 ? 59 : val;
+      return later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d), later.h.val(d), later.m.val(d) + (val >= later.s.val(d) ? -1 : 0), val);
+    }
+  };
+  later.time = later.t = {
+    name: "time",
+    range: 1,
+    val: function(d) {
+      return d.t || (d.t = later.h.val(d) * 3600 + later.m.val(d) * 60 + later.s.val(d));
+    },
+    isValid: function(d, val) {
+      return later.t.val(d) === val;
+    },
+    extent: function() {
+      return [ 0, 86399 ];
+    },
+    start: function(d) {
+      return d;
+    },
+    end: function(d) {
+      return d;
+    },
+    next: function(d, val) {
+      val = val > 86399 ? 0 : val;
+      var next = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d) + (val <= later.t.val(d) ? 1 : 0), 0, 0, val);
+      if (!later.date.isUTC && next.getTime() < d.getTime()) {
+        next = later.date.next(later.Y.val(next), later.M.val(next), later.D.val(next), later.h.val(next), later.m.val(next), val + 7200);
+      }
+      return next;
+    },
+    prev: function(d, val) {
+      val = val > 86399 ? 86399 : val;
+      return later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d) + (val >= later.t.val(d) ? -1 : 0), 0, 0, val);
+    }
+  };
+  later.weekOfMonth = later.wm = {
+    name: "week of month",
+    range: 604800,
+    val: function(d) {
+      return d.wm || (d.wm = (later.D.val(d) + (later.dw.val(later.M.start(d)) - 1) + (7 - later.dw.val(d))) / 7);
+    },
+    isValid: function(d, val) {
+      return later.wm.val(d) === (val || later.wm.extent(d)[1]);
+    },
+    extent: function(d) {
+      return d.wmExtent || (d.wmExtent = [ 1, (later.D.extent(d)[1] + (later.dw.val(later.M.start(d)) - 1) + (7 - later.dw.val(later.M.end(d)))) / 7 ]);
+    },
+    start: function(d) {
+      return d.wmStart || (d.wmStart = later.date.next(later.Y.val(d), later.M.val(d), Math.max(later.D.val(d) - later.dw.val(d) + 1, 1)));
+    },
+    end: function(d) {
+      return d.wmEnd || (d.wmEnd = later.date.prev(later.Y.val(d), later.M.val(d), Math.min(later.D.val(d) + (7 - later.dw.val(d)), later.D.extent(d)[1])));
+    },
+    next: function(d, val) {
+      val = val > later.wm.extent(d)[1] ? 1 : val;
+      var month = later.date.nextRollover(d, val, later.wm, later.M), wmMax = later.wm.extent(month)[1];
+      val = val > wmMax ? 1 : val || wmMax;
+      return later.date.next(later.Y.val(month), later.M.val(month), Math.max(1, (val - 1) * 7 - (later.dw.val(month) - 2)));
+    },
+    prev: function(d, val) {
+      var month = later.date.prevRollover(d, val, later.wm, later.M), wmMax = later.wm.extent(month)[1];
+      val = val > wmMax ? wmMax : val || wmMax;
+      return later.wm.end(later.date.next(later.Y.val(month), later.M.val(month), Math.max(1, (val - 1) * 7 - (later.dw.val(month) - 2))));
+    }
+  };
+  later.weekOfYear = later.wy = {
+    name: "week of year (ISO)",
+    range: 604800,
+    val: function(d) {
+      if (d.wy) return d.wy;
+      var wThur = later.dw.next(later.wy.start(d), 5), YThur = later.dw.next(later.Y.prev(wThur, later.Y.val(wThur) - 1), 5);
+      return d.wy = 1 + Math.ceil((wThur.getTime() - YThur.getTime()) / later.WEEK);
+    },
+    isValid: function(d, val) {
+      return later.wy.val(d) === (val || later.wy.extent(d)[1]);
+    },
+    extent: function(d) {
+      if (d.wyExtent) return d.wyExtent;
+      var year = later.dw.next(later.wy.start(d), 5), dwFirst = later.dw.val(later.Y.start(year)), dwLast = later.dw.val(later.Y.end(year));
+      return d.wyExtent = [ 1, dwFirst === 5 || dwLast === 5 ? 53 : 52 ];
+    },
+    start: function(d) {
+      return d.wyStart || (d.wyStart = later.date.next(later.Y.val(d), later.M.val(d), later.D.val(d) - (later.dw.val(d) > 1 ? later.dw.val(d) - 2 : 6)));
+    },
+    end: function(d) {
+      return d.wyEnd || (d.wyEnd = later.date.prev(later.Y.val(d), later.M.val(d), later.D.val(d) + (later.dw.val(d) > 1 ? 8 - later.dw.val(d) : 0)));
+    },
+    next: function(d, val) {
+      val = val > later.wy.extent(d)[1] ? 1 : val;
+      var wyThur = later.dw.next(later.wy.start(d), 5), year = later.date.nextRollover(wyThur, val, later.wy, later.Y);
+      if (later.wy.val(year) !== 1) {
+        year = later.dw.next(year, 2);
+      }
+      var wyMax = later.wy.extent(year)[1], wyStart = later.wy.start(year);
+      val = val > wyMax ? 1 : val || wyMax;
+      return later.date.next(later.Y.val(wyStart), later.M.val(wyStart), later.D.val(wyStart) + 7 * (val - 1));
+    },
+    prev: function(d, val) {
+      var wyThur = later.dw.next(later.wy.start(d), 5), year = later.date.prevRollover(wyThur, val, later.wy, later.Y);
+      if (later.wy.val(year) !== 1) {
+        year = later.dw.next(year, 2);
+      }
+      var wyMax = later.wy.extent(year)[1], wyEnd = later.wy.end(year);
+      val = val > wyMax ? wyMax : val || wyMax;
+      return later.wy.end(later.date.next(later.Y.val(wyEnd), later.M.val(wyEnd), later.D.val(wyEnd) + 7 * (val - 1)));
+    }
+  };
+  later.year = later.Y = {
+    name: "year",
+    range: 31556900,
+    val: function(d) {
+      return d.Y || (d.Y = later.date.getYear.call(d));
+    },
+    isValid: function(d, val) {
+      return later.Y.val(d) === val;
+    },
+    extent: function() {
+      return [ 1970, 2099 ];
+    },
+    start: function(d) {
+      return d.YStart || (d.YStart = later.date.next(later.Y.val(d)));
+    },
+    end: function(d) {
+      return d.YEnd || (d.YEnd = later.date.prev(later.Y.val(d)));
+    },
+    next: function(d, val) {
+      return val > later.Y.val(d) && val <= later.Y.extent()[1] ? later.date.next(val) : later.NEVER;
+    },
+    prev: function(d, val) {
+      return val < later.Y.val(d) && val >= later.Y.extent()[0] ? later.date.prev(val) : later.NEVER;
+    }
+  };
+  later.fullDate = later.fd = {
+    name: "full date",
+    range: 1,
+    val: function(d) {
+      return d.fd || (d.fd = d.getTime());
+    },
+    isValid: function(d, val) {
+      return later.fd.val(d) === val;
+    },
+    extent: function() {
+      return [ 0, 3250368e7 ];
+    },
+    start: function(d) {
+      return d;
+    },
+    end: function(d) {
+      return d;
+    },
+    next: function(d, val) {
+      return later.fd.val(d) < val ? new Date(val) : later.NEVER;
+    },
+    prev: function(d, val) {
+      return later.fd.val(d) > val ? new Date(val) : later.NEVER;
+    }
+  };
+  later.modifier = {};
+  later.modifier.after = later.modifier.a = function(constraint, values) {
+    var value = values[0];
+    return {
+      name: "after " + constraint.name,
+      range: (constraint.extent(new Date())[1] - value) * constraint.range,
+      val: constraint.val,
+      isValid: function(d, val) {
+        return this.val(d) >= value;
+      },
+      extent: constraint.extent,
+      start: constraint.start,
+      end: constraint.end,
+      next: function(startDate, val) {
+        if (val != value) val = constraint.extent(startDate)[0];
+        return constraint.next(startDate, val);
+      },
+      prev: function(startDate, val) {
+        val = val === value ? constraint.extent(startDate)[1] : value - 1;
+        return constraint.prev(startDate, val);
+      }
+    };
+  };
+  later.modifier.before = later.modifier.b = function(constraint, values) {
+    var value = values[values.length - 1];
+    return {
+      name: "before " + constraint.name,
+      range: constraint.range * (value - 1),
+      val: constraint.val,
+      isValid: function(d, val) {
+        return this.val(d) < value;
+      },
+      extent: constraint.extent,
+      start: constraint.start,
+      end: constraint.end,
+      next: function(startDate, val) {
+        val = val === value ? constraint.extent(startDate)[0] : value;
+        return constraint.next(startDate, val);
+      },
+      prev: function(startDate, val) {
+        val = val === value ? value - 1 : constraint.extent(startDate)[1];
+        return constraint.prev(startDate, val);
+      }
+    };
+  };
+  later.compile = function(schedDef) {
+    var constraints = [], constraintsLen = 0, tickConstraint;
+    for (var key in schedDef) {
+      var nameParts = key.split("_"), name = nameParts[0], mod = nameParts[1], vals = schedDef[key], constraint = mod ? later.modifier[mod](later[name], vals) : later[name];
+      constraints.push({
+        constraint: constraint,
+        vals: vals
+      });
+      constraintsLen++;
+    }
+    constraints.sort(function(a, b) {
+      var ra = a.constraint.range, rb = b.constraint.range;
+      return rb < ra ? -1 : rb > ra ? 1 : 0;
+    });
+    tickConstraint = constraints[constraintsLen - 1].constraint;
+    function compareFn(dir) {
+      return dir === "next" ? function(a, b) {
+        return a.getTime() > b.getTime();
+      } : function(a, b) {
+        return b.getTime() > a.getTime();
+      };
+    }
+    return {
+      start: function(dir, startDate) {
+        var next = startDate, nextVal = later.array[dir], maxAttempts = 1e3, done;
+        while (maxAttempts-- && !done && next) {
+          done = true;
+          for (var i = 0; i < constraintsLen; i++) {
+            var constraint = constraints[i].constraint, curVal = constraint.val(next), extent = constraint.extent(next), newVal = nextVal(curVal, constraints[i].vals, extent);
+            if (!constraint.isValid(next, newVal)) {
+              next = constraint[dir](next, newVal);
+              done = false;
+              break;
+            }
+          }
+        }
+        if (next !== later.NEVER) {
+          next = dir === "next" ? tickConstraint.start(next) : tickConstraint.end(next);
+        }
+        return next;
+      },
+      end: function(dir, startDate) {
+        var result, nextVal = later.array[dir + "Invalid"], compare = compareFn(dir);
+        for (var i = constraintsLen - 1; i >= 0; i--) {
+          var constraint = constraints[i].constraint, curVal = constraint.val(startDate), extent = constraint.extent(startDate), newVal = nextVal(curVal, constraints[i].vals, extent), next;
+          if (newVal !== undefined) {
+            next = constraint[dir](startDate, newVal);
+            if (next && (!result || compare(result, next))) {
+              result = next;
+            }
+          }
+        }
+        return result;
+      },
+      tick: function(dir, date) {
+        return new Date(dir === "next" ? tickConstraint.end(date).getTime() + later.SEC : tickConstraint.start(date).getTime() - later.SEC);
+      },
+      tickStart: function(date) {
+        return tickConstraint.start(date);
+      }
+    };
+  };
+  later.schedule = function(sched) {
+    if (!sched) throw new Error("Missing schedule definition.");
+    if (!sched.schedules) throw new Error("Definition must include at least one schedule.");
+    var schedules = [], schedulesLen = sched.schedules.length, exceptions = [], exceptionsLen = sched.exceptions ? sched.exceptions.length : 0;
+    for (var i = 0; i < schedulesLen; i++) {
+      schedules.push(later.compile(sched.schedules[i]));
+    }
+    for (var j = 0; j < exceptionsLen; j++) {
+      exceptions.push(later.compile(sched.exceptions[j]));
+    }
+    function getInstances(dir, count, startDate, endDate, isRange) {
+      var compare = compareFn(dir), loopCount = count, maxAttempts = 1e3, schedStarts = [], exceptStarts = [], next, end, results = [], isForward = dir === "next", lastResult, rStart = isForward ? 0 : 1, rEnd = isForward ? 1 : 0;
+      startDate = startDate ? new Date(startDate) : new Date();
+      if (!startDate || !startDate.getTime()) throw new Error("Invalid start date.");
+      setNextStarts(dir, schedules, schedStarts, startDate);
+      setRangeStarts(dir, exceptions, exceptStarts, startDate);
+      while (maxAttempts-- && loopCount && (next = findNext(schedStarts, compare))) {
+        if (endDate && compare(next, endDate)) {
+          break;
+        }
+        if (exceptionsLen) {
+          updateRangeStarts(dir, exceptions, exceptStarts, next);
+          if (end = calcRangeOverlap(dir, exceptStarts, next)) {
+            updateNextStarts(dir, schedules, schedStarts, end);
+            continue;
+          }
+        }
+        if (isRange) {
+          var maxEndDate = calcMaxEndDate(exceptStarts, compare);
+          end = calcEnd(dir, schedules, schedStarts, next, maxEndDate);
+          var r = isForward ? [ new Date(Math.max(startDate, next)), end ? new Date(endDate ? Math.min(end, endDate) : end) : undefined ] : [ end ? new Date(endDate ? Math.max(endDate, end.getTime() + later.SEC) : end.getTime() + later.SEC) : undefined, new Date(Math.min(startDate, next.getTime() + later.SEC)) ];
+          if (lastResult && r[rStart].getTime() === lastResult[rEnd].getTime()) {
+            lastResult[rEnd] = r[rEnd];
+            loopCount++;
+          } else {
+            lastResult = r;
+            results.push(lastResult);
+          }
+          if (!end) break;
+          updateNextStarts(dir, schedules, schedStarts, end);
+        } else {
+          results.push(isForward ? new Date(Math.max(startDate, next)) : getStart(schedules, schedStarts, next, endDate));
+          tickStarts(dir, schedules, schedStarts, next);
+        }
+        loopCount--;
+      }
+      for (var i = 0, len = results.length; i < len; i++) {
+        var result = results[i];
+        results[i] = Object.prototype.toString.call(result) === "[object Array]" ? [ cleanDate(result[0]), cleanDate(result[1]) ] : cleanDate(result);
+      }
+      return results.length === 0 ? later.NEVER : count === 1 ? results[0] : results;
+    }
+    function cleanDate(d) {
+      if (d instanceof Date && !isNaN(d.valueOf())) {
+        return new Date(d);
+      }
+      return undefined;
+    }
+    function setNextStarts(dir, schedArr, startsArr, startDate) {
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        startsArr[i] = schedArr[i].start(dir, startDate);
+      }
+    }
+    function updateNextStarts(dir, schedArr, startsArr, startDate) {
+      var compare = compareFn(dir);
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        if (startsArr[i] && !compare(startsArr[i], startDate)) {
+          startsArr[i] = schedArr[i].start(dir, startDate);
+        }
+      }
+    }
+    function setRangeStarts(dir, schedArr, rangesArr, startDate) {
+      var compare = compareFn(dir);
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        var nextStart = schedArr[i].start(dir, startDate);
+        if (!nextStart) {
+          rangesArr[i] = later.NEVER;
+        } else {
+          rangesArr[i] = [ nextStart, schedArr[i].end(dir, nextStart) ];
+        }
+      }
+    }
+    function updateRangeStarts(dir, schedArr, rangesArr, startDate) {
+      var compare = compareFn(dir);
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        if (rangesArr[i] && !compare(rangesArr[i][0], startDate)) {
+          var nextStart = schedArr[i].start(dir, startDate);
+          if (!nextStart) {
+            rangesArr[i] = later.NEVER;
+          } else {
+            rangesArr[i] = [ nextStart, schedArr[i].end(dir, nextStart) ];
+          }
+        }
+      }
+    }
+    function tickStarts(dir, schedArr, startsArr, startDate) {
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        if (startsArr[i] && startsArr[i].getTime() === startDate.getTime()) {
+          startsArr[i] = schedArr[i].start(dir, schedArr[i].tick(dir, startDate));
+        }
+      }
+    }
+    function getStart(schedArr, startsArr, startDate, minEndDate) {
+      var result;
+      for (var i = 0, len = startsArr.length; i < len; i++) {
+        if (startsArr[i] && startsArr[i].getTime() === startDate.getTime()) {
+          var start = schedArr[i].tickStart(startDate);
+          if (minEndDate && start < minEndDate) {
+            return minEndDate;
+          }
+          if (!result || start > result) {
+            result = start;
+          }
+        }
+      }
+      return result;
+    }
+    function calcRangeOverlap(dir, rangesArr, startDate) {
+      var compare = compareFn(dir), result;
+      for (var i = 0, len = rangesArr.length; i < len; i++) {
+        var range = rangesArr[i];
+        if (range && !compare(range[0], startDate) && (!range[1] || compare(range[1], startDate))) {
+          if (!result || compare(range[1], result)) {
+            result = range[1];
+          }
+        }
+      }
+      return result;
+    }
+    function calcMaxEndDate(exceptsArr, compare) {
+      var result;
+      for (var i = 0, len = exceptsArr.length; i < len; i++) {
+        if (exceptsArr[i] && (!result || compare(result, exceptsArr[i][0]))) {
+          result = exceptsArr[i][0];
+        }
+      }
+      return result;
+    }
+    function calcEnd(dir, schedArr, startsArr, startDate, maxEndDate) {
+      var compare = compareFn(dir), result;
+      for (var i = 0, len = schedArr.length; i < len; i++) {
+        var start = startsArr[i];
+        if (start && start.getTime() === startDate.getTime()) {
+          var end = schedArr[i].end(dir, start);
+          if (maxEndDate && (!end || compare(end, maxEndDate))) {
+            return maxEndDate;
+          }
+          if (!result || compare(end, result)) {
+            result = end;
+          }
+        }
+      }
+      return result;
+    }
+    function compareFn(dir) {
+      return dir === "next" ? function(a, b) {
+        return !b || a.getTime() > b.getTime();
+      } : function(a, b) {
+        return !a || b.getTime() > a.getTime();
+      };
+    }
+    function findNext(arr, compare) {
+      var next = arr[0];
+      for (var i = 1, len = arr.length; i < len; i++) {
+        if (arr[i] && compare(next, arr[i])) {
+          next = arr[i];
+        }
+      }
+      return next;
+    }
+    return {
+      isValid: function(d) {
+        return getInstances("next", 1, d, d) !== later.NEVER;
+      },
+      next: function(count, startDate, endDate) {
+        return getInstances("next", count || 1, startDate, endDate);
+      },
+      prev: function(count, startDate, endDate) {
+        return getInstances("prev", count || 1, startDate, endDate);
+      },
+      nextRange: function(count, startDate, endDate) {
+        return getInstances("next", count || 1, startDate, endDate, true);
+      },
+      prevRange: function(count, startDate, endDate) {
+        return getInstances("prev", count || 1, startDate, endDate, true);
+      }
+    };
+  };
+  later.setTimeout = function(fn, sched) {
+    var s = later.schedule(sched), t;
+    if (fn) {
+      scheduleTimeout();
+    }
+    function scheduleTimeout() {
+      var now = Date.now(), next = s.next(2, now);
+      if (!next[0]) {
+        t = undefined;
+        return;
+      }
+      var diff = next[0].getTime() - now;
+      if (diff < 1e3) {
+        diff = next[1] ? next[1].getTime() - now : 1e3;
+      }
+      if (diff < 2147483647) {
+        t = setTimeout(fn, diff);
+      } else {
+        t = setTimeout(scheduleTimeout, 2147483647);
+      }
+    }
+    return {
+      isDone: function() {
+        return !t;
+      },
+      clear: function() {
+        clearTimeout(t);
+      }
+    };
+  };
+  later.setInterval = function(fn, sched) {
+    if (!fn) {
+      return;
+    }
+    var t = later.setTimeout(scheduleTimeout, sched), done = t.isDone();
+    function scheduleTimeout() {
+      if (!done) {
+        fn();
+        t = later.setTimeout(scheduleTimeout, sched);
+      }
+    }
+    return {
+      isDone: function() {
+        return t.isDone();
+      },
+      clear: function() {
+        done = true;
+        t.clear();
+      }
+    };
+  };
+  later.date = {};
+  later.date.timezone = function(useLocalTime) {
+    later.date.build = useLocalTime ? function(Y, M, D, h, m, s) {
+      return new Date(Y, M, D, h, m, s);
+    } : function(Y, M, D, h, m, s) {
+      return new Date(Date.UTC(Y, M, D, h, m, s));
+    };
+    var get = useLocalTime ? "get" : "getUTC", d = Date.prototype;
+    later.date.getYear = d[get + "FullYear"];
+    later.date.getMonth = d[get + "Month"];
+    later.date.getDate = d[get + "Date"];
+    later.date.getDay = d[get + "Day"];
+    later.date.getHour = d[get + "Hours"];
+    later.date.getMin = d[get + "Minutes"];
+    later.date.getSec = d[get + "Seconds"];
+    later.date.isUTC = !useLocalTime;
+  };
+  later.date.UTC = function() {
+    later.date.timezone(false);
+  };
+  later.date.localTime = function() {
+    later.date.timezone(true);
+  };
+  later.date.UTC();
+  later.SEC = 1e3;
+  later.MIN = later.SEC * 60;
+  later.HOUR = later.MIN * 60;
+  later.DAY = later.HOUR * 24;
+  later.WEEK = later.DAY * 7;
+  later.DAYS_IN_MONTH = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+  later.NEVER = 0;
+  later.date.next = function(Y, M, D, h, m, s) {
+    return later.date.build(Y, M !== undefined ? M - 1 : 0, D !== undefined ? D : 1, h || 0, m || 0, s || 0);
+  };
+  later.date.nextRollover = function(d, val, constraint, period) {
+    var cur = constraint.val(d), max = constraint.extent(d)[1];
+    return (val || max) <= cur || val > max ? new Date(period.end(d).getTime() + later.SEC) : period.start(d);
+  };
+  later.date.prev = function(Y, M, D, h, m, s) {
+    var len = arguments.length;
+    M = len < 2 ? 11 : M - 1;
+    D = len < 3 ? later.D.extent(later.date.next(Y, M + 1))[1] : D;
+    h = len < 4 ? 23 : h;
+    m = len < 5 ? 59 : m;
+    s = len < 6 ? 59 : s;
+    return later.date.build(Y, M, D, h, m, s);
+  };
+  later.date.prevRollover = function(d, val, constraint, period) {
+    var cur = constraint.val(d);
+    return val >= cur || !val ? period.start(period.prev(d, period.val(d) - 1)) : period.start(d);
+  };
+  later.parse = {};
+  later.parse.cron = function(expr, hasSeconds) {
+    var NAMES = {
+      JAN: 1,
+      FEB: 2,
+      MAR: 3,
+      APR: 4,
+      MAY: 5,
+      JUN: 6,
+      JUL: 7,
+      AUG: 8,
+      SEP: 9,
+      OCT: 10,
+      NOV: 11,
+      DEC: 12,
+      SUN: 1,
+      MON: 2,
+      TUE: 3,
+      WED: 4,
+      THU: 5,
+      FRI: 6,
+      SAT: 7
+    };
+    var REPLACEMENTS = {
+      "* * * * * *": "0/1 * * * * *",
+      "@YEARLY": "0 0 1 1 *",
+      "@ANNUALLY": "0 0 1 1 *",
+      "@MONTHLY": "0 0 1 * *",
+      "@WEEKLY": "0 0 * * 0",
+      "@DAILY": "0 0 * * *",
+      "@HOURLY": "0 * * * *"
+    };
+    var FIELDS = {
+      s: [ 0, 0, 59 ],
+      m: [ 1, 0, 59 ],
+      h: [ 2, 0, 23 ],
+      D: [ 3, 1, 31 ],
+      M: [ 4, 1, 12 ],
+      Y: [ 6, 1970, 2099 ],
+      d: [ 5, 1, 7, 1 ]
+    };
+    function getValue(value, offset, max) {
+      return isNaN(value) ? NAMES[value] || null : Math.min(+value + (offset || 0), max || 9999);
+    }
+    function cloneSchedule(sched) {
+      var clone = {}, field;
+      for (field in sched) {
+        if (field !== "dc" && field !== "d") {
+          clone[field] = sched[field].slice(0);
+        }
+      }
+      return clone;
+    }
+    function add(sched, name, min, max, inc) {
+      var i = min;
+      if (!sched[name]) {
+        sched[name] = [];
+      }
+      while (i <= max) {
+        if (sched[name].indexOf(i) < 0) {
+          sched[name].push(i);
+        }
+        i += inc || 1;
+      }
+      sched[name].sort(function(a, b) {
+        return a - b;
+      });
+    }
+    function addHash(schedules, curSched, value, hash) {
+      if (curSched.d && !curSched.dc || curSched.dc && curSched.dc.indexOf(hash) < 0) {
+        schedules.push(cloneSchedule(curSched));
+        curSched = schedules[schedules.length - 1];
+      }
+      add(curSched, "d", value, value);
+      add(curSched, "dc", hash, hash);
+    }
+    function addWeekday(s, curSched, value) {
+      var except1 = {}, except2 = {};
+      if (value === 1) {
+        add(curSched, "D", 1, 3);
+        add(curSched, "d", NAMES.MON, NAMES.FRI);
+        add(except1, "D", 2, 2);
+        add(except1, "d", NAMES.TUE, NAMES.FRI);
+        add(except2, "D", 3, 3);
+        add(except2, "d", NAMES.TUE, NAMES.FRI);
+      } else {
+        add(curSched, "D", value - 1, value + 1);
+        add(curSched, "d", NAMES.MON, NAMES.FRI);
+        add(except1, "D", value - 1, value - 1);
+        add(except1, "d", NAMES.MON, NAMES.THU);
+        add(except2, "D", value + 1, value + 1);
+        add(except2, "d", NAMES.TUE, NAMES.FRI);
+      }
+      s.exceptions.push(except1);
+      s.exceptions.push(except2);
+    }
+    function addRange(item, curSched, name, min, max, offset) {
+      var incSplit = item.split("/"), inc = +incSplit[1], range = incSplit[0];
+      if (range !== "*" && range !== "0") {
+        var rangeSplit = range.split("-");
+        min = getValue(rangeSplit[0], offset, max);
+        max = getValue(rangeSplit[1], offset, max) || max;
+      }
+      add(curSched, name, min, max, inc);
+    }
+    function parse(item, s, name, min, max, offset) {
+      var value, split, schedules = s.schedules, curSched = schedules[schedules.length - 1];
+      if (item === "L") {
+        item = min - 1;
+      }
+      if ((value = getValue(item, offset, max)) !== null) {
+        add(curSched, name, value, value);
+      } else if ((value = getValue(item.replace("W", ""), offset, max)) !== null) {
+        addWeekday(s, curSched, value);
+      } else if ((value = getValue(item.replace("L", ""), offset, max)) !== null) {
+        addHash(schedules, curSched, value, min - 1);
+      } else if ((split = item.split("#")).length === 2) {
+        value = getValue(split[0], offset, max);
+        addHash(schedules, curSched, value, getValue(split[1]));
+      } else {
+        addRange(item, curSched, name, min, max, offset);
+      }
+    }
+    function isHash(item) {
+      return item.indexOf("#") > -1 || item.indexOf("L") > 0;
+    }
+    function itemSorter(a, b) {
+      return isHash(a) && !isHash(b) ? 1 : a - b;
+    }
+    function parseExpr(expr) {
+      var schedule = {
+        schedules: [ {} ],
+        exceptions: []
+      }, components = expr.replace(/(\s)+/g, " ").split(" "), field, f, component, items;
+      for (field in FIELDS) {
+        f = FIELDS[field];
+        component = components[f[0]];
+        if (component && component !== "*" && component !== "?") {
+          items = component.split(",").sort(itemSorter);
+          var i, length = items.length;
+          for (i = 0; i < length; i++) {
+            parse(items[i], schedule, field, f[1], f[2], f[3]);
+          }
+        }
+      }
+      return schedule;
+    }
+    function prepareExpr(expr) {
+      var prepared = expr.toUpperCase();
+      return REPLACEMENTS[prepared] || prepared;
+    }
+    var e = prepareExpr(expr);
+    return parseExpr(hasSeconds ? e : "0 " + e);
+  };
+  later.parse.recur = function() {
+    var schedules = [], exceptions = [], cur, curArr = schedules, curName, values, every, modifier, applyMin, applyMax, i, last;
+    function add(name, min, max) {
+      name = modifier ? name + "_" + modifier : name;
+      if (!cur) {
+        curArr.push({});
+        cur = curArr[0];
+      }
+      if (!cur[name]) {
+        cur[name] = [];
+      }
+      curName = cur[name];
+      if (every) {
+        values = [];
+        for (i = min; i <= max; i += every) {
+          values.push(i);
+        }
+        last = {
+          n: name,
+          x: every,
+          c: curName.length,
+          m: max
+        };
+      }
+      values = applyMin ? [ min ] : applyMax ? [ max ] : values;
+      var length = values.length;
+      for (i = 0; i < length; i += 1) {
+        var val = values[i];
+        if (curName.indexOf(val) < 0) {
+          curName.push(val);
+        }
+      }
+      values = every = modifier = applyMin = applyMax = 0;
+    }
+    return {
+      schedules: schedules,
+      exceptions: exceptions,
+      on: function() {
+        values = arguments[0] instanceof Array ? arguments[0] : arguments;
+        return this;
+      },
+      every: function(x) {
+        every = x || 1;
+        return this;
+      },
+      after: function(x) {
+        modifier = "a";
+        values = [ x ];
+        return this;
+      },
+      before: function(x) {
+        modifier = "b";
+        values = [ x ];
+        return this;
+      },
+      first: function() {
+        applyMin = 1;
+        return this;
+      },
+      last: function() {
+        applyMax = 1;
+        return this;
+      },
+      time: function() {
+        for (var i = 0, len = values.length; i < len; i++) {
+          var split = values[i].split(":");
+          if (split.length < 3) split.push(0);
+          values[i] = +split[0] * 3600 + +split[1] * 60 + +split[2];
+        }
+        add("t");
+        return this;
+      },
+      second: function() {
+        add("s", 0, 59);
+        return this;
+      },
+      minute: function() {
+        add("m", 0, 59);
+        return this;
+      },
+      hour: function() {
+        add("h", 0, 23);
+        return this;
+      },
+      dayOfMonth: function() {
+        add("D", 1, applyMax ? 0 : 31);
+        return this;
+      },
+      dayOfWeek: function() {
+        add("d", 1, 7);
+        return this;
+      },
+      onWeekend: function() {
+        values = [ 1, 7 ];
+        return this.dayOfWeek();
+      },
+      onWeekday: function() {
+        values = [ 2, 3, 4, 5, 6 ];
+        return this.dayOfWeek();
+      },
+      dayOfWeekCount: function() {
+        add("dc", 1, applyMax ? 0 : 5);
+        return this;
+      },
+      dayOfYear: function() {
+        add("dy", 1, applyMax ? 0 : 366);
+        return this;
+      },
+      weekOfMonth: function() {
+        add("wm", 1, applyMax ? 0 : 5);
+        return this;
+      },
+      weekOfYear: function() {
+        add("wy", 1, applyMax ? 0 : 53);
+        return this;
+      },
+      month: function() {
+        add("M", 1, 12);
+        return this;
+      },
+      year: function() {
+        add("Y", 1970, 2450);
+        return this;
+      },
+      fullDate: function() {
+        for (var i = 0, len = values.length; i < len; i++) {
+          values[i] = values[i].getTime();
+        }
+        add("fd");
+        return this;
+      },
+      customModifier: function(id, vals) {
+        var custom = later.modifier[id];
+        if (!custom) throw new Error("Custom modifier " + id + " not recognized!");
+        modifier = id;
+        values = arguments[1] instanceof Array ? arguments[1] : [ arguments[1] ];
+        return this;
+      },
+      customPeriod: function(id) {
+        var custom = later[id];
+        if (!custom) throw new Error("Custom time period " + id + " not recognized!");
+        add(id, custom.extent(new Date())[0], custom.extent(new Date())[1]);
+        return this;
+      },
+      startingOn: function(start) {
+        return this.between(start, last.m);
+      },
+      between: function(start, end) {
+        cur[last.n] = cur[last.n].splice(0, last.c);
+        every = last.x;
+        add(last.n, start, end);
+        return this;
+      },
+      and: function() {
+        cur = curArr[curArr.push({}) - 1];
+        return this;
+      },
+      except: function() {
+        curArr = exceptions;
+        cur = null;
+        return this;
+      }
+    };
+  };
+  later.parse.text = function(str) {
+    var recur = later.parse.recur, pos = 0, input = "", error;
+    var TOKENTYPES = {
+      eof: /^$/,
+      rank: /^((\d\d\d\d)|([2-5]?1(st)?|[2-5]?2(nd)?|[2-5]?3(rd)?|(0|[1-5]?[4-9]|[1-5]0|1[1-3])(th)?))\b/,
+      time: /^((([0]?[1-9]|1[0-2]):[0-5]\d(\s)?(am|pm))|(([0]?\d|1\d|2[0-3]):[0-5]\d))\b/,
+      dayName: /^((sun|mon|tue(s)?|wed(nes)?|thu(r(s)?)?|fri|sat(ur)?)(day)?)\b/,
+      monthName: /^(jan(uary)?|feb(ruary)?|ma((r(ch)?)?|y)|apr(il)?|ju(ly|ne)|aug(ust)?|oct(ober)?|(sept|nov|dec)(ember)?)\b/,
+      yearIndex: /^(\d\d\d\d)\b/,
+      every: /^every\b/,
+      after: /^after\b/,
+      before: /^before\b/,
+      second: /^(s|sec(ond)?(s)?)\b/,
+      minute: /^(m|min(ute)?(s)?)\b/,
+      hour: /^(h|hour(s)?)\b/,
+      day: /^(day(s)?( of the month)?)\b/,
+      dayInstance: /^day instance\b/,
+      dayOfWeek: /^day(s)? of the week\b/,
+      dayOfYear: /^day(s)? of the year\b/,
+      weekOfYear: /^week(s)?( of the year)?\b/,
+      weekOfMonth: /^week(s)? of the month\b/,
+      weekday: /^weekday\b/,
+      weekend: /^weekend\b/,
+      month: /^month(s)?\b/,
+      year: /^year(s)?\b/,
+      between: /^between (the)?\b/,
+      start: /^(start(ing)? (at|on( the)?)?)\b/,
+      at: /^(at|@)\b/,
+      and: /^(,|and\b)/,
+      except: /^(except\b)/,
+      also: /(also)\b/,
+      first: /^(first)\b/,
+      last: /^last\b/,
+      "in": /^in\b/,
+      of: /^of\b/,
+      onthe: /^on the\b/,
+      on: /^on\b/,
+      through: /(-|^(to|through)\b)/
+    };
+    var NAMES = {
+      jan: 1,
+      feb: 2,
+      mar: 3,
+      apr: 4,
+      may: 5,
+      jun: 6,
+      jul: 7,
+      aug: 8,
+      sep: 9,
+      oct: 10,
+      nov: 11,
+      dec: 12,
+      sun: 1,
+      mon: 2,
+      tue: 3,
+      wed: 4,
+      thu: 5,
+      fri: 6,
+      sat: 7,
+      "1st": 1,
+      fir: 1,
+      "2nd": 2,
+      sec: 2,
+      "3rd": 3,
+      thi: 3,
+      "4th": 4,
+      "for": 4
+    };
+    function t(start, end, text, type) {
+      return {
+        startPos: start,
+        endPos: end,
+        text: text,
+        type: type
+      };
+    }
+    function peek(expected) {
+      var scanTokens = expected instanceof Array ? expected : [ expected ], whiteSpace = /\s+/, token, curInput, m, scanToken, start, len;
+      scanTokens.push(whiteSpace);
+      start = pos;
+      while (!token || token.type === whiteSpace) {
+        len = -1;
+        curInput = input.substring(start);
+        token = t(start, start, input.split(whiteSpace)[0]);
+        var i, length = scanTokens.length;
+        for (i = 0; i < length; i++) {
+          scanToken = scanTokens[i];
+          m = scanToken.exec(curInput);
+          if (m && m.index === 0 && m[0].length > len) {
+            len = m[0].length;
+            token = t(start, start + len, curInput.substring(0, len), scanToken);
+          }
+        }
+        if (token.type === whiteSpace) {
+          start = token.endPos;
+        }
+      }
+      return token;
+    }
+    function scan(expectedToken) {
+      var token = peek(expectedToken);
+      pos = token.endPos;
+      return token;
+    }
+    function parseThroughExpr(tokenType) {
+      var start = +parseTokenValue(tokenType), end = checkAndParse(TOKENTYPES.through) ? +parseTokenValue(tokenType) : start, nums = [];
+      for (var i = start; i <= end; i++) {
+        nums.push(i);
+      }
+      return nums;
+    }
+    function parseRanges(tokenType) {
+      var nums = parseThroughExpr(tokenType);
+      while (checkAndParse(TOKENTYPES.and)) {
+        nums = nums.concat(parseThroughExpr(tokenType));
+      }
+      return nums;
+    }
+    function parseEvery(r) {
+      var num, period, start, end;
+      if (checkAndParse(TOKENTYPES.weekend)) {
+        r.on(NAMES.sun, NAMES.sat).dayOfWeek();
+      } else if (checkAndParse(TOKENTYPES.weekday)) {
+        r.on(NAMES.mon, NAMES.tue, NAMES.wed, NAMES.thu, NAMES.fri).dayOfWeek();
+      } else {
+        num = parseTokenValue(TOKENTYPES.rank);
+        r.every(num);
+        period = parseTimePeriod(r);
+        if (checkAndParse(TOKENTYPES.start)) {
+          num = parseTokenValue(TOKENTYPES.rank);
+          r.startingOn(num);
+          parseToken(period.type);
+        } else if (checkAndParse(TOKENTYPES.between)) {
+          start = parseTokenValue(TOKENTYPES.rank);
+          if (checkAndParse(TOKENTYPES.and)) {
+            end = parseTokenValue(TOKENTYPES.rank);
+            r.between(start, end);
+          }
+        }
+      }
+    }
+    function parseOnThe(r) {
+      if (checkAndParse(TOKENTYPES.first)) {
+        r.first();
+      } else if (checkAndParse(TOKENTYPES.last)) {
+        r.last();
+      } else {
+        r.on(parseRanges(TOKENTYPES.rank));
+      }
+      parseTimePeriod(r);
+    }
+    function parseScheduleExpr(str) {
+      pos = 0;
+      input = str;
+      error = -1;
+      var r = recur();
+      while (pos < input.length && error < 0) {
+        var token = parseToken([ TOKENTYPES.every, TOKENTYPES.after, TOKENTYPES.before, TOKENTYPES.onthe, TOKENTYPES.on, TOKENTYPES.of, TOKENTYPES["in"], TOKENTYPES.at, TOKENTYPES.and, TOKENTYPES.except, TOKENTYPES.also ]);
+        switch (token.type) {
+         case TOKENTYPES.every:
+          parseEvery(r);
+          break;
+
+         case TOKENTYPES.after:
+          if (peek(TOKENTYPES.time).type !== undefined) {
+            r.after(parseTokenValue(TOKENTYPES.time));
+            r.time();
+          } else {
+            r.after(parseTokenValue(TOKENTYPES.rank));
+            parseTimePeriod(r);
+          }
+          break;
+
+         case TOKENTYPES.before:
+          if (peek(TOKENTYPES.time).type !== undefined) {
+            r.before(parseTokenValue(TOKENTYPES.time));
+            r.time();
+          } else {
+            r.before(parseTokenValue(TOKENTYPES.rank));
+            parseTimePeriod(r);
+          }
+          break;
+
+         case TOKENTYPES.onthe:
+          parseOnThe(r);
+          break;
+
+         case TOKENTYPES.on:
+          r.on(parseRanges(TOKENTYPES.dayName)).dayOfWeek();
+          break;
+
+         case TOKENTYPES.of:
+          r.on(parseRanges(TOKENTYPES.monthName)).month();
+          break;
+
+         case TOKENTYPES["in"]:
+          r.on(parseRanges(TOKENTYPES.yearIndex)).year();
+          break;
+
+         case TOKENTYPES.at:
+          r.on(parseTokenValue(TOKENTYPES.time)).time();
+          while (checkAndParse(TOKENTYPES.and)) {
+            r.on(parseTokenValue(TOKENTYPES.time)).time();
+          }
+          break;
+
+         case TOKENTYPES.and:
+          break;
+
+         case TOKENTYPES.also:
+          r.and();
+          break;
+
+         case TOKENTYPES.except:
+          r.except();
+          break;
+
+         default:
+          error = pos;
+        }
+      }
+      return {
+        schedules: r.schedules,
+        exceptions: r.exceptions,
+        error: error
+      };
+    }
+    function parseTimePeriod(r) {
+      var timePeriod = parseToken([ TOKENTYPES.second, TOKENTYPES.minute, TOKENTYPES.hour, TOKENTYPES.dayOfYear, TOKENTYPES.dayOfWeek, TOKENTYPES.dayInstance, TOKENTYPES.day, TOKENTYPES.month, TOKENTYPES.year, TOKENTYPES.weekOfMonth, TOKENTYPES.weekOfYear ]);
+      switch (timePeriod.type) {
+       case TOKENTYPES.second:
+        r.second();
+        break;
+
+       case TOKENTYPES.minute:
+        r.minute();
+        break;
+
+       case TOKENTYPES.hour:
+        r.hour();
+        break;
+
+       case TOKENTYPES.dayOfYear:
+        r.dayOfYear();
+        break;
+
+       case TOKENTYPES.dayOfWeek:
+        r.dayOfWeek();
+        break;
+
+       case TOKENTYPES.dayInstance:
+        r.dayOfWeekCount();
+        break;
+
+       case TOKENTYPES.day:
+        r.dayOfMonth();
+        break;
+
+       case TOKENTYPES.weekOfMonth:
+        r.weekOfMonth();
+        break;
+
+       case TOKENTYPES.weekOfYear:
+        r.weekOfYear();
+        break;
+
+       case TOKENTYPES.month:
+        r.month();
+        break;
+
+       case TOKENTYPES.year:
+        r.year();
+        break;
+
+       default:
+        error = pos;
+      }
+      return timePeriod;
+    }
+    function checkAndParse(tokenType) {
+      var found = peek(tokenType).type === tokenType;
+      if (found) {
+        scan(tokenType);
+      }
+      return found;
+    }
+    function parseToken(tokenType) {
+      var t = scan(tokenType);
+      if (t.type) {
+        t.text = convertString(t.text, tokenType);
+      } else {
+        error = pos;
+      }
+      return t;
+    }
+    function parseTokenValue(tokenType) {
+      return parseToken(tokenType).text;
+    }
+    function convertString(str, tokenType) {
+      var output = str;
+      switch (tokenType) {
+       case TOKENTYPES.time:
+        var parts = str.split(/(:|am|pm)/), hour = parts[3] === "pm" && parts[0] < 12 ? parseInt(parts[0], 10) + 12 : parts[0], min = parts[2].trim();
+        output = (hour.length === 1 ? "0" : "") + hour + ":" + min;
+        break;
+
+       case TOKENTYPES.rank:
+        output = parseInt(/^\d+/.exec(str)[0], 10);
+        break;
+
+       case TOKENTYPES.monthName:
+       case TOKENTYPES.dayName:
+        output = NAMES[str.substring(0, 3)];
+        break;
+      }
+      return output;
+    }
+    return parseScheduleExpr(str.toLowerCase());
+  };
+  return later;
+}();
+},{}],45:[function(require,module,exports){
 (function (global){
 /*!
     localForage -- Offline Storage, Improved
@@ -10095,7 +11766,7 @@ module.exports = localforage_js;
 },{"3":3}]},{},[4])(4)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("mobx"), require("react"), require("react-dom"));
@@ -11099,7 +12770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-},{"mobx":45,"react":209,"react-dom":57}],45:[function(require,module,exports){
+},{"mobx":47,"react":212,"react-dom":59}],47:[function(require,module,exports){
 (function (global){
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
@@ -13874,7 +15545,7 @@ function isArrayLike(x) {
 exports.isArrayLike = isArrayLike;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 //! moment.js
 //! version : 2.16.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -18174,7 +19845,7 @@ return hooks;
 
 })));
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * Specific customUtils for the browser, where we don't have access to the Crypto and Buffer modules
  */
@@ -18254,7 +19925,7 @@ function uid (len) {
 
 module.exports.uid = uid;
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /**
  * Way data is stored for this database
  * For a Node.js/Node Webkit database it's the file system
@@ -18351,12 +20022,12 @@ module.exports.mkdirp = mkdirp;
 module.exports.ensureDatafileIntegrity = ensureDatafileIntegrity;
 
 
-},{"localforage":43}],49:[function(require,module,exports){
+},{"localforage":45}],51:[function(require,module,exports){
 var Datastore = require('./lib/datastore');
 
 module.exports = Datastore;
 
-},{"./lib/datastore":51}],50:[function(require,module,exports){
+},{"./lib/datastore":53}],52:[function(require,module,exports){
 /**
  * Manage access to data, be it to find, update or remove it
  */
@@ -18562,7 +20233,7 @@ Cursor.prototype.exec = function () {
 // Interface
 module.exports = Cursor;
 
-},{"./model":54,"underscore":210}],51:[function(require,module,exports){
+},{"./model":56,"underscore":213}],53:[function(require,module,exports){
 var customUtils = require('./customUtils')
   , model = require('./model')
   , async = require('async')
@@ -19268,7 +20939,7 @@ Datastore.prototype.remove = function () {
 
 module.exports = Datastore;
 
-},{"./cursor":50,"./customUtils":47,"./executor":52,"./indexes":53,"./model":54,"./persistence":55,"async":14,"events":211,"underscore":210,"util":216}],52:[function(require,module,exports){
+},{"./cursor":52,"./customUtils":49,"./executor":54,"./indexes":55,"./model":56,"./persistence":57,"async":14,"events":214,"underscore":213,"util":219}],54:[function(require,module,exports){
 (function (process){
 /**
  * Responsible for sequentially executing actions on the database
@@ -19350,7 +21021,7 @@ Executor.prototype.processBuffer = function () {
 module.exports = Executor;
 
 }).call(this,require('_process'))
-},{"_process":213,"async":14}],53:[function(require,module,exports){
+},{"_process":216,"async":14}],55:[function(require,module,exports){
 var BinarySearchTree = require('binary-search-tree').AVLTree
   , model = require('./model')
   , _ = require('underscore')
@@ -19646,7 +21317,7 @@ Index.prototype.getAll = function () {
 // Interface
 module.exports = Index;
 
-},{"./model":54,"binary-search-tree":15,"underscore":210,"util":216}],54:[function(require,module,exports){
+},{"./model":56,"binary-search-tree":15,"underscore":213,"util":219}],56:[function(require,module,exports){
 /**
  * Handle models (i.e. docs)
  * Serialization/deserialization
@@ -20483,7 +22154,7 @@ module.exports.match = match;
 module.exports.areThingsEqual = areThingsEqual;
 module.exports.compareThings = compareThings;
 
-},{"underscore":210,"util":216}],55:[function(require,module,exports){
+},{"underscore":213,"util":219}],57:[function(require,module,exports){
 (function (process){
 /**
  * Handle every persistence-related task
@@ -20801,7 +22472,7 @@ Persistence.prototype.loadDatabase = function (cb) {
 module.exports = Persistence;
 
 }).call(this,require('_process'))
-},{"./customUtils":47,"./indexes":53,"./model":54,"./storage":48,"_process":213,"async":14,"path":212}],56:[function(require,module,exports){
+},{"./customUtils":49,"./indexes":55,"./model":56,"./storage":50,"_process":216,"async":14,"path":215}],58:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -20886,12 +22557,12 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/ReactDOM');
 
-},{"./lib/ReactDOM":87}],58:[function(require,module,exports){
+},{"./lib/ReactDOM":89}],60:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -20965,7 +22636,7 @@ var ARIADOMPropertyConfig = {
 };
 
 module.exports = ARIADOMPropertyConfig;
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -20989,7 +22660,7 @@ var AutoFocusUtils = {
 };
 
 module.exports = AutoFocusUtils;
-},{"./ReactDOMComponentTree":90,"fbjs/lib/focusNode":28}],60:[function(require,module,exports){
+},{"./ReactDOMComponentTree":92,"fbjs/lib/focusNode":28}],62:[function(require,module,exports){
 /**
  * Copyright 2013-present Facebook, Inc.
  * All rights reserved.
@@ -21374,7 +23045,7 @@ var BeforeInputEventPlugin = {
 };
 
 module.exports = BeforeInputEventPlugin;
-},{"./EventPropagators":76,"./FallbackCompositionState":77,"./SyntheticCompositionEvent":141,"./SyntheticInputEvent":145,"fbjs/lib/ExecutionEnvironment":20}],61:[function(require,module,exports){
+},{"./EventPropagators":78,"./FallbackCompositionState":79,"./SyntheticCompositionEvent":143,"./SyntheticInputEvent":147,"fbjs/lib/ExecutionEnvironment":20}],63:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -21522,7 +23193,7 @@ var CSSProperty = {
 };
 
 module.exports = CSSProperty;
-},{}],62:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -21733,7 +23404,7 @@ var CSSPropertyOperations = {
 
 module.exports = CSSPropertyOperations;
 }).call(this,require('_process'))
-},{"./CSSProperty":61,"./ReactInstrumentation":119,"./dangerousStyleValue":158,"_process":213,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/camelizeStyleName":22,"fbjs/lib/hyphenateStyleName":33,"fbjs/lib/memoizeStringOnly":37,"fbjs/lib/warning":41}],63:[function(require,module,exports){
+},{"./CSSProperty":63,"./ReactInstrumentation":121,"./dangerousStyleValue":160,"_process":216,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/camelizeStyleName":22,"fbjs/lib/hyphenateStyleName":33,"fbjs/lib/memoizeStringOnly":37,"fbjs/lib/warning":41}],65:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -21854,7 +23525,7 @@ var CallbackQueue = function () {
 
 module.exports = PooledClass.addPoolingTo(CallbackQueue);
 }).call(this,require('_process'))
-},{"./PooledClass":81,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],64:[function(require,module,exports){
+},{"./PooledClass":83,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],66:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -22175,7 +23846,7 @@ var ChangeEventPlugin = {
 };
 
 module.exports = ChangeEventPlugin;
-},{"./EventPluginHub":73,"./EventPropagators":76,"./ReactDOMComponentTree":90,"./ReactUpdates":134,"./SyntheticEvent":143,"./getEventTarget":166,"./isEventSupported":174,"./isTextInputElement":175,"fbjs/lib/ExecutionEnvironment":20}],65:[function(require,module,exports){
+},{"./EventPluginHub":75,"./EventPropagators":78,"./ReactDOMComponentTree":92,"./ReactUpdates":136,"./SyntheticEvent":145,"./getEventTarget":168,"./isEventSupported":176,"./isTextInputElement":177,"fbjs/lib/ExecutionEnvironment":20}],67:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22402,7 +24073,7 @@ var DOMChildrenOperations = {
 
 module.exports = DOMChildrenOperations;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":66,"./Danger":70,"./ReactDOMComponentTree":90,"./ReactInstrumentation":119,"./createMicrosoftUnsafeLocalFunction":157,"./setInnerHTML":179,"./setTextContent":180,"_process":213}],66:[function(require,module,exports){
+},{"./DOMLazyTree":68,"./Danger":72,"./ReactDOMComponentTree":92,"./ReactInstrumentation":121,"./createMicrosoftUnsafeLocalFunction":159,"./setInnerHTML":181,"./setTextContent":182,"_process":216}],68:[function(require,module,exports){
 /**
  * Copyright 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -22520,7 +24191,7 @@ DOMLazyTree.queueHTML = queueHTML;
 DOMLazyTree.queueText = queueText;
 
 module.exports = DOMLazyTree;
-},{"./DOMNamespaces":67,"./createMicrosoftUnsafeLocalFunction":157,"./setInnerHTML":179,"./setTextContent":180}],67:[function(require,module,exports){
+},{"./DOMNamespaces":69,"./createMicrosoftUnsafeLocalFunction":159,"./setInnerHTML":181,"./setTextContent":182}],69:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -22540,7 +24211,7 @@ var DOMNamespaces = {
 };
 
 module.exports = DOMNamespaces;
-},{}],68:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22752,7 +24423,7 @@ var DOMProperty = {
 
 module.exports = DOMProperty;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],69:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],71:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -22991,7 +24662,7 @@ var DOMPropertyOperations = {
 
 module.exports = DOMPropertyOperations;
 }).call(this,require('_process'))
-},{"./DOMProperty":68,"./ReactDOMComponentTree":90,"./ReactInstrumentation":119,"./quoteAttributeValueForBrowser":176,"_process":213,"fbjs/lib/warning":41}],70:[function(require,module,exports){
+},{"./DOMProperty":70,"./ReactDOMComponentTree":92,"./ReactInstrumentation":121,"./quoteAttributeValueForBrowser":178,"_process":216,"fbjs/lib/warning":41}],72:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23041,7 +24712,7 @@ var Danger = {
 
 module.exports = Danger;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":66,"./reactProdInvariant":177,"_process":213,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/createNodesFromMarkup":25,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34}],71:[function(require,module,exports){
+},{"./DOMLazyTree":68,"./reactProdInvariant":179,"_process":216,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/createNodesFromMarkup":25,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34}],73:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -23067,7 +24738,7 @@ module.exports = Danger;
 var DefaultEventPluginOrder = ['ResponderEventPlugin', 'SimpleEventPlugin', 'TapEventPlugin', 'EnterLeaveEventPlugin', 'ChangeEventPlugin', 'SelectEventPlugin', 'BeforeInputEventPlugin'];
 
 module.exports = DefaultEventPluginOrder;
-},{}],72:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -23167,7 +24838,7 @@ var EnterLeaveEventPlugin = {
 };
 
 module.exports = EnterLeaveEventPlugin;
-},{"./EventPropagators":76,"./ReactDOMComponentTree":90,"./SyntheticMouseEvent":147}],73:[function(require,module,exports){
+},{"./EventPropagators":78,"./ReactDOMComponentTree":92,"./SyntheticMouseEvent":149}],75:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23447,7 +25118,7 @@ var EventPluginHub = {
 
 module.exports = EventPluginHub;
 }).call(this,require('_process'))
-},{"./EventPluginRegistry":74,"./EventPluginUtils":75,"./ReactErrorUtils":110,"./accumulateInto":154,"./forEachAccumulated":162,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],74:[function(require,module,exports){
+},{"./EventPluginRegistry":76,"./EventPluginUtils":77,"./ReactErrorUtils":112,"./accumulateInto":156,"./forEachAccumulated":164,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],76:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23704,7 +25375,7 @@ var EventPluginRegistry = {
 
 module.exports = EventPluginRegistry;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],75:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],77:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -23932,7 +25603,7 @@ var EventPluginUtils = {
 
 module.exports = EventPluginUtils;
 }).call(this,require('_process'))
-},{"./ReactErrorUtils":110,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],76:[function(require,module,exports){
+},{"./ReactErrorUtils":112,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],78:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24068,7 +25739,7 @@ var EventPropagators = {
 
 module.exports = EventPropagators;
 }).call(this,require('_process'))
-},{"./EventPluginHub":73,"./EventPluginUtils":75,"./accumulateInto":154,"./forEachAccumulated":162,"_process":213,"fbjs/lib/warning":41}],77:[function(require,module,exports){
+},{"./EventPluginHub":75,"./EventPluginUtils":77,"./accumulateInto":156,"./forEachAccumulated":164,"_process":216,"fbjs/lib/warning":41}],79:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -24163,7 +25834,7 @@ _assign(FallbackCompositionState.prototype, {
 PooledClass.addPoolingTo(FallbackCompositionState);
 
 module.exports = FallbackCompositionState;
-},{"./PooledClass":81,"./getTextContentAccessor":171,"object-assign":56}],78:[function(require,module,exports){
+},{"./PooledClass":83,"./getTextContentAccessor":173,"object-assign":58}],80:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -24375,7 +26046,7 @@ var HTMLDOMPropertyConfig = {
 };
 
 module.exports = HTMLDOMPropertyConfig;
-},{"./DOMProperty":68}],79:[function(require,module,exports){
+},{"./DOMProperty":70}],81:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -24434,7 +26105,7 @@ var KeyEscapeUtils = {
 };
 
 module.exports = KeyEscapeUtils;
-},{}],80:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24571,7 +26242,7 @@ var LinkedValueUtils = {
 
 module.exports = LinkedValueUtils;
 }).call(this,require('_process'))
-},{"./ReactPropTypesSecret":127,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/React":187}],81:[function(require,module,exports){
+},{"./ReactPropTypesSecret":129,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/React":190}],83:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -24697,7 +26368,7 @@ var PooledClass = {
 
 module.exports = PooledClass;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],82:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],84:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25025,7 +26696,7 @@ var ReactBrowserEventEmitter = _assign({}, ReactEventEmitterMixin, {
 });
 
 module.exports = ReactBrowserEventEmitter;
-},{"./EventPluginRegistry":74,"./ReactEventEmitterMixin":111,"./ViewportMetrics":153,"./getVendorPrefixedEventName":172,"./isEventSupported":174,"object-assign":56}],83:[function(require,module,exports){
+},{"./EventPluginRegistry":76,"./ReactEventEmitterMixin":113,"./ViewportMetrics":155,"./getVendorPrefixedEventName":174,"./isEventSupported":176,"object-assign":58}],85:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -25181,7 +26852,7 @@ var ReactChildReconciler = {
 
 module.exports = ReactChildReconciler;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":79,"./ReactReconciler":129,"./instantiateReactComponent":173,"./shouldUpdateReactComponent":181,"./traverseAllChildren":182,"_process":213,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],84:[function(require,module,exports){
+},{"./KeyEscapeUtils":81,"./ReactReconciler":131,"./instantiateReactComponent":175,"./shouldUpdateReactComponent":183,"./traverseAllChildren":184,"_process":216,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],86:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -25211,7 +26882,7 @@ var ReactComponentBrowserEnvironment = {
 };
 
 module.exports = ReactComponentBrowserEnvironment;
-},{"./DOMChildrenOperations":65,"./ReactDOMIDOperations":94}],85:[function(require,module,exports){
+},{"./DOMChildrenOperations":67,"./ReactDOMIDOperations":96}],87:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -25259,7 +26930,7 @@ var ReactComponentEnvironment = {
 
 module.exports = ReactComponentEnvironment;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],86:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],88:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26163,7 +27834,7 @@ var ReactCompositeComponent = {
 
 module.exports = ReactCompositeComponent;
 }).call(this,require('_process'))
-},{"./ReactComponentEnvironment":85,"./ReactErrorUtils":110,"./ReactInstanceMap":118,"./ReactInstrumentation":119,"./ReactNodeTypes":124,"./ReactReconciler":129,"./checkReactTypeSpec":156,"./reactProdInvariant":177,"./shouldUpdateReactComponent":181,"_process":213,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/shallowEqual":40,"fbjs/lib/warning":41,"object-assign":56,"react/lib/React":187,"react/lib/ReactCurrentOwner":192}],87:[function(require,module,exports){
+},{"./ReactComponentEnvironment":87,"./ReactErrorUtils":112,"./ReactInstanceMap":120,"./ReactInstrumentation":121,"./ReactNodeTypes":126,"./ReactReconciler":131,"./checkReactTypeSpec":158,"./reactProdInvariant":179,"./shouldUpdateReactComponent":183,"_process":216,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/shallowEqual":40,"fbjs/lib/warning":41,"object-assign":58,"react/lib/React":190,"react/lib/ReactCurrentOwner":195}],89:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -26276,7 +27947,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactDOM;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":90,"./ReactDOMInvalidARIAHook":96,"./ReactDOMNullInputValuePropHook":97,"./ReactDOMUnknownPropertyHook":104,"./ReactDefaultInjection":107,"./ReactInstrumentation":119,"./ReactMount":122,"./ReactReconciler":129,"./ReactUpdates":134,"./ReactVersion":135,"./findDOMNode":160,"./getHostComponentFromComposite":167,"./renderSubtreeIntoContainer":178,"_process":213,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/warning":41}],88:[function(require,module,exports){
+},{"./ReactDOMComponentTree":92,"./ReactDOMInvalidARIAHook":98,"./ReactDOMNullInputValuePropHook":99,"./ReactDOMUnknownPropertyHook":106,"./ReactDefaultInjection":109,"./ReactInstrumentation":121,"./ReactMount":124,"./ReactReconciler":131,"./ReactUpdates":136,"./ReactVersion":137,"./findDOMNode":162,"./getHostComponentFromComposite":169,"./renderSubtreeIntoContainer":180,"_process":216,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/warning":41}],90:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27273,7 +28944,7 @@ _assign(ReactDOMComponent.prototype, ReactDOMComponent.Mixin, ReactMultiChild.Mi
 
 module.exports = ReactDOMComponent;
 }).call(this,require('_process'))
-},{"./AutoFocusUtils":59,"./CSSPropertyOperations":62,"./DOMLazyTree":66,"./DOMNamespaces":67,"./DOMProperty":68,"./DOMPropertyOperations":69,"./EventPluginHub":73,"./EventPluginRegistry":74,"./ReactBrowserEventEmitter":82,"./ReactDOMComponentFlags":89,"./ReactDOMComponentTree":90,"./ReactDOMInput":95,"./ReactDOMOption":98,"./ReactDOMSelect":99,"./ReactDOMTextarea":102,"./ReactInstrumentation":119,"./ReactMultiChild":123,"./ReactServerRenderingTransaction":131,"./escapeTextContentForBrowser":159,"./isEventSupported":174,"./reactProdInvariant":177,"./validateDOMNesting":183,"_process":213,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34,"fbjs/lib/shallowEqual":40,"fbjs/lib/warning":41,"object-assign":56}],89:[function(require,module,exports){
+},{"./AutoFocusUtils":61,"./CSSPropertyOperations":64,"./DOMLazyTree":68,"./DOMNamespaces":69,"./DOMProperty":70,"./DOMPropertyOperations":71,"./EventPluginHub":75,"./EventPluginRegistry":76,"./ReactBrowserEventEmitter":84,"./ReactDOMComponentFlags":91,"./ReactDOMComponentTree":92,"./ReactDOMInput":97,"./ReactDOMOption":100,"./ReactDOMSelect":101,"./ReactDOMTextarea":104,"./ReactInstrumentation":121,"./ReactMultiChild":125,"./ReactServerRenderingTransaction":133,"./escapeTextContentForBrowser":161,"./isEventSupported":176,"./reactProdInvariant":179,"./validateDOMNesting":185,"_process":216,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34,"fbjs/lib/shallowEqual":40,"fbjs/lib/warning":41,"object-assign":58}],91:[function(require,module,exports){
 /**
  * Copyright 2015-present, Facebook, Inc.
  * All rights reserved.
@@ -27291,7 +28962,7 @@ var ReactDOMComponentFlags = {
 };
 
 module.exports = ReactDOMComponentFlags;
-},{}],90:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27481,7 +29152,7 @@ var ReactDOMComponentTree = {
 
 module.exports = ReactDOMComponentTree;
 }).call(this,require('_process'))
-},{"./DOMProperty":68,"./ReactDOMComponentFlags":89,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],91:[function(require,module,exports){
+},{"./DOMProperty":70,"./ReactDOMComponentFlags":91,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],93:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27516,7 +29187,7 @@ function ReactDOMContainerInfo(topLevelWrapper, node) {
 
 module.exports = ReactDOMContainerInfo;
 }).call(this,require('_process'))
-},{"./validateDOMNesting":183,"_process":213}],92:[function(require,module,exports){
+},{"./validateDOMNesting":185,"_process":216}],94:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -27576,7 +29247,7 @@ _assign(ReactDOMEmptyComponent.prototype, {
 });
 
 module.exports = ReactDOMEmptyComponent;
-},{"./DOMLazyTree":66,"./ReactDOMComponentTree":90,"object-assign":56}],93:[function(require,module,exports){
+},{"./DOMLazyTree":68,"./ReactDOMComponentTree":92,"object-assign":58}],95:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -27595,7 +29266,7 @@ var ReactDOMFeatureFlags = {
 };
 
 module.exports = ReactDOMFeatureFlags;
-},{}],94:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -27629,7 +29300,7 @@ var ReactDOMIDOperations = {
 };
 
 module.exports = ReactDOMIDOperations;
-},{"./DOMChildrenOperations":65,"./ReactDOMComponentTree":90}],95:[function(require,module,exports){
+},{"./DOMChildrenOperations":67,"./ReactDOMComponentTree":92}],97:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27899,7 +29570,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMInput;
 }).call(this,require('_process'))
-},{"./DOMPropertyOperations":69,"./LinkedValueUtils":80,"./ReactDOMComponentTree":90,"./ReactUpdates":134,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":56}],96:[function(require,module,exports){
+},{"./DOMPropertyOperations":71,"./LinkedValueUtils":82,"./ReactDOMComponentTree":92,"./ReactUpdates":136,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":58}],98:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -27994,7 +29665,7 @@ var ReactDOMInvalidARIAHook = {
 
 module.exports = ReactDOMInvalidARIAHook;
 }).call(this,require('_process'))
-},{"./DOMProperty":68,"_process":213,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],97:[function(require,module,exports){
+},{"./DOMProperty":70,"_process":216,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],99:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28039,7 +29710,7 @@ var ReactDOMNullInputValuePropHook = {
 
 module.exports = ReactDOMNullInputValuePropHook;
 }).call(this,require('_process'))
-},{"_process":213,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],98:[function(require,module,exports){
+},{"_process":216,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],100:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28164,7 +29835,7 @@ var ReactDOMOption = {
 
 module.exports = ReactDOMOption;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":90,"./ReactDOMSelect":99,"_process":213,"fbjs/lib/warning":41,"object-assign":56,"react/lib/React":187}],99:[function(require,module,exports){
+},{"./ReactDOMComponentTree":92,"./ReactDOMSelect":101,"_process":216,"fbjs/lib/warning":41,"object-assign":58,"react/lib/React":190}],101:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28366,7 +30037,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMSelect;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":80,"./ReactDOMComponentTree":90,"./ReactUpdates":134,"_process":213,"fbjs/lib/warning":41,"object-assign":56}],100:[function(require,module,exports){
+},{"./LinkedValueUtils":82,"./ReactDOMComponentTree":92,"./ReactUpdates":136,"_process":216,"fbjs/lib/warning":41,"object-assign":58}],102:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -28578,7 +30249,7 @@ var ReactDOMSelection = {
 };
 
 module.exports = ReactDOMSelection;
-},{"./getNodeForCharacterOffset":170,"./getTextContentAccessor":171,"fbjs/lib/ExecutionEnvironment":20}],101:[function(require,module,exports){
+},{"./getNodeForCharacterOffset":172,"./getTextContentAccessor":173,"fbjs/lib/ExecutionEnvironment":20}],103:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28744,7 +30415,7 @@ _assign(ReactDOMTextComponent.prototype, {
 
 module.exports = ReactDOMTextComponent;
 }).call(this,require('_process'))
-},{"./DOMChildrenOperations":65,"./DOMLazyTree":66,"./ReactDOMComponentTree":90,"./escapeTextContentForBrowser":159,"./reactProdInvariant":177,"./validateDOMNesting":183,"_process":213,"fbjs/lib/invariant":34,"object-assign":56}],102:[function(require,module,exports){
+},{"./DOMChildrenOperations":67,"./DOMLazyTree":68,"./ReactDOMComponentTree":92,"./escapeTextContentForBrowser":161,"./reactProdInvariant":179,"./validateDOMNesting":185,"_process":216,"fbjs/lib/invariant":34,"object-assign":58}],104:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -28900,7 +30571,7 @@ function _handleChange(event) {
 
 module.exports = ReactDOMTextarea;
 }).call(this,require('_process'))
-},{"./LinkedValueUtils":80,"./ReactDOMComponentTree":90,"./ReactUpdates":134,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":56}],103:[function(require,module,exports){
+},{"./LinkedValueUtils":82,"./ReactDOMComponentTree":92,"./ReactUpdates":136,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":58}],105:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -29038,7 +30709,7 @@ module.exports = {
   traverseEnterLeave: traverseEnterLeave
 };
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],104:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],106:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -29152,7 +30823,7 @@ var ReactDOMUnknownPropertyHook = {
 
 module.exports = ReactDOMUnknownPropertyHook;
 }).call(this,require('_process'))
-},{"./DOMProperty":68,"./EventPluginRegistry":74,"_process":213,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],105:[function(require,module,exports){
+},{"./DOMProperty":70,"./EventPluginRegistry":76,"_process":216,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],107:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -29515,7 +31186,7 @@ if (/[?&]react_perf\b/.test(url)) {
 
 module.exports = ReactDebugTool;
 }).call(this,require('_process'))
-},{"./ReactHostOperationHistoryHook":115,"./ReactInvalidSetStateWarningHook":120,"_process":213,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/performanceNow":39,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],106:[function(require,module,exports){
+},{"./ReactHostOperationHistoryHook":117,"./ReactInvalidSetStateWarningHook":122,"_process":216,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/performanceNow":39,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],108:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29583,7 +31254,7 @@ var ReactDefaultBatchingStrategy = {
 };
 
 module.exports = ReactDefaultBatchingStrategy;
-},{"./ReactUpdates":134,"./Transaction":152,"fbjs/lib/emptyFunction":26,"object-assign":56}],107:[function(require,module,exports){
+},{"./ReactUpdates":136,"./Transaction":154,"fbjs/lib/emptyFunction":26,"object-assign":58}],109:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29669,7 +31340,7 @@ function inject() {
 module.exports = {
   inject: inject
 };
-},{"./ARIADOMPropertyConfig":58,"./BeforeInputEventPlugin":60,"./ChangeEventPlugin":64,"./DefaultEventPluginOrder":71,"./EnterLeaveEventPlugin":72,"./HTMLDOMPropertyConfig":78,"./ReactComponentBrowserEnvironment":84,"./ReactDOMComponent":88,"./ReactDOMComponentTree":90,"./ReactDOMEmptyComponent":92,"./ReactDOMTextComponent":101,"./ReactDOMTreeTraversal":103,"./ReactDefaultBatchingStrategy":106,"./ReactEventListener":112,"./ReactInjection":116,"./ReactReconcileTransaction":128,"./SVGDOMPropertyConfig":136,"./SelectEventPlugin":137,"./SimpleEventPlugin":138}],108:[function(require,module,exports){
+},{"./ARIADOMPropertyConfig":60,"./BeforeInputEventPlugin":62,"./ChangeEventPlugin":66,"./DefaultEventPluginOrder":73,"./EnterLeaveEventPlugin":74,"./HTMLDOMPropertyConfig":80,"./ReactComponentBrowserEnvironment":86,"./ReactDOMComponent":90,"./ReactDOMComponentTree":92,"./ReactDOMEmptyComponent":94,"./ReactDOMTextComponent":103,"./ReactDOMTreeTraversal":105,"./ReactDefaultBatchingStrategy":108,"./ReactEventListener":114,"./ReactInjection":118,"./ReactReconcileTransaction":130,"./SVGDOMPropertyConfig":138,"./SelectEventPlugin":139,"./SimpleEventPlugin":140}],110:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -29689,7 +31360,7 @@ module.exports = {
 var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 0xeac7;
 
 module.exports = REACT_ELEMENT_TYPE;
-},{}],109:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 /**
  * Copyright 2014-present, Facebook, Inc.
  * All rights reserved.
@@ -29719,7 +31390,7 @@ var ReactEmptyComponent = {
 ReactEmptyComponent.injection = ReactEmptyComponentInjection;
 
 module.exports = ReactEmptyComponent;
-},{}],110:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -29798,7 +31469,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactErrorUtils;
 }).call(this,require('_process'))
-},{"_process":213}],111:[function(require,module,exports){
+},{"_process":216}],113:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29831,7 +31502,7 @@ var ReactEventEmitterMixin = {
 };
 
 module.exports = ReactEventEmitterMixin;
-},{"./EventPluginHub":73}],112:[function(require,module,exports){
+},{"./EventPluginHub":75}],114:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -29986,7 +31657,7 @@ var ReactEventListener = {
 };
 
 module.exports = ReactEventListener;
-},{"./PooledClass":81,"./ReactDOMComponentTree":90,"./ReactUpdates":134,"./getEventTarget":166,"fbjs/lib/EventListener":19,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/getUnboundedScrollPosition":31,"object-assign":56}],113:[function(require,module,exports){
+},{"./PooledClass":83,"./ReactDOMComponentTree":92,"./ReactUpdates":136,"./getEventTarget":168,"fbjs/lib/EventListener":19,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/getUnboundedScrollPosition":31,"object-assign":58}],115:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30008,7 +31679,7 @@ var ReactFeatureFlags = {
 };
 
 module.exports = ReactFeatureFlags;
-},{}],114:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -30086,7 +31757,7 @@ var ReactHostComponent = {
 
 module.exports = ReactHostComponent;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"object-assign":56}],115:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"object-assign":58}],117:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -30120,7 +31791,7 @@ var ReactHostOperationHistoryHook = {
 };
 
 module.exports = ReactHostOperationHistoryHook;
-},{}],116:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30154,7 +31825,7 @@ var ReactInjection = {
 };
 
 module.exports = ReactInjection;
-},{"./DOMProperty":68,"./EventPluginHub":73,"./EventPluginUtils":75,"./ReactBrowserEventEmitter":82,"./ReactComponentEnvironment":85,"./ReactEmptyComponent":109,"./ReactHostComponent":114,"./ReactUpdates":134}],117:[function(require,module,exports){
+},{"./DOMProperty":70,"./EventPluginHub":75,"./EventPluginUtils":77,"./ReactBrowserEventEmitter":84,"./ReactComponentEnvironment":87,"./ReactEmptyComponent":111,"./ReactHostComponent":116,"./ReactUpdates":136}],119:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30278,7 +31949,7 @@ var ReactInputSelection = {
 };
 
 module.exports = ReactInputSelection;
-},{"./ReactDOMSelection":100,"fbjs/lib/containsNode":23,"fbjs/lib/focusNode":28,"fbjs/lib/getActiveElement":29}],118:[function(require,module,exports){
+},{"./ReactDOMSelection":102,"fbjs/lib/containsNode":23,"fbjs/lib/focusNode":28,"fbjs/lib/getActiveElement":29}],120:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30326,7 +31997,7 @@ var ReactInstanceMap = {
 };
 
 module.exports = ReactInstanceMap;
-},{}],119:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -30352,7 +32023,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = { debugTool: debugTool };
 }).call(this,require('_process'))
-},{"./ReactDebugTool":105,"_process":213}],120:[function(require,module,exports){
+},{"./ReactDebugTool":107,"_process":216}],122:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -30391,7 +32062,7 @@ var ReactInvalidSetStateWarningHook = {
 
 module.exports = ReactInvalidSetStateWarningHook;
 }).call(this,require('_process'))
-},{"_process":213,"fbjs/lib/warning":41}],121:[function(require,module,exports){
+},{"_process":216,"fbjs/lib/warning":41}],123:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -30441,7 +32112,7 @@ var ReactMarkupChecksum = {
 };
 
 module.exports = ReactMarkupChecksum;
-},{"./adler32":155}],122:[function(require,module,exports){
+},{"./adler32":157}],124:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -30981,7 +32652,7 @@ var ReactMount = {
 
 module.exports = ReactMount;
 }).call(this,require('_process'))
-},{"./DOMLazyTree":66,"./DOMProperty":68,"./ReactBrowserEventEmitter":82,"./ReactDOMComponentTree":90,"./ReactDOMContainerInfo":91,"./ReactDOMFeatureFlags":93,"./ReactFeatureFlags":113,"./ReactInstanceMap":118,"./ReactInstrumentation":119,"./ReactMarkupChecksum":121,"./ReactReconciler":129,"./ReactUpdateQueue":133,"./ReactUpdates":134,"./instantiateReactComponent":173,"./reactProdInvariant":177,"./setInnerHTML":179,"./shouldUpdateReactComponent":181,"_process":213,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/React":187,"react/lib/ReactCurrentOwner":192}],123:[function(require,module,exports){
+},{"./DOMLazyTree":68,"./DOMProperty":70,"./ReactBrowserEventEmitter":84,"./ReactDOMComponentTree":92,"./ReactDOMContainerInfo":93,"./ReactDOMFeatureFlags":95,"./ReactFeatureFlags":115,"./ReactInstanceMap":120,"./ReactInstrumentation":121,"./ReactMarkupChecksum":123,"./ReactReconciler":131,"./ReactUpdateQueue":135,"./ReactUpdates":136,"./instantiateReactComponent":175,"./reactProdInvariant":179,"./setInnerHTML":181,"./shouldUpdateReactComponent":183,"_process":216,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/React":190,"react/lib/ReactCurrentOwner":195}],125:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31433,7 +33104,7 @@ var ReactMultiChild = {
 
 module.exports = ReactMultiChild;
 }).call(this,require('_process'))
-},{"./ReactChildReconciler":83,"./ReactComponentEnvironment":85,"./ReactInstanceMap":118,"./ReactInstrumentation":119,"./ReactReconciler":129,"./flattenChildren":161,"./reactProdInvariant":177,"_process":213,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34,"react/lib/ReactCurrentOwner":192}],124:[function(require,module,exports){
+},{"./ReactChildReconciler":85,"./ReactComponentEnvironment":87,"./ReactInstanceMap":120,"./ReactInstrumentation":121,"./ReactReconciler":131,"./flattenChildren":163,"./reactProdInvariant":179,"_process":216,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34,"react/lib/ReactCurrentOwner":195}],126:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31475,7 +33146,7 @@ var ReactNodeTypes = {
 
 module.exports = ReactNodeTypes;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"react/lib/React":187}],125:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"react/lib/React":190}],127:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31571,7 +33242,7 @@ var ReactOwner = {
 
 module.exports = ReactOwner;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],126:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],128:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31598,7 +33269,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactPropTypeLocationNames;
 }).call(this,require('_process'))
-},{"_process":213}],127:[function(require,module,exports){
+},{"_process":216}],129:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -31615,7 +33286,7 @@ module.exports = ReactPropTypeLocationNames;
 var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
-},{}],128:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31795,7 +33466,7 @@ PooledClass.addPoolingTo(ReactReconcileTransaction);
 
 module.exports = ReactReconcileTransaction;
 }).call(this,require('_process'))
-},{"./CallbackQueue":63,"./PooledClass":81,"./ReactBrowserEventEmitter":82,"./ReactInputSelection":117,"./ReactInstrumentation":119,"./ReactUpdateQueue":133,"./Transaction":152,"_process":213,"object-assign":56}],129:[function(require,module,exports){
+},{"./CallbackQueue":65,"./PooledClass":83,"./ReactBrowserEventEmitter":84,"./ReactInputSelection":119,"./ReactInstrumentation":121,"./ReactUpdateQueue":135,"./Transaction":154,"_process":216,"object-assign":58}],131:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -31965,7 +33636,7 @@ var ReactReconciler = {
 
 module.exports = ReactReconciler;
 }).call(this,require('_process'))
-},{"./ReactInstrumentation":119,"./ReactRef":130,"_process":213,"fbjs/lib/warning":41}],130:[function(require,module,exports){
+},{"./ReactInstrumentation":121,"./ReactRef":132,"_process":216,"fbjs/lib/warning":41}],132:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -32054,7 +33725,7 @@ ReactRef.detachRefs = function (instance, element) {
 };
 
 module.exports = ReactRef;
-},{"./ReactOwner":125}],131:[function(require,module,exports){
+},{"./ReactOwner":127}],133:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -32146,7 +33817,7 @@ PooledClass.addPoolingTo(ReactServerRenderingTransaction);
 
 module.exports = ReactServerRenderingTransaction;
 }).call(this,require('_process'))
-},{"./PooledClass":81,"./ReactInstrumentation":119,"./ReactServerUpdateQueue":132,"./Transaction":152,"_process":213,"object-assign":56}],132:[function(require,module,exports){
+},{"./PooledClass":83,"./ReactInstrumentation":121,"./ReactServerUpdateQueue":134,"./Transaction":154,"_process":216,"object-assign":58}],134:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -32287,7 +33958,7 @@ var ReactServerUpdateQueue = function () {
 
 module.exports = ReactServerUpdateQueue;
 }).call(this,require('_process'))
-},{"./ReactUpdateQueue":133,"_process":213,"fbjs/lib/warning":41}],133:[function(require,module,exports){
+},{"./ReactUpdateQueue":135,"_process":216,"fbjs/lib/warning":41}],135:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -32515,7 +34186,7 @@ var ReactUpdateQueue = {
 
 module.exports = ReactUpdateQueue;
 }).call(this,require('_process'))
-},{"./ReactInstanceMap":118,"./ReactInstrumentation":119,"./ReactUpdates":134,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":192}],134:[function(require,module,exports){
+},{"./ReactInstanceMap":120,"./ReactInstrumentation":121,"./ReactUpdates":136,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":195}],136:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -32768,7 +34439,7 @@ var ReactUpdates = {
 
 module.exports = ReactUpdates;
 }).call(this,require('_process'))
-},{"./CallbackQueue":63,"./PooledClass":81,"./ReactFeatureFlags":113,"./ReactReconciler":129,"./Transaction":152,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"object-assign":56}],135:[function(require,module,exports){
+},{"./CallbackQueue":65,"./PooledClass":83,"./ReactFeatureFlags":115,"./ReactReconciler":131,"./Transaction":154,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"object-assign":58}],137:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -32782,7 +34453,7 @@ module.exports = ReactUpdates;
 'use strict';
 
 module.exports = '15.4.1';
-},{}],136:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33084,7 +34755,7 @@ Object.keys(ATTRS).forEach(function (key) {
 });
 
 module.exports = SVGDOMPropertyConfig;
-},{}],137:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33275,7 +34946,7 @@ var SelectEventPlugin = {
 };
 
 module.exports = SelectEventPlugin;
-},{"./EventPropagators":76,"./ReactDOMComponentTree":90,"./ReactInputSelection":117,"./SyntheticEvent":143,"./isTextInputElement":175,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/getActiveElement":29,"fbjs/lib/shallowEqual":40}],138:[function(require,module,exports){
+},{"./EventPropagators":78,"./ReactDOMComponentTree":92,"./ReactInputSelection":119,"./SyntheticEvent":145,"./isTextInputElement":177,"fbjs/lib/ExecutionEnvironment":20,"fbjs/lib/getActiveElement":29,"fbjs/lib/shallowEqual":40}],140:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -33505,7 +35176,7 @@ var SimpleEventPlugin = {
 
 module.exports = SimpleEventPlugin;
 }).call(this,require('_process'))
-},{"./EventPropagators":76,"./ReactDOMComponentTree":90,"./SyntheticAnimationEvent":139,"./SyntheticClipboardEvent":140,"./SyntheticDragEvent":142,"./SyntheticEvent":143,"./SyntheticFocusEvent":144,"./SyntheticKeyboardEvent":146,"./SyntheticMouseEvent":147,"./SyntheticTouchEvent":148,"./SyntheticTransitionEvent":149,"./SyntheticUIEvent":150,"./SyntheticWheelEvent":151,"./getEventCharCode":163,"./reactProdInvariant":177,"_process":213,"fbjs/lib/EventListener":19,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34}],139:[function(require,module,exports){
+},{"./EventPropagators":78,"./ReactDOMComponentTree":92,"./SyntheticAnimationEvent":141,"./SyntheticClipboardEvent":142,"./SyntheticDragEvent":144,"./SyntheticEvent":145,"./SyntheticFocusEvent":146,"./SyntheticKeyboardEvent":148,"./SyntheticMouseEvent":149,"./SyntheticTouchEvent":150,"./SyntheticTransitionEvent":151,"./SyntheticUIEvent":152,"./SyntheticWheelEvent":153,"./getEventCharCode":165,"./reactProdInvariant":179,"_process":216,"fbjs/lib/EventListener":19,"fbjs/lib/emptyFunction":26,"fbjs/lib/invariant":34}],141:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33544,7 +35215,7 @@ function SyntheticAnimationEvent(dispatchConfig, dispatchMarker, nativeEvent, na
 SyntheticEvent.augmentClass(SyntheticAnimationEvent, AnimationEventInterface);
 
 module.exports = SyntheticAnimationEvent;
-},{"./SyntheticEvent":143}],140:[function(require,module,exports){
+},{"./SyntheticEvent":145}],142:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33582,7 +35253,7 @@ function SyntheticClipboardEvent(dispatchConfig, dispatchMarker, nativeEvent, na
 SyntheticEvent.augmentClass(SyntheticClipboardEvent, ClipboardEventInterface);
 
 module.exports = SyntheticClipboardEvent;
-},{"./SyntheticEvent":143}],141:[function(require,module,exports){
+},{"./SyntheticEvent":145}],143:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33618,7 +35289,7 @@ function SyntheticCompositionEvent(dispatchConfig, dispatchMarker, nativeEvent, 
 SyntheticEvent.augmentClass(SyntheticCompositionEvent, CompositionEventInterface);
 
 module.exports = SyntheticCompositionEvent;
-},{"./SyntheticEvent":143}],142:[function(require,module,exports){
+},{"./SyntheticEvent":145}],144:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33654,7 +35325,7 @@ function SyntheticDragEvent(dispatchConfig, dispatchMarker, nativeEvent, nativeE
 SyntheticMouseEvent.augmentClass(SyntheticDragEvent, DragEventInterface);
 
 module.exports = SyntheticDragEvent;
-},{"./SyntheticMouseEvent":147}],143:[function(require,module,exports){
+},{"./SyntheticMouseEvent":149}],145:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -33924,7 +35595,7 @@ function getPooledWarningPropertyDefinition(propName, getVal) {
   }
 }
 }).call(this,require('_process'))
-},{"./PooledClass":81,"_process":213,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41,"object-assign":56}],144:[function(require,module,exports){
+},{"./PooledClass":83,"_process":216,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41,"object-assign":58}],146:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33960,7 +35631,7 @@ function SyntheticFocusEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticFocusEvent, FocusEventInterface);
 
 module.exports = SyntheticFocusEvent;
-},{"./SyntheticUIEvent":150}],145:[function(require,module,exports){
+},{"./SyntheticUIEvent":152}],147:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -33997,7 +35668,7 @@ function SyntheticInputEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticEvent.augmentClass(SyntheticInputEvent, InputEventInterface);
 
 module.exports = SyntheticInputEvent;
-},{"./SyntheticEvent":143}],146:[function(require,module,exports){
+},{"./SyntheticEvent":145}],148:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34081,7 +35752,7 @@ function SyntheticKeyboardEvent(dispatchConfig, dispatchMarker, nativeEvent, nat
 SyntheticUIEvent.augmentClass(SyntheticKeyboardEvent, KeyboardEventInterface);
 
 module.exports = SyntheticKeyboardEvent;
-},{"./SyntheticUIEvent":150,"./getEventCharCode":163,"./getEventKey":164,"./getEventModifierState":165}],147:[function(require,module,exports){
+},{"./SyntheticUIEvent":152,"./getEventCharCode":165,"./getEventKey":166,"./getEventModifierState":167}],149:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34153,7 +35824,7 @@ function SyntheticMouseEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticMouseEvent, MouseEventInterface);
 
 module.exports = SyntheticMouseEvent;
-},{"./SyntheticUIEvent":150,"./ViewportMetrics":153,"./getEventModifierState":165}],148:[function(require,module,exports){
+},{"./SyntheticUIEvent":152,"./ViewportMetrics":155,"./getEventModifierState":167}],150:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34198,7 +35869,7 @@ function SyntheticTouchEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticUIEvent.augmentClass(SyntheticTouchEvent, TouchEventInterface);
 
 module.exports = SyntheticTouchEvent;
-},{"./SyntheticUIEvent":150,"./getEventModifierState":165}],149:[function(require,module,exports){
+},{"./SyntheticUIEvent":152,"./getEventModifierState":167}],151:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34237,7 +35908,7 @@ function SyntheticTransitionEvent(dispatchConfig, dispatchMarker, nativeEvent, n
 SyntheticEvent.augmentClass(SyntheticTransitionEvent, TransitionEventInterface);
 
 module.exports = SyntheticTransitionEvent;
-},{"./SyntheticEvent":143}],150:[function(require,module,exports){
+},{"./SyntheticEvent":145}],152:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34296,7 +35967,7 @@ function SyntheticUIEvent(dispatchConfig, dispatchMarker, nativeEvent, nativeEve
 SyntheticEvent.augmentClass(SyntheticUIEvent, UIEventInterface);
 
 module.exports = SyntheticUIEvent;
-},{"./SyntheticEvent":143,"./getEventTarget":166}],151:[function(require,module,exports){
+},{"./SyntheticEvent":145,"./getEventTarget":168}],153:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34350,7 +36021,7 @@ function SyntheticWheelEvent(dispatchConfig, dispatchMarker, nativeEvent, native
 SyntheticMouseEvent.augmentClass(SyntheticWheelEvent, WheelEventInterface);
 
 module.exports = SyntheticWheelEvent;
-},{"./SyntheticMouseEvent":147}],152:[function(require,module,exports){
+},{"./SyntheticMouseEvent":149}],154:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -34577,7 +36248,7 @@ var TransactionImpl = {
 
 module.exports = TransactionImpl;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],153:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],155:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34604,7 +36275,7 @@ var ViewportMetrics = {
 };
 
 module.exports = ViewportMetrics;
-},{}],154:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -34664,7 +36335,7 @@ function accumulateInto(current, next) {
 
 module.exports = accumulateInto;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34}],155:[function(require,module,exports){
+},{"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34}],157:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34708,7 +36379,7 @@ function adler32(data) {
 }
 
 module.exports = adler32;
-},{}],156:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -34797,7 +36468,7 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
 module.exports = checkReactTypeSpec;
 }).call(this,require('_process'))
-},{"./ReactPropTypeLocationNames":126,"./ReactPropTypesSecret":127,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],157:[function(require,module,exports){
+},{"./ReactPropTypeLocationNames":128,"./ReactPropTypesSecret":129,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],159:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -34829,7 +36500,7 @@ var createMicrosoftUnsafeLocalFunction = function (func) {
 };
 
 module.exports = createMicrosoftUnsafeLocalFunction;
-},{}],158:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -34910,7 +36581,7 @@ function dangerousStyleValue(name, value, component) {
 
 module.exports = dangerousStyleValue;
 }).call(this,require('_process'))
-},{"./CSSProperty":61,"_process":213,"fbjs/lib/warning":41}],159:[function(require,module,exports){
+},{"./CSSProperty":63,"_process":216,"fbjs/lib/warning":41}],161:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -35033,7 +36704,7 @@ function escapeTextContentForBrowser(text) {
 }
 
 module.exports = escapeTextContentForBrowser;
-},{}],160:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35095,7 +36766,7 @@ function findDOMNode(componentOrElement) {
 
 module.exports = findDOMNode;
 }).call(this,require('_process'))
-},{"./ReactDOMComponentTree":90,"./ReactInstanceMap":118,"./getHostComponentFromComposite":167,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":192}],161:[function(require,module,exports){
+},{"./ReactDOMComponentTree":92,"./ReactInstanceMap":120,"./getHostComponentFromComposite":169,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":195}],163:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35173,7 +36844,7 @@ function flattenChildren(children, selfDebugID) {
 
 module.exports = flattenChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":79,"./traverseAllChildren":182,"_process":213,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":191}],162:[function(require,module,exports){
+},{"./KeyEscapeUtils":81,"./traverseAllChildren":184,"_process":216,"fbjs/lib/warning":41,"react/lib/ReactComponentTreeHook":194}],164:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35204,7 +36875,7 @@ function forEachAccumulated(arr, cb, scope) {
 }
 
 module.exports = forEachAccumulated;
-},{}],163:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35254,7 +36925,7 @@ function getEventCharCode(nativeEvent) {
 }
 
 module.exports = getEventCharCode;
-},{}],164:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35356,7 +37027,7 @@ function getEventKey(nativeEvent) {
 }
 
 module.exports = getEventKey;
-},{"./getEventCharCode":163}],165:[function(require,module,exports){
+},{"./getEventCharCode":165}],167:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35399,7 +37070,7 @@ function getEventModifierState(nativeEvent) {
 }
 
 module.exports = getEventModifierState;
-},{}],166:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35434,7 +37105,7 @@ function getEventTarget(nativeEvent) {
 }
 
 module.exports = getEventTarget;
-},{}],167:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35464,7 +37135,7 @@ function getHostComponentFromComposite(inst) {
 }
 
 module.exports = getHostComponentFromComposite;
-},{"./ReactNodeTypes":124}],168:[function(require,module,exports){
+},{"./ReactNodeTypes":126}],170:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35505,7 +37176,7 @@ function getIteratorFn(maybeIterable) {
 }
 
 module.exports = getIteratorFn;
-},{}],169:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35526,7 +37197,7 @@ function getNextDebugID() {
 }
 
 module.exports = getNextDebugID;
-},{}],170:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35600,7 +37271,7 @@ function getNodeForCharacterOffset(root, offset) {
 }
 
 module.exports = getNodeForCharacterOffset;
-},{}],171:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35633,7 +37304,7 @@ function getTextContentAccessor() {
 }
 
 module.exports = getTextContentAccessor;
-},{"fbjs/lib/ExecutionEnvironment":20}],172:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":20}],174:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35734,7 +37405,7 @@ function getVendorPrefixedEventName(eventName) {
 }
 
 module.exports = getVendorPrefixedEventName;
-},{"fbjs/lib/ExecutionEnvironment":20}],173:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":20}],175:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -35854,7 +37525,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
 
 module.exports = instantiateReactComponent;
 }).call(this,require('_process'))
-},{"./ReactCompositeComponent":86,"./ReactEmptyComponent":109,"./ReactHostComponent":114,"./getNextDebugID":169,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":56}],174:[function(require,module,exports){
+},{"./ReactCompositeComponent":88,"./ReactEmptyComponent":111,"./ReactHostComponent":116,"./getNextDebugID":171,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":58}],176:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35914,7 +37585,7 @@ function isEventSupported(eventNameSuffix, capture) {
 }
 
 module.exports = isEventSupported;
-},{"fbjs/lib/ExecutionEnvironment":20}],175:[function(require,module,exports){
+},{"fbjs/lib/ExecutionEnvironment":20}],177:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35965,7 +37636,7 @@ function isTextInputElement(elem) {
 }
 
 module.exports = isTextInputElement;
-},{}],176:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -35991,7 +37662,7 @@ function quoteAttributeValueForBrowser(value) {
 }
 
 module.exports = quoteAttributeValueForBrowser;
-},{"./escapeTextContentForBrowser":159}],177:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":161}],179:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -36030,7 +37701,7 @@ function reactProdInvariant(code) {
 }
 
 module.exports = reactProdInvariant;
-},{}],178:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -36046,7 +37717,7 @@ module.exports = reactProdInvariant;
 var ReactMount = require('./ReactMount');
 
 module.exports = ReactMount.renderSubtreeIntoContainer;
-},{"./ReactMount":122}],179:[function(require,module,exports){
+},{"./ReactMount":124}],181:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -36144,7 +37815,7 @@ if (ExecutionEnvironment.canUseDOM) {
 }
 
 module.exports = setInnerHTML;
-},{"./DOMNamespaces":67,"./createMicrosoftUnsafeLocalFunction":157,"fbjs/lib/ExecutionEnvironment":20}],180:[function(require,module,exports){
+},{"./DOMNamespaces":69,"./createMicrosoftUnsafeLocalFunction":159,"fbjs/lib/ExecutionEnvironment":20}],182:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -36196,7 +37867,7 @@ if (ExecutionEnvironment.canUseDOM) {
 }
 
 module.exports = setTextContent;
-},{"./escapeTextContentForBrowser":159,"./setInnerHTML":179,"fbjs/lib/ExecutionEnvironment":20}],181:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":161,"./setInnerHTML":181,"fbjs/lib/ExecutionEnvironment":20}],183:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -36238,7 +37909,7 @@ function shouldUpdateReactComponent(prevElement, nextElement) {
 }
 
 module.exports = shouldUpdateReactComponent;
-},{}],182:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -36416,7 +38087,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":79,"./ReactElementSymbol":108,"./getIteratorFn":168,"./reactProdInvariant":177,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":192}],183:[function(require,module,exports){
+},{"./KeyEscapeUtils":81,"./ReactElementSymbol":110,"./getIteratorFn":170,"./reactProdInvariant":179,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"react/lib/ReactCurrentOwner":195}],185:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -36800,7 +38471,1615 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = validateDOMNesting;
 }).call(this,require('_process'))
-},{"_process":213,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41,"object-assign":56}],184:[function(require,module,exports){
+},{"_process":216,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41,"object-assign":58}],186:[function(require,module,exports){
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("react"), require("react-dom"));
+	else if(typeof define === 'function' && define.amd)
+		define(["react", "react-dom"], factory);
+	else if(typeof exports === 'object')
+		exports["ReactDraggable"] = factory(require("react"), require("react-dom"));
+	else
+		root["ReactDraggable"] = factory(root["React"], root["ReactDOM"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	module.exports = __webpack_require__(1).default;
+	module.exports.DraggableCore = __webpack_require__(9).default;
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(2);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(3);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _classnames = __webpack_require__(4);
+	
+	var _classnames2 = _interopRequireDefault(_classnames);
+	
+	var _domFns = __webpack_require__(5);
+	
+	var _positionFns = __webpack_require__(8);
+	
+	var _shims = __webpack_require__(6);
+	
+	var _DraggableCore = __webpack_require__(9);
+	
+	var _DraggableCore2 = _interopRequireDefault(_DraggableCore);
+	
+	var _log = __webpack_require__(11);
+	
+	var _log2 = _interopRequireDefault(_log);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	// $FlowIgnore
+	
+	
+	/*:: import type {DraggableEventHandler} from './utils/types';*/
+	/*:: type DraggableState = {
+	  dragging: boolean,
+	  dragged: boolean,
+	  x: number, y: number,
+	  slackX: number, slackY: number,
+	  isElementSVG: boolean
+	};*/
+	
+	
+	//
+	// Define <Draggable>
+	//
+	
+	/*:: type ConstructorProps = {
+	  position: { x: number, y: number },
+	  defaultPosition: { x: number, y: number }
+	};*/
+	
+	var Draggable = function (_React$Component) {
+	  _inherits(Draggable, _React$Component);
+	
+	  function Draggable(props /*: ConstructorProps*/) {
+	    _classCallCheck(this, Draggable);
+	
+	    var _this = _possibleConstructorReturn(this, (Draggable.__proto__ || Object.getPrototypeOf(Draggable)).call(this, props));
+	
+	    _this.onDragStart = function (e, coreData) {
+	      (0, _log2.default)('Draggable: onDragStart: %j', coreData);
+	
+	      // Short-circuit if user's callback killed it.
+	      var shouldStart = _this.props.onStart(e, (0, _positionFns.createDraggableData)(_this, coreData));
+	      // Kills start event on core as well, so move handlers are never bound.
+	      if (shouldStart === false) return false;
+	
+	      _this.setState({ dragging: true, dragged: true });
+	    };
+	
+	    _this.onDrag = function (e, coreData) {
+	      if (!_this.state.dragging) return false;
+	      (0, _log2.default)('Draggable: onDrag: %j', coreData);
+	
+	      var uiData = (0, _positionFns.createDraggableData)(_this, coreData);
+	
+	      var newState /*: $Shape<DraggableState>*/ = {
+	        x: uiData.x,
+	        y: uiData.y
+	      };
+	
+	      // Keep within bounds.
+	      if (_this.props.bounds) {
+	        // Save original x and y.
+	        var _x = newState.x,
+	            _y = newState.y;
+	
+	        // Add slack to the values used to calculate bound position. This will ensure that if
+	        // we start removing slack, the element won't react to it right away until it's been
+	        // completely removed.
+	
+	        newState.x += _this.state.slackX;
+	        newState.y += _this.state.slackY;
+	
+	        // Get bound position. This will ceil/floor the x and y within the boundaries.
+	        // $FlowBug
+	
+	        // Recalculate slack by noting how much was shaved by the boundPosition handler.
+	        var _getBoundPosition = (0, _positionFns.getBoundPosition)(_this, newState.x, newState.y);
+	
+	        var _getBoundPosition2 = _slicedToArray(_getBoundPosition, 2);
+	
+	        newState.x = _getBoundPosition2[0];
+	        newState.y = _getBoundPosition2[1];
+	        newState.slackX = _this.state.slackX + (_x - newState.x);
+	        newState.slackY = _this.state.slackY + (_y - newState.y);
+	
+	        // Update the event we fire to reflect what really happened after bounds took effect.
+	        uiData.x = _x;
+	        uiData.y = _y;
+	        uiData.deltaX = newState.x - _this.state.x;
+	        uiData.deltaY = newState.y - _this.state.y;
+	      }
+	
+	      // Short-circuit if user's callback killed it.
+	      var shouldUpdate = _this.props.onDrag(e, uiData);
+	      if (shouldUpdate === false) return false;
+	
+	      _this.setState(newState);
+	    };
+	
+	    _this.onDragStop = function (e, coreData) {
+	      if (!_this.state.dragging) return false;
+	
+	      // Short-circuit if user's callback killed it.
+	      var shouldStop = _this.props.onStop(e, (0, _positionFns.createDraggableData)(_this, coreData));
+	      if (shouldStop === false) return false;
+	
+	      (0, _log2.default)('Draggable: onDragStop: %j', coreData);
+	
+	      var newState /*: $Shape<DraggableState>*/ = {
+	        dragging: false,
+	        slackX: 0,
+	        slackY: 0
+	      };
+	
+	      // If this is a controlled component, the result of this operation will be to
+	      // revert back to the old position. We expect a handler on `onDragStop`, at the least.
+	      var controlled = Boolean(_this.props.position);
+	      if (controlled) {
+	        var _this$props$position = _this.props.position,
+	            _x2 = _this$props$position.x,
+	            _y2 = _this$props$position.y;
+	
+	        newState.x = _x2;
+	        newState.y = _y2;
+	      }
+	
+	      _this.setState(newState);
+	    };
+	
+	    _this.state = {
+	      // Whether or not we are currently dragging.
+	      dragging: false,
+	
+	      // Whether or not we have been dragged before.
+	      dragged: false,
+	
+	      // Current transform x and y.
+	      x: props.position ? props.position.x : props.defaultPosition.x,
+	      y: props.position ? props.position.y : props.defaultPosition.y,
+	
+	      // Used for compensating for out-of-bounds drags
+	      slackX: 0, slackY: 0,
+	
+	      // Can only determine if SVG after mounting
+	      isElementSVG: false
+	    };
+	    return _this;
+	  }
+	
+	  _createClass(Draggable, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      if (this.props.position && !(this.props.onDrag || this.props.onStop)) {
+	        // eslint-disable-next-line
+	        console.warn('A `position` was applied to this <Draggable>, without drag handlers. This will make this ' + 'component effectively undraggable. Please attach `onDrag` or `onStop` handlers so you can adjust the ' + '`position` of this element.');
+	      }
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      // Check to see if the element passed is an instanceof SVGElement
+	      if (typeof SVGElement !== 'undefined' && _reactDom2.default.findDOMNode(this) instanceof SVGElement) {
+	        this.setState({ isElementSVG: true });
+	      }
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps /*: Object*/) {
+	      // Set x/y if position has changed
+	      if (nextProps.position && (!this.props.position || nextProps.position.x !== this.props.position.x || nextProps.position.y !== this.props.position.y)) {
+	        this.setState({ x: nextProps.position.x, y: nextProps.position.y });
+	      }
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.setState({ dragging: false }); // prevents invariant if unmounted while dragging
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() /*: React.Element<any>*/ {
+	      var _classNames;
+	
+	      var style = {},
+	          svgTransform = null;
+	
+	      // If this is controlled, we don't want to move it - unless it's dragging.
+	      var controlled = Boolean(this.props.position);
+	      var draggable = !controlled || this.state.dragging;
+	
+	      var position = this.props.position || this.props.defaultPosition;
+	      var transformOpts = {
+	        // Set left if horizontal drag is enabled
+	        x: (0, _positionFns.canDragX)(this) && draggable ? this.state.x : position.x,
+	
+	        // Set top if vertical drag is enabled
+	        y: (0, _positionFns.canDragY)(this) && draggable ? this.state.y : position.y
+	      };
+	
+	      // If this element was SVG, we use the `transform` attribute.
+	      if (this.state.isElementSVG) {
+	        svgTransform = (0, _domFns.createSVGTransform)(transformOpts);
+	      } else {
+	        // Add a CSS transform to move the element around. This allows us to move the element around
+	        // without worrying about whether or not it is relatively or absolutely positioned.
+	        // If the item you are dragging already has a transform set, wrap it in a <span> so <Draggable>
+	        // has a clean slate.
+	        style = (0, _domFns.createCSSTransform)(transformOpts);
+	      }
+	
+	      var _props = this.props,
+	          defaultClassName = _props.defaultClassName,
+	          defaultClassNameDragging = _props.defaultClassNameDragging,
+	          defaultClassNameDragged = _props.defaultClassNameDragged;
+	
+	      // Mark with class while dragging
+	
+	      var className = (0, _classnames2.default)(this.props.children.props.className || '', defaultClassName, (_classNames = {}, _defineProperty(_classNames, defaultClassNameDragging, this.state.dragging), _defineProperty(_classNames, defaultClassNameDragged, this.state.dragged), _classNames));
+	
+	      // Reuse the child provided
+	      // This makes it flexible to use whatever element is wanted (div, ul, etc)
+	      return _react2.default.createElement(
+	        _DraggableCore2.default,
+	        _extends({}, this.props, { onStart: this.onDragStart, onDrag: this.onDrag, onStop: this.onDragStop }),
+	        _react2.default.cloneElement(_react2.default.Children.only(this.props.children), {
+	          className: className,
+	          style: _extends({}, this.props.children.props.style, style),
+	          transform: svgTransform
+	        })
+	      );
+	    }
+	  }]);
+	
+	  return Draggable;
+	}(_react2.default.Component);
+	
+	Draggable.displayName = 'Draggable';
+	Draggable.propTypes = _extends({}, _DraggableCore2.default.propTypes, {
+	
+	  /**
+	   * `axis` determines which axis the draggable can move.
+	   *
+	   *  Note that all callbacks will still return data as normal. This only
+	   *  controls flushing to the DOM.
+	   *
+	   * 'both' allows movement horizontally and vertically.
+	   * 'x' limits movement to horizontal axis.
+	   * 'y' limits movement to vertical axis.
+	   * 'none' limits all movement.
+	   *
+	   * Defaults to 'both'.
+	   */
+	  axis: _react.PropTypes.oneOf(['both', 'x', 'y', 'none']),
+	
+	  /**
+	   * `bounds` determines the range of movement available to the element.
+	   * Available values are:
+	   *
+	   * 'parent' restricts movement within the Draggable's parent node.
+	   *
+	   * Alternatively, pass an object with the following properties, all of which are optional:
+	   *
+	   * {left: LEFT_BOUND, right: RIGHT_BOUND, bottom: BOTTOM_BOUND, top: TOP_BOUND}
+	   *
+	   * All values are in px.
+	   *
+	   * Example:
+	   *
+	   * ```jsx
+	   *   let App = React.createClass({
+	   *       render: function () {
+	   *         return (
+	   *            <Draggable bounds={{right: 300, bottom: 300}}>
+	   *              <div>Content</div>
+	   *           </Draggable>
+	   *         );
+	   *       }
+	   *   });
+	   * ```
+	   */
+	  bounds: _react.PropTypes.oneOfType([_react.PropTypes.shape({
+	    left: _react.PropTypes.number,
+	    right: _react.PropTypes.number,
+	    top: _react.PropTypes.number,
+	    bottom: _react.PropTypes.number
+	  }), _react.PropTypes.string, _react.PropTypes.oneOf([false])]),
+	
+	  defaultClassName: _react.PropTypes.string,
+	  defaultClassNameDragging: _react.PropTypes.string,
+	  defaultClassNameDragged: _react.PropTypes.string,
+	
+	  /**
+	   * `defaultPosition` specifies the x and y that the dragged item should start at
+	   *
+	   * Example:
+	   *
+	   * ```jsx
+	   *      let App = React.createClass({
+	   *          render: function () {
+	   *              return (
+	   *                  <Draggable defaultPosition={{x: 25, y: 25}}>
+	   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
+	   *                  </Draggable>
+	   *              );
+	   *          }
+	   *      });
+	   * ```
+	   */
+	  defaultPosition: _react.PropTypes.shape({
+	    x: _react.PropTypes.number,
+	    y: _react.PropTypes.number
+	  }),
+	
+	  /**
+	   * `position`, if present, defines the current position of the element.
+	   *
+	   *  This is similar to how form elements in React work - if no `position` is supplied, the component
+	   *  is uncontrolled.
+	   *
+	   * Example:
+	   *
+	   * ```jsx
+	   *      let App = React.createClass({
+	   *          render: function () {
+	   *              return (
+	   *                  <Draggable position={{x: 25, y: 25}}>
+	   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
+	   *                  </Draggable>
+	   *              );
+	   *          }
+	   *      });
+	   * ```
+	   */
+	  position: _react.PropTypes.shape({
+	    x: _react.PropTypes.number,
+	    y: _react.PropTypes.number
+	  }),
+	
+	  /**
+	   * These properties should be defined on the child, not here.
+	   */
+	  className: _shims.dontSetMe,
+	  style: _shims.dontSetMe,
+	  transform: _shims.dontSetMe
+	});
+	Draggable.defaultProps = _extends({}, _DraggableCore2.default.defaultProps, {
+	  axis: 'both',
+	  bounds: false,
+	  defaultClassName: 'react-draggable',
+	  defaultClassNameDragging: 'react-draggable-dragging',
+	  defaultClassNameDragged: 'react-draggable-dragged',
+	  defaultPosition: { x: 0, y: 0 },
+	  position: null
+	});
+	exports.default = Draggable;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+	
+	(function () {
+		'use strict';
+	
+		var hasOwn = {}.hasOwnProperty;
+	
+		function classNames () {
+			var classes = [];
+	
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+	
+				var argType = typeof arg;
+	
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+	
+			return classes.join(' ');
+		}
+	
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	exports.matchesSelector = matchesSelector;
+	exports.matchesSelectorAndParentsTo = matchesSelectorAndParentsTo;
+	exports.addEvent = addEvent;
+	exports.removeEvent = removeEvent;
+	exports.outerHeight = outerHeight;
+	exports.outerWidth = outerWidth;
+	exports.innerHeight = innerHeight;
+	exports.innerWidth = innerWidth;
+	exports.offsetXYFromParent = offsetXYFromParent;
+	exports.createCSSTransform = createCSSTransform;
+	exports.createSVGTransform = createSVGTransform;
+	exports.getTouch = getTouch;
+	exports.getTouchIdentifier = getTouchIdentifier;
+	exports.addUserSelectStyles = addUserSelectStyles;
+	exports.removeUserSelectStyles = removeUserSelectStyles;
+	exports.styleHacks = styleHacks;
+	
+	var _shims = __webpack_require__(6);
+	
+	var _getPrefix = __webpack_require__(7);
+	
+	var _getPrefix2 = _interopRequireDefault(_getPrefix);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
+	/*:: import type {ControlPosition} from './types';*/
+	
+	
+	var matchesSelectorFunc = '';
+	function matchesSelector(el /*: Node*/, selector /*: string*/) /*: boolean*/ {
+	  if (!matchesSelectorFunc) {
+	    matchesSelectorFunc = (0, _shims.findInArray)(['matches', 'webkitMatchesSelector', 'mozMatchesSelector', 'msMatchesSelector', 'oMatchesSelector'], function (method) {
+	      // $FlowIgnore: Doesn't think elements are indexable
+	      return (0, _shims.isFunction)(el[method]);
+	    });
+	  }
+	
+	  // $FlowIgnore: Doesn't think elements are indexable
+	  return el[matchesSelectorFunc].call(el, selector);
+	}
+	
+	// Works up the tree to the draggable itself attempting to match selector.
+	function matchesSelectorAndParentsTo(el /*: Node*/, selector /*: string*/, baseNode /*: Node*/) /*: boolean*/ {
+	  var node = el;
+	  do {
+	    if (matchesSelector(node, selector)) return true;
+	    if (node === baseNode) return false;
+	    node = node.parentNode;
+	  } while (node);
+	
+	  return false;
+	}
+	
+	function addEvent(el /*: ?Node*/, event /*: string*/, handler /*: Function*/) /*: void*/ {
+	  if (!el) {
+	    return;
+	  }
+	  if (el.attachEvent) {
+	    el.attachEvent('on' + event, handler);
+	  } else if (el.addEventListener) {
+	    el.addEventListener(event, handler, true);
+	  } else {
+	    // $FlowIgnore: Doesn't think elements are indexable
+	    el['on' + event] = handler;
+	  }
+	}
+	
+	function removeEvent(el /*: ?Node*/, event /*: string*/, handler /*: Function*/) /*: void*/ {
+	  if (!el) {
+	    return;
+	  }
+	  if (el.detachEvent) {
+	    el.detachEvent('on' + event, handler);
+	  } else if (el.removeEventListener) {
+	    el.removeEventListener(event, handler, true);
+	  } else {
+	    // $FlowIgnore: Doesn't think elements are indexable
+	    el['on' + event] = null;
+	  }
+	}
+	
+	function outerHeight(node /*: HTMLElement*/) /*: number*/ {
+	  // This is deliberately excluding margin for our calculations, since we are using
+	  // offsetTop which is including margin. See getBoundPosition
+	  var height = node.clientHeight;
+	  var computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+	  height += (0, _shims.int)(computedStyle.borderTopWidth);
+	  height += (0, _shims.int)(computedStyle.borderBottomWidth);
+	  return height;
+	}
+	
+	function outerWidth(node /*: HTMLElement*/) /*: number*/ {
+	  // This is deliberately excluding margin for our calculations, since we are using
+	  // offsetLeft which is including margin. See getBoundPosition
+	  var width = node.clientWidth;
+	  var computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+	  width += (0, _shims.int)(computedStyle.borderLeftWidth);
+	  width += (0, _shims.int)(computedStyle.borderRightWidth);
+	  return width;
+	}
+	function innerHeight(node /*: HTMLElement*/) /*: number*/ {
+	  var height = node.clientHeight;
+	  var computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+	  height -= (0, _shims.int)(computedStyle.paddingTop);
+	  height -= (0, _shims.int)(computedStyle.paddingBottom);
+	  return height;
+	}
+	
+	function innerWidth(node /*: HTMLElement*/) /*: number*/ {
+	  var width = node.clientWidth;
+	  var computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+	  width -= (0, _shims.int)(computedStyle.paddingLeft);
+	  width -= (0, _shims.int)(computedStyle.paddingRight);
+	  return width;
+	}
+	
+	// Get from offsetParent
+	function offsetXYFromParent(evt /*: {clientX: number, clientY: number}*/, offsetParent /*: HTMLElement*/) /*: ControlPosition*/ {
+	  var isBody = offsetParent === offsetParent.ownerDocument.body;
+	  var offsetParentRect = isBody ? { left: 0, top: 0 } : offsetParent.getBoundingClientRect();
+	
+	  var x = evt.clientX + offsetParent.scrollLeft - offsetParentRect.left;
+	  var y = evt.clientY + offsetParent.scrollTop - offsetParentRect.top;
+	
+	  return { x: x, y: y };
+	}
+	
+	function createCSSTransform(_ref) /*: Object*/ {
+	  var x = _ref.x,
+	      y = _ref.y;
+	
+	  // Replace unitless items with px
+	  return _defineProperty({}, (0, _getPrefix.browserPrefixToKey)('transform', _getPrefix2.default), 'translate(' + x + 'px,' + y + 'px)');
+	}
+	
+	function createSVGTransform(_ref3) /*: string*/ {
+	  var x = _ref3.x,
+	      y = _ref3.y;
+	
+	  return 'translate(' + x + ',' + y + ')';
+	}
+	
+	function getTouch(e /*: MouseTouchEvent*/, identifier /*: number*/) /*: ?{clientX: number, clientY: number}*/ {
+	  return e.targetTouches && (0, _shims.findInArray)(e.targetTouches, function (t) {
+	    return identifier === t.identifier;
+	  }) || e.changedTouches && (0, _shims.findInArray)(e.changedTouches, function (t) {
+	    return identifier === t.identifier;
+	  });
+	}
+	
+	function getTouchIdentifier(e /*: MouseTouchEvent*/) /*: ?number*/ {
+	  if (e.targetTouches && e.targetTouches[0]) return e.targetTouches[0].identifier;
+	  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].identifier;
+	}
+	
+	// User-select Hacks:
+	//
+	// Useful for preventing blue highlights all over everything when dragging.
+	var userSelectPrefix = (0, _getPrefix.getPrefix)('user-select');
+	var userSelect = (0, _getPrefix.browserPrefixToStyle)('user-select', userSelectPrefix);
+	var userSelectStyle = ';' + userSelect + ': none;';
+	var userSelectReplaceRegExp = new RegExp(';?' + userSelect + ': none;'); // leading ; not present on IE
+	
+	// Note we're passing `document` b/c we could be iframed
+	function addUserSelectStyles(body /*: HTMLElement*/) {
+	  var style = body.getAttribute('style') || '';
+	  body.setAttribute('style', style + userSelectStyle);
+	}
+	
+	function removeUserSelectStyles(body /*: HTMLElement*/) {
+	  var style = body.getAttribute('style') || '';
+	  body.setAttribute('style', style.replace(userSelectReplaceRegExp, ''));
+	}
+	
+	function styleHacks() /*: Object*/ {
+	  var childStyle /*: Object*/ = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	
+	  // Workaround IE pointer events; see #51
+	  // https://github.com/mzabriskie/react-draggable/issues/51#issuecomment-103488278
+	  return _extends({
+	    touchAction: 'none'
+	  }, childStyle);
+	}
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.findInArray = findInArray;
+	exports.isFunction = isFunction;
+	exports.isNum = isNum;
+	exports.int = int;
+	exports.dontSetMe = dontSetMe;
+	
+	// @credits https://gist.github.com/rogozhnikoff/a43cfed27c41e4e68cdc
+	function findInArray(array /*: Array<any> | TouchList*/, callback /*: Function*/) /*: any*/ {
+	  for (var i = 0, length = array.length; i < length; i++) {
+	    if (callback.apply(callback, [array[i], i, array])) return array[i];
+	  }
+	}
+	
+	function isFunction(func /*: any*/) /*: boolean*/ {
+	  return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
+	}
+	
+	function isNum(num /*: any*/) /*: boolean*/ {
+	  return typeof num === 'number' && !isNaN(num);
+	}
+	
+	function int(a /*: string*/) /*: number*/ {
+	  return parseInt(a, 10);
+	}
+	
+	function dontSetMe(props /*: Object*/, propName /*: string*/, componentName /*: string*/) {
+	  if (props[propName]) {
+	    return new Error('Invalid prop ' + propName + ' passed to ' + componentName + ' - do not set this, set it on the child.');
+	  }
+	}
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.getPrefix = getPrefix;
+	exports.browserPrefixToKey = browserPrefixToKey;
+	exports.browserPrefixToStyle = browserPrefixToStyle;
+	var prefixes = ['Moz', 'Webkit', 'O', 'ms'];
+	function getPrefix() /*: string*/ {
+	  var prop /*: string*/ = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'transform';
+	
+	  // Checking specifically for 'window.document' is for pseudo-browser server-side
+	  // environments that define 'window' as the global context.
+	  // E.g. React-rails (see https://github.com/reactjs/react-rails/pull/84)
+	  if (typeof window === 'undefined' || typeof window.document === 'undefined') return '';
+	
+	  var style = window.document.documentElement.style;
+	
+	  if (prop in style) return '';
+	
+	  for (var i = 0; i < prefixes.length; i++) {
+	    if (browserPrefixToKey(prop, prefixes[i]) in style) return prefixes[i];
+	  }
+	
+	  return '';
+	}
+	
+	function browserPrefixToKey(prop /*: string*/, prefix /*: string*/) /*: string*/ {
+	  return prefix ? '' + prefix + kebabToTitleCase(prop) : prop;
+	}
+	
+	function browserPrefixToStyle(prop /*: string*/, prefix /*: string*/) /*: string*/ {
+	  return prefix ? '-' + prefix.toLowerCase() + '-' + prop : prop;
+	}
+	
+	function kebabToTitleCase(str /*: string*/) /*: string*/ {
+	  var out = '';
+	  var shouldCapitalize = true;
+	  for (var i = 0; i < str.length; i++) {
+	    if (shouldCapitalize) {
+	      out += str[i].toUpperCase();
+	      shouldCapitalize = false;
+	    } else if (str[i] === '-') {
+	      shouldCapitalize = true;
+	    } else {
+	      out += str[i];
+	    }
+	  }
+	  return out;
+	}
+	
+	// Default export is the prefix itself, like 'Moz', 'Webkit', etc
+	// Note that you may have to re-test for certain things; for instance, Chrome 50
+	// can handle unprefixed `transform`, but not unprefixed `user-select`
+	exports.default = getPrefix();
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.getBoundPosition = getBoundPosition;
+	exports.snapToGrid = snapToGrid;
+	exports.canDragX = canDragX;
+	exports.canDragY = canDragY;
+	exports.getControlPosition = getControlPosition;
+	exports.createCoreData = createCoreData;
+	exports.createDraggableData = createDraggableData;
+	
+	var _shims = __webpack_require__(6);
+	
+	var _reactDom = __webpack_require__(3);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _domFns = __webpack_require__(5);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*:: import type Draggable from '../Draggable';*/
+	/*:: import type {Bounds, ControlPosition, DraggableData} from './types';*/
+	/*:: import type DraggableCore from '../DraggableCore';*/
+	function getBoundPosition(draggable /*: Draggable*/, x /*: number*/, y /*: number*/) /*: [number, number]*/ {
+	  // If no bounds, short-circuit and move on
+	  if (!draggable.props.bounds) return [x, y];
+	
+	  // Clone new bounds
+	  var bounds = draggable.props.bounds;
+	
+	  bounds = typeof bounds === 'string' ? bounds : cloneBounds(bounds);
+	  var node = _reactDom2.default.findDOMNode(draggable);
+	
+	  if (typeof bounds === 'string') {
+	    var ownerDocument = node.ownerDocument;
+	
+	    var ownerWindow = ownerDocument.defaultView;
+	    var boundNode = void 0;
+	    if (bounds === 'parent') {
+	      boundNode = node.parentNode;
+	    } else {
+	      boundNode = ownerDocument.querySelector(bounds);
+	      if (!boundNode) throw new Error('Bounds selector "' + bounds + '" could not find an element.');
+	    }
+	    var nodeStyle = ownerWindow.getComputedStyle(node);
+	    var boundNodeStyle = ownerWindow.getComputedStyle(boundNode);
+	    // Compute bounds. This is a pain with padding and offsets but this gets it exactly right.
+	    bounds = {
+	      left: -node.offsetLeft + (0, _shims.int)(boundNodeStyle.paddingLeft) + (0, _shims.int)(nodeStyle.borderLeftWidth) + (0, _shims.int)(nodeStyle.marginLeft),
+	      top: -node.offsetTop + (0, _shims.int)(boundNodeStyle.paddingTop) + (0, _shims.int)(nodeStyle.borderTopWidth) + (0, _shims.int)(nodeStyle.marginTop),
+	      right: (0, _domFns.innerWidth)(boundNode) - (0, _domFns.outerWidth)(node) - node.offsetLeft,
+	      bottom: (0, _domFns.innerHeight)(boundNode) - (0, _domFns.outerHeight)(node) - node.offsetTop
+	    };
+	  }
+	
+	  // Keep x and y below right and bottom limits...
+	  if ((0, _shims.isNum)(bounds.right)) x = Math.min(x, bounds.right);
+	  if ((0, _shims.isNum)(bounds.bottom)) y = Math.min(y, bounds.bottom);
+	
+	  // But above left and top limits.
+	  if ((0, _shims.isNum)(bounds.left)) x = Math.max(x, bounds.left);
+	  if ((0, _shims.isNum)(bounds.top)) y = Math.max(y, bounds.top);
+	
+	  return [x, y];
+	}
+	
+	function snapToGrid(grid /*: [number, number]*/, pendingX /*: number*/, pendingY /*: number*/) /*: [number, number]*/ {
+	  var x = Math.round(pendingX / grid[0]) * grid[0];
+	  var y = Math.round(pendingY / grid[1]) * grid[1];
+	  return [x, y];
+	}
+	
+	function canDragX(draggable /*: Draggable*/) /*: boolean*/ {
+	  return draggable.props.axis === 'both' || draggable.props.axis === 'x';
+	}
+	
+	function canDragY(draggable /*: Draggable*/) /*: boolean*/ {
+	  return draggable.props.axis === 'both' || draggable.props.axis === 'y';
+	}
+	
+	// Get {x, y} positions from event.
+	function getControlPosition(e /*: MouseTouchEvent*/, touchIdentifier /*: ?number*/, draggableCore /*: DraggableCore*/) /*: ?ControlPosition*/ {
+	  var touchObj = typeof touchIdentifier === 'number' ? (0, _domFns.getTouch)(e, touchIdentifier) : null;
+	  if (typeof touchIdentifier === 'number' && !touchObj) return null; // not the right touch
+	  var node = _reactDom2.default.findDOMNode(draggableCore);
+	  // User can provide an offsetParent if desired.
+	  var offsetParent = draggableCore.props.offsetParent || node.offsetParent || node.ownerDocument.body;
+	  return (0, _domFns.offsetXYFromParent)(touchObj || e, offsetParent);
+	}
+	
+	// Create an data object exposed by <DraggableCore>'s events
+	function createCoreData(draggable /*: DraggableCore*/, x /*: number*/, y /*: number*/) /*: DraggableData*/ {
+	  var state = draggable.state;
+	  var isStart = !(0, _shims.isNum)(state.lastX);
+	
+	  if (isStart) {
+	    // If this is our first move, use the x and y as last coords.
+	    return {
+	      node: _reactDom2.default.findDOMNode(draggable),
+	      deltaX: 0, deltaY: 0,
+	      lastX: x, lastY: y,
+	      x: x, y: y
+	    };
+	  } else {
+	    // Otherwise calculate proper values.
+	    return {
+	      node: _reactDom2.default.findDOMNode(draggable),
+	      deltaX: x - state.lastX, deltaY: y - state.lastY,
+	      lastX: state.lastX, lastY: state.lastY,
+	      x: x, y: y
+	    };
+	  }
+	}
+	
+	// Create an data exposed by <Draggable>'s events
+	function createDraggableData(draggable /*: Draggable*/, coreData /*: DraggableData*/) /*: DraggableData*/ {
+	  return {
+	    node: coreData.node,
+	    x: draggable.state.x + coreData.deltaX,
+	    y: draggable.state.y + coreData.deltaY,
+	    deltaX: coreData.deltaX,
+	    deltaY: coreData.deltaY,
+	    lastX: draggable.state.x,
+	    lastY: draggable.state.y
+	  };
+	}
+	
+	// A lot faster than stringify/parse
+	function cloneBounds(bounds /*: Bounds*/) /*: Bounds*/ {
+	  return {
+	    left: bounds.left,
+	    top: bounds.top,
+	    right: bounds.right,
+	    bottom: bounds.bottom
+	  };
+	}
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(2);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(3);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _domFns = __webpack_require__(5);
+	
+	var _positionFns = __webpack_require__(8);
+	
+	var _shims = __webpack_require__(6);
+	
+	var _log = __webpack_require__(11);
+	
+	var _log2 = _interopRequireDefault(_log);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	// Simple abstraction for dragging events names.
+	/*:: import type {EventHandler} from './utils/types';*/
+	var eventsFor = {
+	  touch: {
+	    start: 'touchstart',
+	    move: 'touchmove',
+	    stop: 'touchend'
+	  },
+	  mouse: {
+	    start: 'mousedown',
+	    move: 'mousemove',
+	    stop: 'mouseup'
+	  }
+	};
+	
+	// Default to mouse events.
+	var dragEventFor = eventsFor.mouse;
+	
+	//
+	// Define <DraggableCore>.
+	//
+	// <DraggableCore> is for advanced usage of <Draggable>. It maintains minimal internal state so it can
+	// work well with libraries that require more control over the element.
+	//
+	
+	/*:: type CoreState = {
+	  dragging: boolean,
+	  lastX: number,
+	  lastY: number,
+	  touchIdentifier: ?number
+	};*/
+	
+	var DraggableCore = function (_React$Component) {
+	  _inherits(DraggableCore, _React$Component);
+	
+	  function DraggableCore() {
+	    var _ref;
+	
+	    var _temp, _this, _ret;
+	
+	    _classCallCheck(this, DraggableCore);
+	
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = DraggableCore.__proto__ || Object.getPrototypeOf(DraggableCore)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+	      dragging: false,
+	      // Used while dragging to determine deltas.
+	      lastX: NaN, lastY: NaN,
+	      touchIdentifier: null
+	    }, _this.handleDragStart = function (e) {
+	      // Make it possible to attach event handlers on top of this one.
+	      _this.props.onMouseDown(e);
+	
+	      // Only accept left-clicks.
+	      if (!_this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
+	
+	      // Get nodes. Be sure to grab relative document (could be iframed)
+	      var domNode = _reactDom2.default.findDOMNode(_this);
+	      var ownerDocument = domNode.ownerDocument;
+	
+	      // Short circuit if handle or cancel prop was provided and selector doesn't match.
+	
+	      if (_this.props.disabled || !(e.target instanceof ownerDocument.defaultView.Node) || _this.props.handle && !(0, _domFns.matchesSelectorAndParentsTo)(e.target, _this.props.handle, domNode) || _this.props.cancel && (0, _domFns.matchesSelectorAndParentsTo)(e.target, _this.props.cancel, domNode)) {
+	        return;
+	      }
+	
+	      // Set touch identifier in component state if this is a touch event. This allows us to
+	      // distinguish between individual touches on multitouch screens by identifying which
+	      // touchpoint was set to this element.
+	      var touchIdentifier = (0, _domFns.getTouchIdentifier)(e);
+	      _this.setState({ touchIdentifier: touchIdentifier });
+	
+	      // Get the current drag point from the event. This is used as the offset.
+	      var position = (0, _positionFns.getControlPosition)(e, touchIdentifier, _this);
+	      if (position == null) return; // not possible but satisfies flow
+	      var x = position.x,
+	          y = position.y;
+	
+	      // Create an event object with all the data parents need to make a decision here.
+	
+	      var coreEvent = (0, _positionFns.createCoreData)(_this, x, y);
+	
+	      (0, _log2.default)('DraggableCore: handleDragStart: %j', coreEvent);
+	
+	      // Call event handler. If it returns explicit false, cancel.
+	      (0, _log2.default)('calling', _this.props.onStart);
+	      var shouldUpdate = _this.props.onStart(e, coreEvent);
+	      if (shouldUpdate === false) return;
+	
+	      // Add a style to the body to disable user-select. This prevents text from
+	      // being selected all over the page.
+	      if (_this.props.enableUserSelectHack) (0, _domFns.addUserSelectStyles)(ownerDocument.body);
+	
+	      // Initiate dragging. Set the current x and y as offsets
+	      // so we know how much we've moved during the drag. This allows us
+	      // to drag elements around even if they have been moved, without issue.
+	      _this.setState({
+	        dragging: true,
+	
+	        lastX: x,
+	        lastY: y
+	      });
+	
+	      // Add events to the document directly so we catch when the user's mouse/touch moves outside of
+	      // this element. We use different events depending on whether or not we have detected that this
+	      // is a touch-capable device.
+	      (0, _domFns.addEvent)(ownerDocument, dragEventFor.move, _this.handleDrag);
+	      (0, _domFns.addEvent)(ownerDocument, dragEventFor.stop, _this.handleDragStop);
+	    }, _this.handleDrag = function (e) {
+	
+	      // Prevent scrolling on mobile devices, like ipad/iphone.
+	      if (e.type === 'touchmove') e.preventDefault();
+	
+	      // Get the current drag point from the event. This is used as the offset.
+	      var position = (0, _positionFns.getControlPosition)(e, _this.state.touchIdentifier, _this);
+	      if (position == null) return;
+	      var x = position.x,
+	          y = position.y;
+	
+	      // Snap to grid if prop has been provided
+	
+	      if (x !== x) debugger;
+	
+	      if (Array.isArray(_this.props.grid)) {
+	        var deltaX = x - _this.state.lastX,
+	            deltaY = y - _this.state.lastY;
+	
+	        var _snapToGrid = (0, _positionFns.snapToGrid)(_this.props.grid, deltaX, deltaY);
+	
+	        var _snapToGrid2 = _slicedToArray(_snapToGrid, 2);
+	
+	        deltaX = _snapToGrid2[0];
+	        deltaY = _snapToGrid2[1];
+	
+	        if (!deltaX && !deltaY) return; // skip useless drag
+	        x = _this.state.lastX + deltaX, y = _this.state.lastY + deltaY;
+	      }
+	
+	      var coreEvent = (0, _positionFns.createCoreData)(_this, x, y);
+	
+	      (0, _log2.default)('DraggableCore: handleDrag: %j', coreEvent);
+	
+	      // Call event handler. If it returns explicit false, trigger end.
+	      var shouldUpdate = _this.props.onDrag(e, coreEvent);
+	      if (shouldUpdate === false) {
+	        try {
+	          // $FlowIgnore
+	          _this.handleDragStop(new MouseEvent('mouseup'));
+	        } catch (err) {
+	          // Old browsers
+	          var event = ((document.createEvent('MouseEvents') /*: any*/) /*: MouseTouchEvent*/);
+	          // I see why this insanity was deprecated
+	          // $FlowIgnore
+	          event.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+	          _this.handleDragStop(event);
+	        }
+	        return;
+	      }
+	
+	      _this.setState({
+	        lastX: x,
+	        lastY: y
+	      });
+	    }, _this.handleDragStop = function (e) {
+	      if (!_this.state.dragging) return;
+	
+	      var position = (0, _positionFns.getControlPosition)(e, _this.state.touchIdentifier, _this);
+	      if (position == null) return;
+	      var x = position.x,
+	          y = position.y;
+	
+	      var coreEvent = (0, _positionFns.createCoreData)(_this, x, y);
+	
+	      var _ReactDOM$findDOMNode = _reactDom2.default.findDOMNode(_this),
+	          ownerDocument = _ReactDOM$findDOMNode.ownerDocument;
+	
+	      // Remove user-select hack
+	
+	
+	      if (_this.props.enableUserSelectHack) (0, _domFns.removeUserSelectStyles)(ownerDocument.body);
+	
+	      (0, _log2.default)('DraggableCore: handleDragStop: %j', coreEvent);
+	
+	      // Reset the el.
+	      _this.setState({
+	        dragging: false,
+	        lastX: NaN,
+	        lastY: NaN
+	      });
+	
+	      // Call event handler
+	      _this.props.onStop(e, coreEvent);
+	
+	      // Remove event handlers
+	      (0, _log2.default)('DraggableCore: Removing handlers');
+	      (0, _domFns.removeEvent)(ownerDocument, dragEventFor.move, _this.handleDrag);
+	      (0, _domFns.removeEvent)(ownerDocument, dragEventFor.stop, _this.handleDragStop);
+	    }, _this.onMouseDown = function (e) {
+	      dragEventFor = eventsFor.mouse; // on touchscreen laptops we could switch back to mouse
+	
+	      return _this.handleDragStart(e);
+	    }, _this.onMouseUp = function (e) {
+	      dragEventFor = eventsFor.mouse;
+	
+	      return _this.handleDragStop(e);
+	    }, _this.onTouchStart = function (e) {
+	      // We're on a touch device now, so change the event handlers
+	      dragEventFor = eventsFor.touch;
+	
+	      return _this.handleDragStart(e);
+	    }, _this.onTouchEnd = function (e) {
+	      // We're on a touch device now, so change the event handlers
+	      dragEventFor = eventsFor.touch;
+	
+	      return _this.handleDragStop(e);
+	    }, _temp), _possibleConstructorReturn(_this, _ret);
+	  }
+	
+	  _createClass(DraggableCore, [{
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      // Remove any leftover event handlers. Remove both touch and mouse handlers in case
+	      // some browser quirk caused a touch event to fire during a mouse move, or vice versa.
+	      var _ReactDOM$findDOMNode2 = _reactDom2.default.findDOMNode(this),
+	          ownerDocument = _ReactDOM$findDOMNode2.ownerDocument;
+	
+	      (0, _domFns.removeEvent)(ownerDocument, eventsFor.mouse.move, this.handleDrag);
+	      (0, _domFns.removeEvent)(ownerDocument, eventsFor.touch.move, this.handleDrag);
+	      (0, _domFns.removeEvent)(ownerDocument, eventsFor.mouse.stop, this.handleDragStop);
+	      (0, _domFns.removeEvent)(ownerDocument, eventsFor.touch.stop, this.handleDragStop);
+	      if (this.props.enableUserSelectHack) (0, _domFns.removeUserSelectStyles)(ownerDocument.body);
+	    }
+	
+	    // Same as onMouseDown (start drag), but now consider this a touch device.
+	
+	  }, {
+	    key: 'render',
+	    value: function render() /*: React.Element<any>*/ {
+	      // Reuse the child provided
+	      // This makes it flexible to use whatever element is wanted (div, ul, etc)
+	      return _react2.default.cloneElement(_react2.default.Children.only(this.props.children), {
+	        style: (0, _domFns.styleHacks)(this.props.children.props.style),
+	
+	        // Note: mouseMove handler is attached to document so it will still function
+	        // when the user drags quickly and leaves the bounds of the element.
+	        onMouseDown: this.onMouseDown,
+	        onTouchStart: this.onTouchStart,
+	        onMouseUp: this.onMouseUp,
+	        onTouchEnd: this.onTouchEnd
+	      });
+	    }
+	  }]);
+	
+	  return DraggableCore;
+	}(_react2.default.Component);
+	
+	DraggableCore.displayName = 'DraggableCore';
+	DraggableCore.propTypes = {
+	  /**
+	   * `allowAnyClick` allows dragging using any mouse button.
+	   * By default, we only accept the left button.
+	   *
+	   * Defaults to `false`.
+	   */
+	  allowAnyClick: _react.PropTypes.bool,
+	
+	  /**
+	   * `disabled`, if true, stops the <Draggable> from dragging. All handlers,
+	   * with the exception of `onMouseDown`, will not fire.
+	   */
+	  disabled: _react.PropTypes.bool,
+	
+	  /**
+	   * By default, we add 'user-select:none' attributes to the document body
+	   * to prevent ugly text selection during drag. If this is causing problems
+	   * for your app, set this to `false`.
+	   */
+	  enableUserSelectHack: _react.PropTypes.bool,
+	
+	  /**
+	   * `offsetParent`, if set, uses the passed DOM node to compute drag offsets
+	   * instead of using the parent node.
+	   */
+	  offsetParent: function offsetParent(props, propName) {
+	    if (process.browser && props[propName] && props[propName].nodeType !== 1) {
+	      throw new Error('Draggable\'s offsetParent must be a DOM Node.');
+	    }
+	  },
+	
+	  /**
+	   * `grid` specifies the x and y that dragging should snap to.
+	   */
+	  grid: _react.PropTypes.arrayOf(_react.PropTypes.number),
+	
+	  /**
+	   * `handle` specifies a selector to be used as the handle that initiates drag.
+	   *
+	   * Example:
+	   *
+	   * ```jsx
+	   *   let App = React.createClass({
+	   *       render: function () {
+	   *         return (
+	   *            <Draggable handle=".handle">
+	   *              <div>
+	   *                  <div className="handle">Click me to drag</div>
+	   *                  <div>This is some other content</div>
+	   *              </div>
+	   *           </Draggable>
+	   *         );
+	   *       }
+	   *   });
+	   * ```
+	   */
+	  handle: _react.PropTypes.string,
+	
+	  /**
+	   * `cancel` specifies a selector to be used to prevent drag initialization.
+	   *
+	   * Example:
+	   *
+	   * ```jsx
+	   *   let App = React.createClass({
+	   *       render: function () {
+	   *           return(
+	   *               <Draggable cancel=".cancel">
+	   *                   <div>
+	   *                     <div className="cancel">You can't drag from here</div>
+	   *                     <div>Dragging here works fine</div>
+	   *                   </div>
+	   *               </Draggable>
+	   *           );
+	   *       }
+	   *   });
+	   * ```
+	   */
+	  cancel: _react.PropTypes.string,
+	
+	  /**
+	   * Called when dragging starts.
+	   * If this function returns the boolean false, dragging will be canceled.
+	   */
+	  onStart: _react.PropTypes.func,
+	
+	  /**
+	   * Called while dragging.
+	   * If this function returns the boolean false, dragging will be canceled.
+	   */
+	  onDrag: _react.PropTypes.func,
+	
+	  /**
+	   * Called when dragging stops.
+	   * If this function returns the boolean false, the drag will remain active.
+	   */
+	  onStop: _react.PropTypes.func,
+	
+	  /**
+	   * A workaround option which can be passed if onMouseDown needs to be accessed,
+	   * since it'll always be blocked (as there is internal use of onMouseDown)
+	   */
+	  onMouseDown: _react.PropTypes.func,
+	
+	  /**
+	   * These properties should be defined on the child, not here.
+	   */
+	  className: _shims.dontSetMe,
+	  style: _shims.dontSetMe,
+	  transform: _shims.dontSetMe
+	};
+	DraggableCore.defaultProps = {
+	  allowAnyClick: false, // by default only accept left click
+	  cancel: null,
+	  disabled: false,
+	  enableUserSelectHack: true,
+	  offsetParent: null,
+	  handle: null,
+	  grid: null,
+	  transform: null,
+	  onStart: function onStart() {},
+	  onDrag: function onDrag() {},
+	  onStop: function onStop() {},
+	  onMouseDown: function onMouseDown() {}
+	};
+	exports.default = DraggableCore;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+	var process = module.exports = {};
+	
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+	
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+	
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
+	(function () {
+	    try {
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
+	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
+	    }
+	    try {
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
+	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
+	    }
+	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+	
+	
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+	
+	
+	
+	}
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+	
+	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+	
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = runTimeout(cleanUpNextTick);
+	    draining = true;
+	
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    runClearTimeout(timeout);
+	}
+	
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        runTimeout(drainQueue);
+	    }
+	};
+	
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+	
+	function noop() {}
+	
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+	
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+	
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = log;
+	
+	/*eslint no-console:0*/
+	function log() {
+	  var _console;
+	
+	  if ((undefined)) (_console = console).log.apply(_console, arguments);
+	}
+
+/***/ }
+/******/ ])
+});
+;
+
+},{"react":212,"react-dom":59}],187:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36917,11 +40196,11 @@ function setDefaultId() {
     }
   }
 }
-},{"flatpickr":42,"react":209}],185:[function(require,module,exports){
-arguments[4][79][0].apply(exports,arguments)
-},{"dup":79}],186:[function(require,module,exports){
+},{"flatpickr":42,"react":212}],188:[function(require,module,exports){
 arguments[4][81][0].apply(exports,arguments)
-},{"./reactProdInvariant":207,"_process":213,"dup":81,"fbjs/lib/invariant":34}],187:[function(require,module,exports){
+},{"dup":81}],189:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"./reactProdInvariant":210,"_process":216,"dup":83,"fbjs/lib/invariant":34}],190:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -37012,7 +40291,7 @@ var React = {
 
 module.exports = React;
 }).call(this,require('_process'))
-},{"./ReactChildren":188,"./ReactClass":189,"./ReactComponent":190,"./ReactDOMFactories":193,"./ReactElement":194,"./ReactElementValidator":196,"./ReactPropTypes":199,"./ReactPureComponent":201,"./ReactVersion":202,"./onlyChild":206,"_process":213,"fbjs/lib/warning":41,"object-assign":56}],188:[function(require,module,exports){
+},{"./ReactChildren":191,"./ReactClass":192,"./ReactComponent":193,"./ReactDOMFactories":196,"./ReactElement":197,"./ReactElementValidator":199,"./ReactPropTypes":202,"./ReactPureComponent":204,"./ReactVersion":205,"./onlyChild":209,"_process":216,"fbjs/lib/warning":41,"object-assign":58}],191:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -37203,7 +40482,7 @@ var ReactChildren = {
 };
 
 module.exports = ReactChildren;
-},{"./PooledClass":186,"./ReactElement":194,"./traverseAllChildren":208,"fbjs/lib/emptyFunction":26}],189:[function(require,module,exports){
+},{"./PooledClass":189,"./ReactElement":197,"./traverseAllChildren":211,"fbjs/lib/emptyFunction":26}],192:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -37922,7 +41201,7 @@ var ReactClass = {
 
 module.exports = ReactClass;
 }).call(this,require('_process'))
-},{"./ReactComponent":190,"./ReactElement":194,"./ReactNoopUpdateQueue":197,"./ReactPropTypeLocationNames":198,"./reactProdInvariant":207,"_process":213,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":56}],190:[function(require,module,exports){
+},{"./ReactComponent":193,"./ReactElement":197,"./ReactNoopUpdateQueue":200,"./ReactPropTypeLocationNames":201,"./reactProdInvariant":210,"_process":216,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41,"object-assign":58}],193:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -38042,7 +41321,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactComponent;
 }).call(this,require('_process'))
-},{"./ReactNoopUpdateQueue":197,"./canDefineProperty":203,"./reactProdInvariant":207,"_process":213,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],191:[function(require,module,exports){
+},{"./ReactNoopUpdateQueue":200,"./canDefineProperty":206,"./reactProdInvariant":210,"_process":216,"fbjs/lib/emptyObject":27,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],194:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -38378,7 +41657,7 @@ var ReactComponentTreeHook = {
 
 module.exports = ReactComponentTreeHook;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":192,"./reactProdInvariant":207,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],192:[function(require,module,exports){
+},{"./ReactCurrentOwner":195,"./reactProdInvariant":210,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],195:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -38409,7 +41688,7 @@ var ReactCurrentOwner = {
 };
 
 module.exports = ReactCurrentOwner;
-},{}],193:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -38581,7 +41860,7 @@ var ReactDOMFactories = {
 
 module.exports = ReactDOMFactories;
 }).call(this,require('_process'))
-},{"./ReactElement":194,"./ReactElementValidator":196,"_process":213}],194:[function(require,module,exports){
+},{"./ReactElement":197,"./ReactElementValidator":199,"_process":216}],197:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -38924,9 +42203,9 @@ ReactElement.isValidElement = function (object) {
 
 module.exports = ReactElement;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":192,"./ReactElementSymbol":195,"./canDefineProperty":203,"_process":213,"fbjs/lib/warning":41,"object-assign":56}],195:[function(require,module,exports){
-arguments[4][108][0].apply(exports,arguments)
-},{"dup":108}],196:[function(require,module,exports){
+},{"./ReactCurrentOwner":195,"./ReactElementSymbol":198,"./canDefineProperty":206,"_process":216,"fbjs/lib/warning":41,"object-assign":58}],198:[function(require,module,exports){
+arguments[4][110][0].apply(exports,arguments)
+},{"dup":110}],199:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -39155,7 +42434,7 @@ var ReactElementValidator = {
 
 module.exports = ReactElementValidator;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":191,"./ReactCurrentOwner":192,"./ReactElement":194,"./canDefineProperty":203,"./checkReactTypeSpec":204,"./getIteratorFn":205,"_process":213,"fbjs/lib/warning":41}],197:[function(require,module,exports){
+},{"./ReactComponentTreeHook":194,"./ReactCurrentOwner":195,"./ReactElement":197,"./canDefineProperty":206,"./checkReactTypeSpec":207,"./getIteratorFn":208,"_process":216,"fbjs/lib/warning":41}],200:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -39253,9 +42532,9 @@ var ReactNoopUpdateQueue = {
 
 module.exports = ReactNoopUpdateQueue;
 }).call(this,require('_process'))
-},{"_process":213,"fbjs/lib/warning":41}],198:[function(require,module,exports){
-arguments[4][126][0].apply(exports,arguments)
-},{"_process":213,"dup":126}],199:[function(require,module,exports){
+},{"_process":216,"fbjs/lib/warning":41}],201:[function(require,module,exports){
+arguments[4][128][0].apply(exports,arguments)
+},{"_process":216,"dup":128}],202:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -39691,9 +42970,9 @@ function getClassName(propValue) {
 
 module.exports = ReactPropTypes;
 }).call(this,require('_process'))
-},{"./ReactElement":194,"./ReactPropTypeLocationNames":198,"./ReactPropTypesSecret":200,"./getIteratorFn":205,"_process":213,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41}],200:[function(require,module,exports){
-arguments[4][127][0].apply(exports,arguments)
-},{"dup":127}],201:[function(require,module,exports){
+},{"./ReactElement":197,"./ReactPropTypeLocationNames":201,"./ReactPropTypesSecret":203,"./getIteratorFn":208,"_process":216,"fbjs/lib/emptyFunction":26,"fbjs/lib/warning":41}],203:[function(require,module,exports){
+arguments[4][129][0].apply(exports,arguments)
+},{"dup":129}],204:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -39735,9 +43014,9 @@ _assign(ReactPureComponent.prototype, ReactComponent.prototype);
 ReactPureComponent.prototype.isPureReactComponent = true;
 
 module.exports = ReactPureComponent;
-},{"./ReactComponent":190,"./ReactNoopUpdateQueue":197,"fbjs/lib/emptyObject":27,"object-assign":56}],202:[function(require,module,exports){
-arguments[4][135][0].apply(exports,arguments)
-},{"dup":135}],203:[function(require,module,exports){
+},{"./ReactComponent":193,"./ReactNoopUpdateQueue":200,"fbjs/lib/emptyObject":27,"object-assign":58}],205:[function(require,module,exports){
+arguments[4][137][0].apply(exports,arguments)
+},{"dup":137}],206:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -39765,7 +43044,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = canDefineProperty;
 }).call(this,require('_process'))
-},{"_process":213}],204:[function(require,module,exports){
+},{"_process":216}],207:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -39854,9 +43133,9 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
 module.exports = checkReactTypeSpec;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":191,"./ReactPropTypeLocationNames":198,"./ReactPropTypesSecret":200,"./reactProdInvariant":207,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],205:[function(require,module,exports){
-arguments[4][168][0].apply(exports,arguments)
-},{"dup":168}],206:[function(require,module,exports){
+},{"./ReactComponentTreeHook":194,"./ReactPropTypeLocationNames":201,"./ReactPropTypesSecret":203,"./reactProdInvariant":210,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],208:[function(require,module,exports){
+arguments[4][170][0].apply(exports,arguments)
+},{"dup":170}],209:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -39896,9 +43175,9 @@ function onlyChild(children) {
 
 module.exports = onlyChild;
 }).call(this,require('_process'))
-},{"./ReactElement":194,"./reactProdInvariant":207,"_process":213,"fbjs/lib/invariant":34}],207:[function(require,module,exports){
-arguments[4][177][0].apply(exports,arguments)
-},{"dup":177}],208:[function(require,module,exports){
+},{"./ReactElement":197,"./reactProdInvariant":210,"_process":216,"fbjs/lib/invariant":34}],210:[function(require,module,exports){
+arguments[4][179][0].apply(exports,arguments)
+},{"dup":179}],211:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -40076,12 +43355,12 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":185,"./ReactCurrentOwner":192,"./ReactElementSymbol":195,"./getIteratorFn":205,"./reactProdInvariant":207,"_process":213,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],209:[function(require,module,exports){
+},{"./KeyEscapeUtils":188,"./ReactCurrentOwner":195,"./ReactElementSymbol":198,"./getIteratorFn":208,"./reactProdInvariant":210,"_process":216,"fbjs/lib/invariant":34,"fbjs/lib/warning":41}],212:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/React');
 
-},{"./lib/React":187}],210:[function(require,module,exports){
+},{"./lib/React":190}],213:[function(require,module,exports){
 //     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -41309,7 +44588,7 @@ module.exports = require('./lib/React');
 
 }).call(this);
 
-},{}],211:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -41613,7 +44892,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],212:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -41841,7 +45120,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":213}],213:[function(require,module,exports){
+},{"_process":216}],216:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -42023,7 +45302,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],214:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -42048,14 +45327,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],215:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],216:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -42645,4 +45924,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":215,"_process":213,"inherits":214}]},{},[1]);
+},{"./support/isBuffer":218,"_process":216,"inherits":217}]},{},[1]);

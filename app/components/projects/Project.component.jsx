@@ -111,6 +111,26 @@ export default class Project extends Component{
         });
     }
 
+    /**
+    * Sets project.starred = true or false
+    */
+    starProject(){
+        if (!this.props.project.starred) {
+            console.log("star project");
+            this.props.db.updateProject({ _id: this.props.project._id },{ $set: { starred: true } });
+        } else {
+            console.log("unstar project");
+            this.props.db.updateProject({ _id: this.props.project._id },{ $set: { starred: false } });
+        }
+    }
+
+    /**
+    * Use the mailto option to create a mail with some rudimental information about a project
+    */
+    shareProjectViaMail(){
+        location.href = 'mailto:mail@provider.com?Subject='+this.props.project.title+'&Body=Title: '+'Project '+this.props.project.title + '%0D%0ADue date: ' + this.state.dueDate.toString();
+    }
+
 
     tasksDonePercentage(){
         if(this.props.project.tasks.length > 0){
@@ -139,60 +159,67 @@ export default class Project extends Component{
         }
     }
 
-    //TODO make date deleteable and add color coding for projects
+    //add color coding for projects
     render(){
+        const halfWidth = {
+            width: '50%',
+        };
         if (!this.state.edit) {
             return(
-                <div className="box project">
-                    <article className="media">
-                        <div className="media-content">
-                            <div className="content">
-                                <p className="title">
-                                    {this.props.project.title}
-                                    <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"}</small>
-                                </p>
-                                <hr />
-                                <span className="menu-label">Progess</span>
-                                <progress className={this.getProgessClass()} value={this.tasksDonePercentage()} max="100">{this.tasksDonePercentage()}</progress>
-                                <span className="menu-label">Tasks</span>
-                                <ul className="menu-list">
-                                    {this.props.project.tasks.length > 0 ? this.props.project.tasks.map((taskId)=>{
-                                        var task = this.props.db.findTaskSynchronous(taskId);
-                                        return <li key={task._id}>
-                                                    {task.title}
-                                                    {task.done ? (<span className="icon"><i className="fa fa-check" aria-hidden="true"></i></span>):null}
-                                               </li>}): <li>No tasks assigned to this project</li>
-                                    }
-                                </ul>
-                                {this.props.project.tags.map((tag)=>{
-                                    return <Tag name={tag} key={tag} parent={this}/>
-                                })}
-                            </div>
+                <div className="card is-fullwidth project">
+                    <header className="card-header">
+                        <p className="card-header-title">
+                            {this.props.project.title}
+                            <small><span className="due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.project.dueDate ? this.props.project.dueDate.toString() : "No due date"}</small>
+                        </p>
+                    </header>
+                    <div className="card-content">
+                        <div className="content">
+                            <span className="menu-label">Progess</span>
+                            <progress className={this.getProgessClass()} value={this.tasksDonePercentage()} max="100">{this.tasksDonePercentage()}</progress>
+                            <span className="menu-label">Tasks</span>
+                            <ul className="menu-list">
+                                {this.props.project.tasks.length > 0 ? this.props.project.tasks.map((taskId)=>{
+                                    var task = this.props.db.findTaskSynchronous(taskId);
+                                    return <li key={task._id}>
+                                                {task.title}
+                                                {task.done ? (<span className="icon"><i className="fa fa-check" aria-hidden="true"></i></span>):null}
+                                           </li>}): <li>No tasks assigned to this project</li>
+                                }
+                            </ul>
+                            {this.props.project.tags.map((tag)=>{
+                                return <Tag name={tag} key={tag} parent={this}/>
+                            })}
                         </div>
-                        <div className="media-right">
-                            <div className="media-right">
-                                <button className="btn-round btn-warning" onClick={()=>this.edit()}>
-                                    <i className="fa fa-edit" />
-                                </button>
+                        <nav className="level">
+                            <div className="level-left">
+                                <a className={this.props.project.starred ? 'item-level active': 'item-level'} onClick={()=>this.starProject()}>
+                                    <span className="icon is-small"><i className="fa fa-star"></i></span>
+                                </a>
+                                <a className="item-level" onClick={()=>this.shareProjectViaMail()}>
+                                    <span className="icon is-small"><i className="fa fa-envelope-o" aria-hidden="true"></i></span>
+                                </a>
                             </div>
-                            <div className="media-right">
-                                <button className="btn-round btn-danger" onClick={()=>this.deleteProject()}>
-                                    <i className="fa fa-trash-o" />
-                                </button>
-                            </div>
-                        </div>
-                    </article>
+                        </nav>
+                    </div>
+                    <footer className="card-footer">
+                        <a className="card-footer-item" onClick={()=>this.edit()}>Edit</a>
+                        <a className="card-footer-item" onClick={()=>this.deleteProject()}>Delete</a>
+                    </footer>
                 </div>
             )
         } else {
             return(
-                <div className="box project is-edit">
-                    <article className="media">
-                        <div className="media-content">
+                <div className="card is-fullwidth project is-edit">
+                    <header className="card-header">
+                        <p className="card-header-title">
+                            <input className="input" type="text" defaultValue={this.props.project.title} ref="projectTitleInput" style={halfWidth} />
+                            <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} style={halfWidth}/>
+                            <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
+                        </p>
+                    </header>
+                        <div className="card-content">
                             <div className="content">
-                                <input className="input" type="text" defaultValue={this.props.project.title} ref="projectTitleInput" />
-                                <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} />
-                                <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
                                 <p className="menu-label">
                                     Tasks
                                 </p>
@@ -211,17 +238,10 @@ export default class Project extends Component{
                                 <input className="input" type="text"ref="projectTagsInput" defaultValue={this.getTagsString()}/>
                             </div>
                         </div>
-                        <div className="media-right">
-                            <div className="media-right">
-                                <button className="btn-round btn-success" onClick={()=>this.saveEdit()}>
-                                    <i className="fa fa-floppy-o" />
-                                </button>
-                            </div>
-                            <div className="media-right">
-                                <button className="delete" onClick={()=>this.cancelEdit()} />
-                            </div>
-                        </div>
-                    </article>
+                    <footer className="card-footer">
+                        <a className="card-footer-item" onClick={()=>this.saveEdit()}>Save</a>
+                        <a className="card-footer-item" onClick={()=>this.cancelEdit()}>Cancel</a>
+                    </footer>
                 </div>
             )
         }

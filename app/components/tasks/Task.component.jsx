@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import moment from 'moment';
 import Flatpickr from 'react-flatpickr'
+import Draggable from 'react-draggable';
 
 
 import Tag from '../navigation/Tag.component.jsx';
@@ -37,6 +38,13 @@ export default class Task extends Component {
     */
     finishTask(){
         this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+    }
+
+    /**
+    * Sets task.done = false
+    */
+    undoneTask(){
+        this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: false } });
     }
 
     /**
@@ -140,7 +148,7 @@ export default class Task extends Component {
     * Use the mailto option to create a mail with some rudimental information about a task
     */
     shareTaskViaMail(){
-        location.href = 'mailto:mail@provider.com?Subject='+this.props.task.title+'&Body=Title: '+this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.props.task.dueDate.toString();
+        location.href = 'mailto:mail@provider.com?Subject='+this.props.task.title+'&Body=Title: '+'Task '+this.props.task.title + '%0D%0ANotes: ' + this.props.task.notes + '%0D%0ADue date: ' + this.state.dueDate.toString();
     }
 
     /**
@@ -172,19 +180,17 @@ export default class Task extends Component {
 
     toggleContent(){
         if (this.state.contentOpened) {
-            console.log("close content");
-
             this.setState({
                 contentOpened: false
             });
         } else {
-            console.log("show content");
             this.setState({
                 contentOpened: true
             });
         }
     }
 
+    //TODO make task draggable ?
     render(){
         if (!this.state.edit) {
             return (
@@ -202,7 +208,7 @@ export default class Task extends Component {
                         <div className="content">
                         <p>
                             <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>
-                            {this.props.task.notes}
+                            {this.props.task.notes ? this.props.task.notes : "No notes"}
                         </p>
                         <p>
                             <span><i className="fa fa-briefcase" aria-hidden="true"></i></span>
@@ -225,7 +231,7 @@ export default class Task extends Component {
                         </nav>
                     </div>
                     <footer className="card-footer">
-                        {this.props.task.done ?  null : <a className="card-footer-item" onClick={()=>this.finishTask()}>Finish</a> }
+                        {this.props.task.done ?  <a className="card-footer-item" onClick={()=>this.undoneTask()}>Undone</a> : <a className="card-footer-item" onClick={()=>this.finishTask()}>Finish</a> }
                         <a className="card-footer-item" onClick={()=>this.edit()}>Edit</a>
                         <a className="card-footer-item" onClick={()=>this.deleteTask()}>Delete</a>
                     </footer>
@@ -238,7 +244,7 @@ export default class Task extends Component {
                         <p className="card-header-title">
                             <input className="input" type="text" defaultValue={this.props.task.title} ref="taskTitleInput" />
                             <Flatpickr data-enable-time value={this.state.dueDate ? moment(this.state.dueDate).toString() :""} onChange={(_, str) => this.handleDateChange(str)} />
-                            <button className="button is-danger" onClick={()=> this.removeDueDate()}>Remove due date</button>
+                            <button className="btn-round btn-danger" onClick={()=> this.removeDueDate()}><i className="fa fa-trash-o" /></button>
 
                         </p>
                     </header>

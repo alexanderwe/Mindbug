@@ -10,7 +10,7 @@ export default class ToolbarHeader extends Component{
 
     render(){
         return(
-            <nav className="level draggable">
+            <nav className="level is-mobile draggable">
                 <div className="level-item has-text-centered">
                     <p className="heading">Undone Tasks</p>
                     <p className="title">{this.props.db.totalUndoneTasks}</p>
@@ -18,6 +18,11 @@ export default class ToolbarHeader extends Component{
                 <div className="level-item has-text-centered">
                     <p className="heading">Open Projects</p>
                     <p className="title">{this.props.db.totalOpenProjects}</p>
+                </div>
+                <div className="level-left">
+                    <div className="level-item">
+                        <i className="fa fa-sort" aria-hidden="true"></i>
+                    </div>
                 </div>
             </nav>
         )

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
+import later from 'later';
 
 import Database from './data/Database.js'
 
@@ -17,6 +18,10 @@ import CreateProjectDialog from './components/projects/CreateProjectDialog.compo
 
 const ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
 
+//TODO implement repaeatable tasks (repeat text, repeat value, set new date(parse repeattext) if repeat on done or notify?)
+//TODO  implement db optimization button
+//TODO implement auto updater
+//TODO implement calendaer
 class Main extends Component {
 
     constructor(props){
@@ -29,6 +34,12 @@ class Main extends Component {
 
     componentWillMount(){
         this.refreshDatabase();
+        var text = 'every 5 mins';
+        var s = later.parse.text(text);
+
+        console.log(
+            later.schedule(s).next(10)
+        );
     }
 
     componentDidUpdate(){
@@ -58,17 +69,17 @@ class Main extends Component {
     refreshDatabase(){
         if (this.state.activeItem === "tasks") {
             Database.setDbFilter(this.state.dbFilter);
-            Database.findTasks(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter, {dueDate: 1});
         } else if (this.state.activeItem === "projects") {
             Database.setDbFilter(this.state.dbFilter);
-            Database.findProjects(this.state.dbFilter);
+            Database.findProjects(this.state.dbFilter, {dueDate: 1});
         } else if (this.state.activeItem === "today"){
             Database.setDbFilter(this.state.dbFilter);
-            Database.findTasks(this.state.dbFilter);
-            Database.findProjects(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter, {dueDate: 1});
+            Database.findProjects(this.state.dbFilter, {dueDate: 1});
         } else if (this.state.activeItem === "inbox") {
             Database.setDbFilter(this.state.dbFilter);
-            Database.findTasks(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter, {dueDate: 1});
         }
     }
     /**
@@ -93,17 +104,22 @@ class Main extends Component {
                             <Navbar ref="navbar" parent={this} db={Database}/>
                         </div>
                         <div className="pane main-content" id="mainPane">
-                            <ToolbarHeader parent={this} db={Database}/>
-                            {this.state.activeItem === 'tasks' ? (
-                                <TaskList ref="taskList" parent={this} db={Database} />
-                            ) : this.state.activeItem === 'projects' ? (
-                                <ProjectList ref="projectsList" parent={this} db={Database} />
-                            ) : this.state.activeItem === 'today' ? (
-                                <Today ref="projectsList" parent={this} db={Database}/>
-                            ) : this.state.activeItem === 'inbox' ? (
-                                <Inbox ref="inbox" parent={this} db={Database}/>
-                            ) :null}
+                             <ToolbarHeader parent={this} db={Database}/>
+                             {this.state.activeItem === 'tasks' ? (
+                                 <TaskList ref="taskList" parent={this} db={Database} />
+                             ) : this.state.activeItem === 'projects' ? (
+                                 <ProjectList ref="projectsList" parent={this} db={Database} />
+                             ) : this.state.activeItem === 'today' ? (
+                                 <Today ref="projectsList" parent={this} db={Database}/>
+                             ) : this.state.activeItem === 'inbox' ? (
+                                 <Inbox ref="inbox" parent={this} db={Database}/>
+                             ) :null}
                         </div>
+                        {/*
+                        <div className="pane-sm">
+                            <RightSideBar ref="rightSideBar" parent={this} db={Database}/>
+                        </div>
+                        */}
                     </div>
                 </div>
             </div>

@@ -320,7 +320,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5;
+var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5, _descriptor6, _descriptor7;
 
 var _nedb = require('nedb');
 
@@ -382,6 +382,9 @@ function _initializerWarningHelper(descriptor, context) {
 var ipcRenderer = window.require('electron').ipcRenderer;
 
 var Database = (_class = function () {
+    //representation for the tasksSort in the view
+    //representation for all tasks in db
+    //representation for the projects visible in the view
     function Database() {
         _classCallCheck(this, Database);
 
@@ -394,6 +397,10 @@ var Database = (_class = function () {
         _initDefineProp(this, 'allTasks', _descriptor4, this);
 
         _initDefineProp(this, 'allProjects', _descriptor5, this);
+
+        _initDefineProp(this, 'taskSort', _descriptor6, this);
+
+        _initDefineProp(this, 'projectSort', _descriptor7, this);
 
         this.dbFilter = null;
 
@@ -409,12 +416,16 @@ var Database = (_class = function () {
             timestampData: true
         });
 
-        this.findTasks({}, { dueDate: 1 });
+        this.findTasks({}, this.taskSort);
         this.findProjects({}, { dueDate: 1 });
         this.updateTags();
         this.refreshAllTasks();
         this.refreshAllProjects();
-    }
+    } //representation for the projectSort in the view
+    //representation for all project in db
+    //representation for the tags visible in the navView
+    //representation for the task visible in the view
+
 
     _createClass(Database, [{
         key: 'insertTask',
@@ -427,7 +438,7 @@ var Database = (_class = function () {
                 if (newDoc.project != '') {
                     _this.updateProject({ _id: newDoc.project }, { $push: { tasks: newDoc._id } });
                 }
-                _this.findTasks(_this.dbFilter);
+                _this.findTasks(_this.dbFilter, _this.taskSort);
                 _this.updateTags();
                 _this.refreshAllTasks();
                 _this.refreshAllProjects();
@@ -488,7 +499,7 @@ var Database = (_class = function () {
             console.log(set);
 
             this.taskCollection.update(query, set, function (err, numReplaced) {
-                _this3.findTasks(_this3.dbFilter);
+                _this3.findTasks(_this3.dbFilter, _this3.taskSort);
                 _this3.updateTags();
                 _this3.refreshAllTasks();
 
@@ -510,8 +521,8 @@ var Database = (_class = function () {
             var _this4 = this;
 
             this.taskCollection.remove(query, {}, function (err, numRemoved) {
-                _this4.findTasks(_this4.dbFilter);
-                _this4.findProjects(_this4.dbFilter);
+                _this4.findTasks(_this4.dbFilter, _this4.taskSort);
+                _this4.findProjects(_this4.dbFilter, _this4.projectSort);
                 _this4.updateTags();
                 _this4.refreshAllTasks();
             });
@@ -534,7 +545,7 @@ var Database = (_class = function () {
 
             console.log("inserting project");
             this.projectCollection.insert(doc, function (err, newDoc) {
-                _this6.findProjects(_this6.dbFilter);
+                _this6.findProjects(_this6.dbFilter, _this6.projectSort);
                 _this6.updateTags();
                 _this6.refreshAllProjects();
             });
@@ -603,7 +614,7 @@ var Database = (_class = function () {
                 console.log("Project updated with: ");
                 console.log(query);
 
-                _this8.findProjects(_this8.dbFilter);
+                _this8.findProjects(_this8.dbFilter, _this8.projectSort);
                 _this8.updateTags();
                 _this8.refreshAllProjects();
             });
@@ -616,7 +627,7 @@ var Database = (_class = function () {
             this.projectCollection.remove(query, {}, function (err, numRemoved) {
                 console.log("projekt deleted");
 
-                _this9.findProjects(_this9.dbFilter);
+                _this9.findProjects(_this9.dbFilter, _this9.projectSort);
                 _this9.updateTags();
                 _this9.refreshAllProjects();
             });
@@ -689,6 +700,16 @@ var Database = (_class = function () {
             this.activeItem = activeItem;
         }
     }, {
+        key: 'setTaskSort',
+        value: function setTaskSort(taskSort) {
+            this.taskSort = taskSort;
+        }
+    }, {
+        key: 'setProjectSort',
+        value: function setProjectSort(projectSort) {
+            this.projectSort = projectSort;
+        }
+    }, {
         key: 'setDbFilter',
         value: function setDbFilter(dbFilter) {
             this.dbFilter = dbFilter;
@@ -754,7 +775,17 @@ var Database = (_class = function () {
     initializer: function initializer() {
         return new Array();
     }
-}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
+}), _descriptor6 = _applyDecoratedDescriptor(_class.prototype, 'taskSort', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return { dueDate: 1 };
+    }
+}), _descriptor7 = _applyDecoratedDescriptor(_class.prototype, 'projectSort', [_mobx.observable], {
+    enumerable: true,
+    initializer: function initializer() {
+        return { dueDate: 1 };
+    }
+}), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setTaskSort', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setTaskSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setProjectSort', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setProjectSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
 exports.default = new Database();
 
 }).call(this,"/app/data")
