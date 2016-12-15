@@ -3,6 +3,8 @@ import Flatpickr from 'react-flatpickr'
 import moment from 'moment';
 import { observer } from 'mobx-react';
 
+import RepeatPicker from '../common/RepeatPicker.component.jsx';
+
 @observer
 export default class CreateTaskDialog extends Component {
 
@@ -12,6 +14,8 @@ export default class CreateTaskDialog extends Component {
             dueDate: null,
             projects: null,
             isActive: false,
+            showRepeat: false,
+            repeatText: "",
         }
     }
 
@@ -24,7 +28,9 @@ export default class CreateTaskDialog extends Component {
         this.refs.taskTagsInput.value = "";
         this.refs.taskRepeatCheckbox.checked = false;
         this.setState({
-            dueDate: null
+            dueDate: null,
+            showRepeat: false,
+            repeatText: "",
         });
     }
 
@@ -116,6 +122,7 @@ export default class CreateTaskDialog extends Component {
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
             repeat: this.refs.taskRepeatCheckbox.checked,
+            repeatText: this.refs.taskRepeatCheckbox.checked ? this.state.repeatText: null,
             done: false,
             starred: false,
             deleted: false,
@@ -132,6 +139,33 @@ export default class CreateTaskDialog extends Component {
         this.closeModal();
     }
 
+
+    handleRepeatChange(str){
+        this.setState({
+            repeatText: str
+        });
+    }
+
+    toggleRepeat(){
+        if (!this.state.dueDate){
+            this.props.parent.showInfoBox({
+                text: "You can not set a repeat on a task which as no due date",
+                level: "danger"
+            });
+            this.refs.taskRepeatCheckbox.checked = false;
+        } else {
+            if (this.refs.taskRepeatCheckbox.checked) {
+                this.setState({
+                    showRepeat: true
+                })
+            } else {
+
+                this.setState({
+                    showRepeat: false
+                })
+            }
+        }
+    }
 
     render(){
         return(
@@ -158,9 +192,10 @@ export default class CreateTaskDialog extends Component {
                     </p>
                     <p className="control">
                         <label className="checkbox">
-                            <input type="checkbox" ref="taskRepeatCheckbox"/>
+                            <input onChange={()=>this.toggleRepeat()} type="checkbox" ref="taskRepeatCheckbox"/>
                             Repeat this task
                         </label>
+                        {this.state.showRepeat ? <RepeatPicker onChange={(str) => this.handleRepeatChange(str)} />: null}
                     </p>
                     <p className="control">
                         <button className="button is-primary" onClick={()=>this.addTask()}>Add</button>

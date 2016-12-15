@@ -6,6 +6,7 @@ import Draggable from 'react-draggable';
 
 
 import Tag from '../navigation/Tag.component.jsx';
+import RepeatPicker from '../common/RepeatPicker.component.jsx';
 
 export default class Task extends Component {
 
@@ -15,12 +16,15 @@ export default class Task extends Component {
             edit:false,
             dueDate: this.props.task.dueDate ? this.props.task.dueDate : null, //needed for react-datepicker,
             contentOpened: false,
+            showRepeat: this.props.task.repeat,
+            repeatText: this.props.task.repeatText,
         }
     }
 
     componentDidMount(){
         console.log("Mounted task");
         console.log(this.props.task);
+        this.refs.repeatT
     }
 
     /**
@@ -101,6 +105,35 @@ export default class Task extends Component {
         });
     }
 
+    handleRepeatChange(str){
+        this.setState({
+            repeatText: str
+        });
+    }
+
+    toggleRepeat(){
+        if (!this.state.dueDate){
+            this.props.parent.props.parent.showInfoBox({
+                text: "You can not set a repeat on a task which as no due date",
+                level: "danger"
+            });
+            this.refs.taskRepeatCheckbox.checked = false;
+        } else {
+            if (this.refs.taskRepeatCheckbox.checked) {
+                this.setState({
+                    showRepeat: true
+                })
+                this.refs.taskRepeatCheckbox.checked = false;
+            } else {
+
+                this.setState({
+                    showRepeat: false,
+                    repeatText: null,
+                })
+            }
+        }
+    }
+
     /**
     * Saves the edits and make this task uneditable
     */
@@ -121,6 +154,8 @@ export default class Task extends Component {
             dueDate: this.state.dueDate,
             project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
             notified: notified,
+            repeat: this.refs.taskRepeatCheckbox.checked,
+            repeatText: this.state.repeatText,
             inbox: false, //set to false, because when its edited, the user has looked at it
         }},this.props.task.project);
         this.cancelEdit();
@@ -131,7 +166,9 @@ export default class Task extends Component {
     */
     removeDueDate(){
         this.setState({
-            dueDate: null
+            dueDate: null,
+            repeatText: null,
+            showRepeat: false
         });
     }
 
@@ -198,6 +235,7 @@ export default class Task extends Component {
                     <header className="card-header">
                         <p className="card-header-title">
                             {this.props.task.title}
+                            {this.props.task.repeat ? <small><span className="task-due-icon"><i className="fa fa-repeat" aria-hidden="true"></i></span>{this.props.task.repeatText}</small>  : null}
                             <small><span className="task-due-icon"><i className="fa fa-clock-o" aria-hidden="true"></i></span> {this.props.task.dueDate ? moment(this.props.task.dueDate).toString() : "No due date"}</small>
                         </p>
                         <a className="card-header-icon" onClick={()=>this.toggleContent()}>
@@ -260,6 +298,13 @@ export default class Task extends Component {
                             Tags:
                             <input className="input" type="text"ref="taskTagsInput" defaultValue={this.getTagsString()}/>
                         </div>
+                        <p className="control">
+                            <label className="checkbox">
+                                <input onChange={()=>this.toggleRepeat()} type="checkbox" ref="taskRepeatCheckbox" checked={this.state.showRepeat}/>
+                                Repeat this task
+                            </label>
+                            {this.state.showRepeat ? <RepeatPicker onChange={(str) => this.handleRepeatChange(str)} defaultNumber={this.state.repeatText.split(" ")[1]} defaultTime={this.state.repeatText.split(" ")[2]}/>: null}
+                        </p>
                     </div>
                     <footer className="card-footer">
                         <a className="card-footer-item" onClick={()=>this.saveEdit()}>Save</a>

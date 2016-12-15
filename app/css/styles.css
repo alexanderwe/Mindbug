@@ -1,6 +1,5 @@
 @import '../node_modules/bulma/css/bulma.css';
 @import '../node_modules/font-awesome/css/font-awesome.css';
-@import '../node_modules/react-big-calendar/lib/css/react-big-calendar.css';
 @import './flatpickr_green.min.css';
 .flatpickr-input {
   width: 100%;
@@ -52,6 +51,11 @@ hr {
 }
 .no-drag {
   -webkit-app-region: no-drag;
+}
+.hidden {
+  max-height: 0px !important;
+  padding-top: 0px !important;
+  opacity: 0;
 }
 /*From Photon.css*/
 .window {
@@ -185,6 +189,33 @@ hr {
 \*------------------------------------*/
 .main-content {
   padding: 10px;
+}
+/*------------------------------------*    RepeatPicker
+\*------------------------------------*/
+.repeat-picker {
+  margin-top: 5px;
+}
+.repeat-picker span {
+  vertical-align: -webkit-baseline-middle;
+  margin-right: 10px;
+}
+.repeat-picker .menu-label {
+  color: #7a7a7a;
+}
+/*------------------------------------*    InfoBox
+\*------------------------------------*/
+.notification {
+  position: absolute;
+  width: 100%;
+  z-index: 2000;
+  max-height: 50px;
+  transition: all 0.5s;
+}
+.notification .delete {
+  background-color: rgba(10,10,10,0.1) !important;
+}
+.notification .delete:hover {
+  background-color: rgba(10,10,10,0.2) !important;
 }
 /*------------------------------------*    Tasklist
 \*------------------------------------*/

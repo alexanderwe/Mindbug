@@ -16,7 +16,11 @@ import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx'
 import ProjectList from './components/projects/ProjectList.component.jsx';
 import CreateProjectDialog from './components/projects/CreateProjectDialog.component.jsx';
 
+import InfoBox from './components/common/InfoBox.component.jsx';
+
 const ipcRenderer = window.require('electron').ipcRenderer; //Workaround for using ipcRenderer in React component
+const app = window.require('electron').app;
+
 
 //TODO implement repaeatable tasks (repeat text, repeat value, set new date(parse repeattext) if repeat on done or notify?)
 //TODO  implement db optimization button
@@ -93,14 +97,23 @@ class Main extends Component {
         });
     }
 
+    /**
+    * Show the info box with a specific text
+    * @param {String} text - info box text
+    */
+    showInfoBox(info){
+        this.refs.infoBox.showInfoBox(info);
+    }
+
     render(){
         return (
             <div className="window">
                 <CreateTaskDialog ref="createTaskDialog" parent={this} db={Database} />
                 <CreateProjectDialog ref="createProjectDialog" parent={this} db={Database}/>
+                <InfoBox ref="infoBox"/>
                 <div className="window-content">
                     <div className="pane-group">
-                        <div className="pane-sm sidebar draggable">
+                        <div className="pane-sm sidebar draggable ">
                             <Navbar ref="navbar" parent={this} db={Database}/>
                         </div>
                         <div className="pane main-content" id="mainPane">

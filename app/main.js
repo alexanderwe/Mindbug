@@ -19,15 +19,27 @@ let taskWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      minHeight: 300,
-      minWidth: 520,
-      titleBarStyle: 'hidden',
-      title: 'Mindbug',
-      vibrancy: 'dark'
-    });
+  if(process.platform === 'darwin'){
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        minHeight: 300,
+        minWidth: 520,
+        titleBarStyle: 'hidden',
+        title: 'Mindbug',
+        vibrancy: 'dark'
+      });
+  } else {
+      mainWindow = new BrowserWindow({
+          width: 800,
+          height: 600,
+          minHeight: 300,
+          minWidth: 520,
+          titleBarStyle: 'hidden',
+          title: 'Mindbug',
+        });
+  }
+
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -186,7 +198,9 @@ ipcMain.on('created-task', (event, arg) => {
 })
 
 ipcMain.on('set-app-badge',(event,arg)=>{
-    app.dock.setBadge(arg.toString());
+    if (process.platform === 'darwin') { //badge only available on macOs
+        app.dock.setBadge(arg.toString());
+    }
 
 })
 

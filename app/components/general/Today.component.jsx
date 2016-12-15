@@ -4,6 +4,8 @@ import {observer} from 'mobx-react';
 import TaskList from '../tasks/TaskList.component.jsx';
 import ProjectList from '../projects/ProjectList.component.jsx';
 
+import RepeatPicker from '../common/RepeatPicker.component.jsx';
+
 @observer export default class Today extends Component{
 
     constructor(props){
@@ -21,10 +23,9 @@ import ProjectList from '../projects/ProjectList.component.jsx';
                     <h1 className="title">Projects</h1>
                     <ProjectList ref="projectsList" parent={this} db={this.props.db} />
                 </div>
+
             </div>
 
         )
     }
-
-
 }
