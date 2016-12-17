@@ -1,6 +1,6 @@
 # Mindbug
 
-Mindbug is a minimal 'Get Things Done' Electron application with React.js.
+Mindbug is a minimal 'Get Things Done' Electron application made with [React.js](https://facebook.github.io/react/), [Bulma CSS](http://bulma.io) and [NeDB](https://github.com/louischatriot/nedb).
 
 
 ![alt text](https://raw.githubusercontent.com/alexanderwe/Mindbug/master/README/current-state.png "Current application window")
