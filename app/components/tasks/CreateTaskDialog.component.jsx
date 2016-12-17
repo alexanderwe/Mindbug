@@ -139,13 +139,18 @@ export default class CreateTaskDialog extends Component {
         this.closeModal();
     }
 
-
+    /**
+    * @param {String} str - Handle return value of the RepeatPicker
+    */
     handleRepeatChange(str){
         this.setState({
             repeatText: str
         });
     }
 
+    /**
+    * Toggle the RepeatPicker
+    */
     toggleRepeat(){
         if (!this.state.dueDate){
             this.props.parent.showInfoBox({

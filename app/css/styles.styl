@@ -8,7 +8,7 @@
 \*------------------------------------*/
 
 colors ={
-    primary: #00d1b2,
+    primary: #00D1B2,
     red: #ff3860,
     green: #20bc56,
     yellow: #ffd83d,
@@ -27,6 +27,8 @@ html, body
 
 a
     -webkit-app-region: no-drag;
+    color: colors.primary;
+
 
 ::-webkit-scrollbar{
     display: none;
@@ -91,7 +93,10 @@ hr
 .tag
     cursor: pointer;
     &:hover
-        background: darken(colors.primary, 10%);
+        background: darken(colors.primary, 10%) !important;
+
+.is-primary
+    background-color: colors.primary !important;
 
 .delete
     &:hover
@@ -133,7 +138,9 @@ hr
     &:hover
         background-color: colors.red
 
-
+.checkbox
+    input
+        margin-left: 5px;
 /*------------------------------------*\
     Navbar
 \*------------------------------------*/
@@ -168,6 +175,7 @@ hr
             color: colors.primary !important;
             background-color: transparent !important;
     .is-active
+        background-color: colors.primary !important;
         &:hover
             color: #fff !important;
             background-color: colors.primary !important;

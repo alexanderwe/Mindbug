@@ -37,6 +37,10 @@ class Database{
 
     }
 
+    /**
+    * Insert a task in the database, update all references
+    * @param {Object} doc - task document
+    */
     @action
     insertTask(doc){
         console.log("inserting task");
@@ -52,6 +56,11 @@ class Database{
         });
     }
 
+    /**
+    * Find tasks responding to a query and a specific sort
+    * @param {Object} query - MongoDB query
+    * @param {Object} sort - MongoDB sort query
+    */
     @action
     findTasks(query,sort){
         console.log("Find tasks with query: ");
@@ -71,6 +80,10 @@ class Database{
         })
     }
 
+    /**
+    * Find tasks synchronously with the local value allTasks
+    * @param {String} taskId - ID of the task
+    */
     findTaskSynchronous(taskId){
         console.log("Find a task synchronous: " + taskId);
         console.log(this.allTasks);
@@ -82,6 +95,10 @@ class Database{
         }
     }
 
+    /**
+    * Find tasks according to a date
+    * @param {String} date - due date of the task
+    */
     findTaskByNow(date){
         if (this.allTasks) {
             return this.allTasks.find(x => x.dueDate === moment() && x.notified==false|| moment().diff(x.dueDate) > 0 && x.notified==false );
@@ -110,6 +127,12 @@ class Database{
         }
     }
 
+    /**
+    * Update a tasks with a query, a set query and a previousProjectId
+    * @param {Object} query - MongoDB query
+    * @param {Object} set - MongoDB set query
+    * @param {String} previousProjectId - Project ID before the edit was saved
+    */
     @action
     updateTask(query, set, previousProjectId){
         console.log("update task with ");
@@ -134,6 +157,10 @@ class Database{
         });
     }
 
+    /**
+    * Delete a task
+    * @param {Object} date - MongoDB query
+    */
     @action
     deleteTask(query){
         this.taskCollection.remove(query, {}, (err, numRemoved) => {
@@ -144,6 +171,9 @@ class Database{
         });
     }
 
+    /**
+    * Refresh all tasks @allTasks
+    */
     @action
     refreshAllTasks(){
         this.taskCollection.find({}, (err, docs)=> {
@@ -153,7 +183,10 @@ class Database{
         })
     }
 
-
+    /**
+    * Insert a project in the database, update all references
+    * @param {Object} doc - project document
+    */
     @action
     insertProject(doc){
         console.log("inserting project");
@@ -164,6 +197,11 @@ class Database{
         });
     }
 
+    /**
+    * Find project responding to a query and a specific sort
+    * @param {Object} query - MongoDB query
+    * @param {Object} sort - MongoDB sort query
+    */
     @action
     findProjects(query,sort){
         console.log("find projects with: ");
@@ -178,6 +216,10 @@ class Database{
         })
     }
 
+    /**
+    * Find projects synchronously with the local value allProjects
+    * @param {String} projectId - ID of the project
+    */
     findProjectSynchronous(projectId){
         if (this.allProjects) {
             return this.allProjects.find(x => x._id === projectId);
@@ -186,6 +228,10 @@ class Database{
         }
     }
 
+    /**
+    * Find projects synchronously with the local value allProjects
+    * @param {String} projectName - Name of the project
+    */
     findProjectSynchronousWithName(projectName){
         console.log("find project with name " + projectName);
 
@@ -198,6 +244,10 @@ class Database{
         }
     }
 
+    /**
+    * Find projects according to a date
+    * @param {String} date - due date of the project
+    */
     findProjectByNow(date){
         if (this.allProjects) {
             return this.allProjects.find(x => x.dueDate === moment() && x.notified==false|| moment().diff(x.dueDate) > 0 && x.notified==false );
@@ -216,6 +266,11 @@ class Database{
         }
     }
 
+    /**
+    * Update a project with a query, a set query
+    * @param {Object} query - MongoDB query
+    * @param {Object} set - MongoDB set query
+    */
     @action
     updateProject(query, set){
         this.projectCollection.update(query, set ,(err, numReplaced) => {
@@ -227,7 +282,10 @@ class Database{
             this.refreshAllProjects();
         });
     }
-
+    /**
+    * Update a project
+    * @param {Object} set - MongoDB query
+    */
     @action
     deleteProject(query){
         this.projectCollection.remove(query, {}, (err, numRemoved) => {
@@ -239,6 +297,9 @@ class Database{
         });
     }
 
+    /**
+    * Refresh all projects  @allProjects
+    */
     @action
     refreshAllProjects(){
         this.projectCollection.find({}).sort().exec((err,docs)=>{

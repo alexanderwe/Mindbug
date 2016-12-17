@@ -19,7 +19,6 @@ export default class Tag extends Component {
         }
     }
 
-
     render(){
         return(
             <span className="tag is-primary" onClick={()=>this.filterTasks()}>

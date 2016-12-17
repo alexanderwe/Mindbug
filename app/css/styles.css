@@ -39,6 +39,7 @@ body {
 }
 a {
   -webkit-app-region: no-drag;
+  color: #00d1b2;
 }
 ::-webkit-scrollbar {
   display: none;
@@ -100,7 +101,10 @@ hr {
   cursor: pointer;
 }
 .tag:hover {
-  background: #00bca0;
+  background: #00bca0 !important;
+}
+.is-primary {
+  background-color: #00d1b2 !important;
 }
 .delete:hover {
   background-color: #ff3860;
@@ -137,6 +141,9 @@ hr {
 .btn-danger:hover {
   background-color: #ff3860;
 }
+.checkbox input {
+  margin-left: 5px;
+}
 /*------------------------------------*    Navbar
 \*------------------------------------*/
 .sidebar {
@@ -170,6 +177,9 @@ hr {
 .menu-list a:hover {
   color: #00d1b2 !important;
   background-color: transparent !important;
+}
+.menu-list .is-active {
+  background-color: #00d1b2 !important;
 }
 .menu-list .is-active:hover {
   color: #fff !important;

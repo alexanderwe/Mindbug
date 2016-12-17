@@ -3,12 +3,12 @@ import {observer} from 'mobx-react';
 import moment from 'moment';
 import Flatpickr from 'react-flatpickr'
 import Draggable from 'react-draggable';
-
+import later from 'later';
 
 import Tag from '../navigation/Tag.component.jsx';
 import RepeatPicker from '../common/RepeatPicker.component.jsx';
 
-export default class Task extends Component {
+@observer export default class Task extends Component {
 
     constructor(props){
         super(props);
@@ -41,7 +41,12 @@ export default class Task extends Component {
     * Sets task.done = true
     */
     finishTask(){
-        this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+        if(this.props.task.repeat){
+            this.props.db.updateTask({ _id: this.props.task._id }, { $set: { dueDate: moment(this.props.task.dueDate).add(this.props.task.repeatText.split(" ")[1],this.props.task.repeatText.split(" ")[2]).toDate(), notfied: false } });
+
+        } else {
+            this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+        }
     }
 
     /**
@@ -105,12 +110,18 @@ export default class Task extends Component {
         });
     }
 
+    /**
+    * @param {String} str - Handle return value of the RepeatPicker
+    */
     handleRepeatChange(str){
         this.setState({
             repeatText: str
         });
     }
 
+    /**
+    * Toggle the RepeatPicker
+    */
     toggleRepeat(){
         if (!this.state.dueDate){
             this.props.parent.props.parent.showInfoBox({
@@ -215,6 +226,9 @@ export default class Task extends Component {
         }
     }
 
+    /**
+    * Toggle the content of the Task card component
+    */
     toggleContent(){
         if (this.state.contentOpened) {
             this.setState({
@@ -303,7 +317,7 @@ export default class Task extends Component {
                                 <input onChange={()=>this.toggleRepeat()} type="checkbox" ref="taskRepeatCheckbox" checked={this.state.showRepeat}/>
                                 Repeat this task
                             </label>
-                            {this.state.showRepeat ? <RepeatPicker onChange={(str) => this.handleRepeatChange(str)} defaultNumber={this.state.repeatText.split(" ")[1]} defaultTime={this.state.repeatText.split(" ")[2]}/>: null}
+                            {this.state.showRepeat ? <RepeatPicker onChange={(str) => this.handleRepeatChange(str)} defaultNumber={this.state.repeatText ? this.state.repeatText.split(" ")[1]:""} defaultTime={this.state.repeatText ? this.state.repeatText.split(" ")[2]:""}/>: null}
                         </p>
                     </div>
                     <footer className="card-footer">

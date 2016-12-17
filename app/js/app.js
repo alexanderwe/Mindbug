@@ -267,6 +267,24 @@ var Infobox = function (_Component) {
                 _this2.closeInfoBox();
             }, 5000);
         }
+    }, {
+        key: "infoBoxClass",
+        value: function infoBoxClass() {
+            var baseClass = 'notification';
+            switch (this.state.level) {
+                case 'success':
+                    return baseClass += ' is-success';
+                    break;
+                case 'warning':
+                    return baseClass += ' is-warning';
+                    break;
+                case 'danger':
+                    return baseClass += ' is-danger';
+                    break;
+                default:
+                    return baseClass;break;
+            }
+        }
 
         /**
         * Close the info box
@@ -288,7 +306,7 @@ var Infobox = function (_Component) {
 
             return _react2.default.createElement(
                 "div",
-                { className: this.state.show ? "notification is-danger" : "notification is-danger hidden" },
+                { className: this.state.show ? this.infoBoxClass() : this.infoBoxClass() + ' hidden' },
                 _react2.default.createElement("button", { className: "delete", onClick: function onClick() {
                         return _this3.closeInfoBox();
                     } }),
@@ -347,11 +365,16 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
             console.log("Repeat mounted");
             this.handleChange();
         }
+
+        /**
+        * Return the change in the RepeatPicker to the parent component
+        */
+
     }, {
         key: 'handleChange',
         value: function handleChange() {
             if (this.props.onChange) {
-                this.props.onChange("Every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
+                this.props.onChange("every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
             }
         }
     }, {
@@ -359,6 +382,7 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             var _this2 = this;
 
+            //Construct day numbers
             var dayArray = [];
             for (var i = 1; i < 32; i++) {
                 dayArray.push(i);
@@ -404,23 +428,23 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
                             }, ref: 'timeOption', value: this.props.defaultTime },
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Day'
+                            { value: 'days' },
+                            'Days'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Week'
+                            { value: 'weeks' },
+                            'Weeks'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Month'
+                            { value: 'months' },
+                            'Months'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Year'
+                            { value: 'years' },
+                            'Years'
                         )
                     )
                 )
@@ -1706,6 +1730,11 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function shareProjectViaMail() {
             location.href = 'mailto:mail@provider.com?Subject=' + this.props.project.title + '&Body=Title: ' + 'Project ' + this.props.project.title + '%0D%0ADue date: ' + this.state.dueDate.toString();
         }
+
+        /**
+        * Calculate the task done percentage
+        */
+
     }, {
         key: 'tasksDonePercentage',
         value: function tasksDonePercentage() {
@@ -1729,6 +1758,11 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
                 return 0;
             }
         }
+
+        /**
+        * Change the progress class according to the @tasksDonePercentage()
+        */
+
     }, {
         key: 'getProgessClass',
         value: function getProgessClass() {
@@ -1743,7 +1777,7 @@ var Project = (0, _mobxReact.observer)(_class = function (_Component) {
             }
         }
 
-        //add color coding for projects
+        //TODO add color coding for projects
 
     }, {
         key: 'render',
@@ -2266,6 +2300,11 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
             //Close dialog
             this.closeModal();
         }
+
+        /**
+        * @param {String} str - Handle return value of the RepeatPicker
+        */
+
     }, {
         key: 'handleRepeatChange',
         value: function handleRepeatChange(str) {
@@ -2273,6 +2312,11 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                 repeatText: str
             });
         }
+
+        /**
+        * Toggle the RepeatPicker
+        */
+
     }, {
         key: 'toggleRepeat',
         value: function toggleRepeat() {
@@ -2420,6 +2464,8 @@ exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _class;
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -2438,6 +2484,10 @@ var _reactDraggable = require('react-draggable');
 
 var _reactDraggable2 = _interopRequireDefault(_reactDraggable);
 
+var _later = require('later');
+
+var _later2 = _interopRequireDefault(_later);
+
 var _TagComponent = require('../navigation/Tag.component.jsx');
 
 var _TagComponent2 = _interopRequireDefault(_TagComponent);
@@ -2454,7 +2504,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Task = function (_Component) {
+var Task = (0, _mobxReact.observer)(_class = function (_Component) {
     _inherits(Task, _Component);
 
     function Task(props) {
@@ -2500,7 +2550,11 @@ var Task = function (_Component) {
     }, {
         key: 'finishTask',
         value: function finishTask() {
-            this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+            if (this.props.task.repeat) {
+                this.props.db.updateTask({ _id: this.props.task._id }, { $set: { dueDate: (0, _moment2.default)(this.props.task.dueDate).add(this.props.task.repeatText.split(" ")[1], this.props.task.repeatText.split(" ")[2]).toDate(), notfied: false } });
+            } else {
+                this.props.db.updateTask({ _id: this.props.task._id }, { $set: { done: true } });
+            }
         }
 
         /**
@@ -2580,6 +2634,11 @@ var Task = function (_Component) {
                 edit: true
             });
         }
+
+        /**
+        * @param {String} str - Handle return value of the RepeatPicker
+        */
+
     }, {
         key: 'handleRepeatChange',
         value: function handleRepeatChange(str) {
@@ -2587,6 +2646,11 @@ var Task = function (_Component) {
                 repeatText: str
             });
         }
+
+        /**
+        * Toggle the RepeatPicker
+        */
+
     }, {
         key: 'toggleRepeat',
         value: function toggleRepeat() {
@@ -2723,6 +2787,11 @@ var Task = function (_Component) {
                 );
             }
         }
+
+        /**
+        * Toggle the content of the Task card component
+        */
+
     }, {
         key: 'toggleContent',
         value: function toggleContent() {
@@ -2939,7 +3008,7 @@ var Task = function (_Component) {
                             ),
                             this.state.showRepeat ? _react2.default.createElement(_RepeatPickerComponent2.default, { onChange: function onChange(str) {
                                     return _this3.handleRepeatChange(str);
-                                }, defaultNumber: this.state.repeatText.split(" ")[1], defaultTime: this.state.repeatText.split(" ")[2] }) : null
+                                }, defaultNumber: this.state.repeatText ? this.state.repeatText.split(" ")[1] : "", defaultTime: this.state.repeatText ? this.state.repeatText.split(" ")[2] : "" }) : null
                         )
                     ),
                     _react2.default.createElement(
@@ -2966,7 +3035,7 @@ var Task = function (_Component) {
     }]);
 
     return Task;
-}(_react.Component);
+}(_react.Component)) || _class;
 
 exports.default = Task;
 
@@ -2978,7 +3047,7 @@ Task.propTypes = {
     edit: _react2.default.PropTypes.bool
 };
 
-},{"../common/RepeatPicker.component.jsx":3,"../navigation/Tag.component.jsx":7,"mobx-react":48,"moment":50,"react":214,"react-draggable":188,"react-flatpickr":189}],14:[function(require,module,exports){
+},{"../common/RepeatPicker.component.jsx":3,"../navigation/Tag.component.jsx":7,"later":45,"mobx-react":48,"moment":50,"react":214,"react-draggable":188,"react-flatpickr":189}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3166,7 +3235,13 @@ var Database = (_class = function () {
         this.updateTags();
         this.refreshAllTasks();
         this.refreshAllProjects();
-    } //representation for the projectSort in the view
+    }
+
+    /**
+    * Insert a task in the database, update all references
+    * @param {Object} doc - task document
+    */
+    //representation for the projectSort in the view
     //representation for all project in db
     //representation for the tags visible in the navView
     //representation for the task visible in the view
@@ -3189,6 +3264,13 @@ var Database = (_class = function () {
                 _this.refreshAllProjects();
             });
         }
+
+        /**
+        * Find tasks responding to a query and a specific sort
+        * @param {Object} query - MongoDB query
+        * @param {Object} sort - MongoDB sort query
+        */
+
     }, {
         key: 'findTasks',
         value: function findTasks(query, sort) {
@@ -3210,6 +3292,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Find tasks synchronously with the local value allTasks
+        * @param {String} taskId - ID of the task
+        */
+
     }, {
         key: 'findTaskSynchronous',
         value: function findTaskSynchronous(taskId) {
@@ -3224,6 +3312,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find tasks according to a date
+        * @param {String} date - due date of the task
+        */
+
     }, {
         key: 'findTaskByNow',
         value: function findTaskByNow(date) {
@@ -3260,6 +3354,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Delete a task
+        * @param {Object} date - MongoDB query
+        */
+
     }, {
         key: 'deleteTask',
         value: function deleteTask(query) {
@@ -3272,6 +3372,11 @@ var Database = (_class = function () {
                 _this4.refreshAllTasks();
             });
         }
+
+        /**
+        * Refresh all tasks @allTasks
+        */
+
     }, {
         key: 'refreshAllTasks',
         value: function refreshAllTasks() {
@@ -3283,6 +3388,12 @@ var Database = (_class = function () {
                 ipcRenderer.send('set-app-badge', _this5.totalUndoneTasks);
             });
         }
+
+        /**
+        * Insert a project in the database, update all references
+        * @param {Object} doc - project document
+        */
+
     }, {
         key: 'insertProject',
         value: function insertProject(doc) {
@@ -3295,6 +3406,13 @@ var Database = (_class = function () {
                 _this6.refreshAllProjects();
             });
         }
+
+        /**
+        * Find project responding to a query and a specific sort
+        * @param {Object} query - MongoDB query
+        * @param {Object} sort - MongoDB sort query
+        */
+
     }, {
         key: 'findProjects',
         value: function findProjects(query, sort) {
@@ -3311,6 +3429,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Find projects synchronously with the local value allProjects
+        * @param {String} projectId - ID of the project
+        */
+
     }, {
         key: 'findProjectSynchronous',
         value: function findProjectSynchronous(projectId) {
@@ -3322,6 +3446,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find projects synchronously with the local value allProjects
+        * @param {String} projectName - Name of the project
+        */
+
     }, {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
@@ -3339,6 +3469,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find projects according to a date
+        * @param {String} date - due date of the project
+        */
+
     }, {
         key: 'findProjectByNow',
         value: function findProjectByNow(date) {
@@ -3364,6 +3500,11 @@ var Database = (_class = function () {
                 _this8.refreshAllProjects();
             });
         }
+        /**
+        * Update a project
+        * @param {Object} set - MongoDB query
+        */
+
     }, {
         key: 'deleteProject',
         value: function deleteProject(query) {
@@ -3377,6 +3518,11 @@ var Database = (_class = function () {
                 _this9.refreshAllProjects();
             });
         }
+
+        /**
+        * Refresh all projects  @allProjects
+        */
+
     }, {
         key: 'refreshAllProjects',
         value: function refreshAllProjects() {
@@ -3481,6 +3627,14 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Update a tasks with a query, a set query and a previousProjectId
+        * @param {Object} query - MongoDB query
+        * @param {Object} set - MongoDB set query
+        * @param {String} previousProjectId - Project ID before the edit was saved
+        */
+
     }, {
         key: 'totalOpenProjects',
         get: function get() {
@@ -3492,6 +3646,13 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Update a project with a query, a set query
+        * @param {Object} query - MongoDB query
+        * @param {Object} set - MongoDB set query
+        */
+
     }]);
 
     return Database;

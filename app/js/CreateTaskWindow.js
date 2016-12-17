@@ -39,11 +39,16 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
             console.log("Repeat mounted");
             this.handleChange();
         }
+
+        /**
+        * Return the change in the RepeatPicker to the parent component
+        */
+
     }, {
         key: 'handleChange',
         value: function handleChange() {
             if (this.props.onChange) {
-                this.props.onChange("Every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
+                this.props.onChange("every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
             }
         }
     }, {
@@ -51,6 +56,7 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             var _this2 = this;
 
+            //Construct day numbers
             var dayArray = [];
             for (var i = 1; i < 32; i++) {
                 dayArray.push(i);
@@ -96,23 +102,23 @@ var RepeatPicker = (0, _mobxReact.observer)(_class = function (_Component) {
                             }, ref: 'timeOption', value: this.props.defaultTime },
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Day'
+                            { value: 'days' },
+                            'Days'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Week'
+                            { value: 'weeks' },
+                            'Weeks'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Month'
+                            { value: 'months' },
+                            'Months'
                         ),
                         _react2.default.createElement(
                             'option',
-                            null,
-                            'Year'
+                            { value: 'years' },
+                            'Years'
                         )
                     )
                 )
@@ -336,6 +342,11 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
             //Close dialog
             this.closeModal();
         }
+
+        /**
+        * @param {String} str - Handle return value of the RepeatPicker
+        */
+
     }, {
         key: 'handleRepeatChange',
         value: function handleRepeatChange(str) {
@@ -343,6 +354,11 @@ var CreateTaskDialog = (0, _mobxReact.observer)(_class = function (_Component) {
                 repeatText: str
             });
         }
+
+        /**
+        * Toggle the RepeatPicker
+        */
+
     }, {
         key: 'toggleRepeat',
         value: function toggleRepeat() {
@@ -591,7 +607,13 @@ var Database = (_class = function () {
         this.updateTags();
         this.refreshAllTasks();
         this.refreshAllProjects();
-    } //representation for the projectSort in the view
+    }
+
+    /**
+    * Insert a task in the database, update all references
+    * @param {Object} doc - task document
+    */
+    //representation for the projectSort in the view
     //representation for all project in db
     //representation for the tags visible in the navView
     //representation for the task visible in the view
@@ -614,6 +636,13 @@ var Database = (_class = function () {
                 _this.refreshAllProjects();
             });
         }
+
+        /**
+        * Find tasks responding to a query and a specific sort
+        * @param {Object} query - MongoDB query
+        * @param {Object} sort - MongoDB sort query
+        */
+
     }, {
         key: 'findTasks',
         value: function findTasks(query, sort) {
@@ -635,6 +664,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Find tasks synchronously with the local value allTasks
+        * @param {String} taskId - ID of the task
+        */
+
     }, {
         key: 'findTaskSynchronous',
         value: function findTaskSynchronous(taskId) {
@@ -649,6 +684,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find tasks according to a date
+        * @param {String} date - due date of the task
+        */
+
     }, {
         key: 'findTaskByNow',
         value: function findTaskByNow(date) {
@@ -685,6 +726,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Delete a task
+        * @param {Object} date - MongoDB query
+        */
+
     }, {
         key: 'deleteTask',
         value: function deleteTask(query) {
@@ -697,6 +744,11 @@ var Database = (_class = function () {
                 _this4.refreshAllTasks();
             });
         }
+
+        /**
+        * Refresh all tasks @allTasks
+        */
+
     }, {
         key: 'refreshAllTasks',
         value: function refreshAllTasks() {
@@ -708,6 +760,12 @@ var Database = (_class = function () {
                 ipcRenderer.send('set-app-badge', _this5.totalUndoneTasks);
             });
         }
+
+        /**
+        * Insert a project in the database, update all references
+        * @param {Object} doc - project document
+        */
+
     }, {
         key: 'insertProject',
         value: function insertProject(doc) {
@@ -720,6 +778,13 @@ var Database = (_class = function () {
                 _this6.refreshAllProjects();
             });
         }
+
+        /**
+        * Find project responding to a query and a specific sort
+        * @param {Object} query - MongoDB query
+        * @param {Object} sort - MongoDB sort query
+        */
+
     }, {
         key: 'findProjects',
         value: function findProjects(query, sort) {
@@ -736,6 +801,12 @@ var Database = (_class = function () {
                 }
             });
         }
+
+        /**
+        * Find projects synchronously with the local value allProjects
+        * @param {String} projectId - ID of the project
+        */
+
     }, {
         key: 'findProjectSynchronous',
         value: function findProjectSynchronous(projectId) {
@@ -747,6 +818,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find projects synchronously with the local value allProjects
+        * @param {String} projectName - Name of the project
+        */
+
     }, {
         key: 'findProjectSynchronousWithName',
         value: function findProjectSynchronousWithName(projectName) {
@@ -764,6 +841,12 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Find projects according to a date
+        * @param {String} date - due date of the project
+        */
+
     }, {
         key: 'findProjectByNow',
         value: function findProjectByNow(date) {
@@ -789,6 +872,11 @@ var Database = (_class = function () {
                 _this8.refreshAllProjects();
             });
         }
+        /**
+        * Update a project
+        * @param {Object} set - MongoDB query
+        */
+
     }, {
         key: 'deleteProject',
         value: function deleteProject(query) {
@@ -802,6 +890,11 @@ var Database = (_class = function () {
                 _this9.refreshAllProjects();
             });
         }
+
+        /**
+        * Refresh all projects  @allProjects
+        */
+
     }, {
         key: 'refreshAllProjects',
         value: function refreshAllProjects() {
@@ -906,6 +999,14 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Update a tasks with a query, a set query and a previousProjectId
+        * @param {Object} query - MongoDB query
+        * @param {Object} set - MongoDB set query
+        * @param {String} previousProjectId - Project ID before the edit was saved
+        */
+
     }, {
         key: 'totalOpenProjects',
         get: function get() {
@@ -917,6 +1018,13 @@ var Database = (_class = function () {
                 return null;
             }
         }
+
+        /**
+        * Update a project with a query, a set query
+        * @param {Object} query - MongoDB query
+        * @param {Object} set - MongoDB set query
+        */
+
     }]);
 
     return Database;

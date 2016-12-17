@@ -131,7 +131,9 @@ export default class Project extends Component{
         location.href = 'mailto:mail@provider.com?Subject='+this.props.project.title+'&Body=Title: '+'Project '+this.props.project.title + '%0D%0ADue date: ' + this.state.dueDate.toString();
     }
 
-
+    /**
+    * Calculate the task done percentage
+    */
     tasksDonePercentage(){
         if(this.props.project.tasks.length > 0){
             let doneCounter = 0;
@@ -146,7 +148,9 @@ export default class Project extends Component{
         }
     }
 
-
+    /**
+    * Change the progress class according to the @tasksDonePercentage()
+    */
     getProgessClass(){
         var taskDone = this.tasksDonePercentage();
 
@@ -159,7 +163,7 @@ export default class Project extends Component{
         }
     }
 
-    //add color coding for projects
+    //TODO add color coding for projects
     render(){
         const halfWidth = {
             width: '50%',

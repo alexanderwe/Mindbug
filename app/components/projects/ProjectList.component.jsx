@@ -9,7 +9,6 @@ import Project from './Project.component.jsx';
         super(props);
     }
 
-
     render(){
         if (this.props.db.projects) {
             return(

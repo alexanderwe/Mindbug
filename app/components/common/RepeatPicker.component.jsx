@@ -15,21 +15,22 @@ import {observer} from 'mobx-react';
         this.handleChange()
     }
 
-
+    /**
+    * Return the change in the RepeatPicker to the parent component
+    */
     handleChange(){
         if (this.props.onChange) {
-            this.props.onChange("Every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
+            this.props.onChange("every " + this.refs.numberOption.value + " " + this.refs.timeOption.value);
         }
     }
 
-
-
     render(){
+
+        //Construct day numbers
         var dayArray = [];
         for (var i=1; i < 32; i++) {
             dayArray.push(i);
         }
-
 
         return (
             <div className="repeat-picker">
@@ -46,14 +47,13 @@ import {observer} from 'mobx-react';
                 </span>
                 <span className="select">
                     <select onChange={()=>this.handleChange()} ref="timeOption" value={this.props.defaultTime}>
-                        <option>Day</option>
-                        <option>Week</option>
-                        <option>Month</option>
-                        <option>Year</option>
+                        <option value="days">Days</option>
+                        <option value="weeks">Weeks</option>
+                        <option value="months">Months</option>
+                        <option value="years">Years</option>
                     </select>
                 </span>
             </div>
-
         )
     }
 }

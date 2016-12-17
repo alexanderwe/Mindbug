@@ -11,18 +11,34 @@ export default class Infobox extends Component{
         }
     }
 
-        /**
-        * Show the info box with a specific text
-        * @param {String} text - info box text
-        */
-        showInfoBox(info){
-            this.setState({
-                show:true,
-                text:info.text,
-                level: info.level,
-            });
-            setTimeout(() => { this.closeInfoBox() }, 5000);
+    /**
+    * Show the info box with a specific text
+    * @param {String} text - info box text
+    */
+    showInfoBox(info){
+        this.setState({
+            show:true,
+            text:info.text,
+            level: info.level,
+        });
+        setTimeout(() => { this.closeInfoBox() }, 5000);
+    }
+
+    infoBoxClass(){
+        let baseClass = 'notification';
+        switch (this.state.level) {
+            case 'success':
+                return baseClass += ' is-success';
+                break;
+            case 'warning':
+                return baseClass += ' is-warning';
+                break;
+            case 'danger':
+                return baseClass += ' is-danger';
+                break;
+            default: return baseClass; break;
         }
+    }
 
     /**
     * Close the info box
@@ -35,11 +51,9 @@ export default class Infobox extends Component{
         });
     }
 
-
-
     render(){
         return (
-            <div className={this.state.show ? "notification is-danger" : "notification is-danger hidden"}>
+            <div className={this.state.show ? this.infoBoxClass() : this.infoBoxClass() + ' hidden'}>
               <button className="delete" onClick={()=>this.closeInfoBox()}></button>
               <span className="content">{this.state.text}</span>
             </div>
