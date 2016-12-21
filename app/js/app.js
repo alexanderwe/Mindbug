@@ -2948,9 +2948,6 @@ var Task = (0, _mobxReact.observer)(_class = function (_Component) {
                     )
                 );
             } else {
-                console.log("load edit");
-                console.log(this.state.dueDate);
-
                 return _react2.default.createElement(
                     'div',
                     { className: 'card is-fullwidth task is-edit' },
@@ -3124,6 +3121,7 @@ TaskList.propTypes = {
 };
 
 },{"./Task.component.jsx":13,"mobx-react":48,"react":219}],15:[function(require,module,exports){
+(function (__dirname){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3219,13 +3217,13 @@ var Database = (_class = function () {
         this.dbFilter = null;
 
         this.taskCollection = new Datastore({
-            filename: 'tasks.json',
+            filename: __dirname + './tasks.json',
             autoload: true,
             timestampData: true
         });
 
         this.projectCollection = new Datastore({
-            filename: 'projects.json',
+            filename: __dirname + './projects.json',
             autoload: true,
             timestampData: true
         });
@@ -3699,6 +3697,7 @@ var Database = (_class = function () {
 }), _applyDecoratedDescriptor(_class.prototype, 'insertTask', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findTasks', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'findTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalUndoneTasks', [computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalUndoneTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalInbox', [computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalInbox'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTask', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteTask', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteTask'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllTasks', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllTasks'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'insertProject', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'insertProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'findProjects', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'findProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalOpenProjects', [computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalOpenProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateProject', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'deleteProject', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'deleteProject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'refreshAllProjects', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'refreshAllProjects'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTags', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'updateTags'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setActiveItem', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'setActiveItem'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setTaskSort', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'setTaskSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setProjectSort', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'setProjectSort'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setDbFilter', [action], Object.getOwnPropertyDescriptor(_class.prototype, 'setDbFilter'), _class.prototype)), _class);
 exports.default = new Database();
 
+}).call(this,"/app/data")
 },{"fs":221,"mobx":49,"moment":50,"nedb":53}],16:[function(require,module,exports){
 (function (process){
 /*global setImmediate: false, setTimeout: false, console: false */

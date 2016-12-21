@@ -286,10 +286,6 @@ import AutoLinkText from 'react-autolink-text';
                 </div>
             )
         } else {
-            console.log("load edit");
-            console.log(this.state.dueDate);
-
-
             return (
                 <div className="card is-fullwidth task is-edit">
                     <header className="card-header">

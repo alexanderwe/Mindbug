@@ -19,13 +19,13 @@ class Database{
 
     constructor(){
         this.taskCollection = new Datastore({
-            filename:'tasks.json',
+            filename: __dirname + './tasks.json',
             autoload: true,
             timestampData: true,
         });
 
         this.projectCollection = new Datastore({
-            filename:'projects.json',
+            filename: __dirname + './projects.json',
             autoload: true,
             timestampData: true,
         });
