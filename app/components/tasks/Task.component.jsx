@@ -2,19 +2,20 @@ import React, {Component} from 'react';
 import {observer} from 'mobx-react';
 import moment from 'moment';
 import Flatpickr from 'react-flatpickr'
-import Draggable from 'react-draggable';
 import later from 'later';
 
 import Tag from '../navigation/Tag.component.jsx';
 import RepeatPicker from '../common/RepeatPicker.component.jsx';
+import AutoLinkText from 'react-autolink-text';
 
+// TODO implement Tags component
 @observer export default class Task extends Component {
 
     constructor(props){
         super(props);
         this.state={
             edit:false,
-            dueDate: this.props.task.dueDate ? this.props.task.dueDate : null, //needed for react-datepicker,
+            dueDate: this.props.task.dueDate ? this.props.task.dueDate.toString() : null, //needed for react-datepicker,
             contentOpened: false,
             showRepeat: this.props.task.repeat,
             repeatText: this.props.task.repeatText,
@@ -163,7 +164,7 @@ import RepeatPicker from '../common/RepeatPicker.component.jsx';
             notes: this.refs.taskNotesTextarea.value,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
-            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
+            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronous(this.refs.projectSelect.value)._id: null :null,
             notified: notified,
             repeat: this.refs.taskRepeatCheckbox.checked,
             repeatText: this.state.repeatText,
@@ -207,15 +208,10 @@ import RepeatPicker from '../common/RepeatPicker.component.jsx';
             return(
                 <p className="control">
                     <span className="select">
-                        <select ref="projectSelect">
+                        <select ref="projectSelect" defaultValue={this.props.task.project}>
                             <option></option>
                             {this.props.db.allProjects.map((project)=>{
-                                if(project._id === this.props.task.project){
-                                    return <option key={project._id} selected>{project.title}</option>
-                                }else{
-                                    return <option key={project._id}>{project.title}</option>
-                                }
-
+                                return <option key={project._id} value={project._id}> {project.title} </option>
                             })}
                         </select>
                     </span>
@@ -260,7 +256,7 @@ import RepeatPicker from '../common/RepeatPicker.component.jsx';
                         <div className="content">
                         <p>
                             <span><i className="fa fa-sticky-note-o" aria-hidden="true"></i></span>
-                            {this.props.task.notes ? this.props.task.notes : "No notes"}
+                            <AutoLinkText text={this.props.task.notes} />
                         </p>
                         <p>
                             <span><i className="fa fa-briefcase" aria-hidden="true"></i></span>
@@ -290,6 +286,10 @@ import RepeatPicker from '../common/RepeatPicker.component.jsx';
                 </div>
             )
         } else {
+            console.log("load edit");
+            console.log(this.state.dueDate);
+
+
             return (
                 <div className="card is-fullwidth task is-edit">
                     <header className="card-header">

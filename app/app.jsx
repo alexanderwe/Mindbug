@@ -38,12 +38,6 @@ class Main extends Component {
 
     componentWillMount(){
         this.refreshDatabase();
-        var text = 'every 5 mins';
-        var s = later.parse.text(text);
-
-        console.log(
-            later.schedule(s).next(10)
-        );
     }
 
     componentDidUpdate(){
@@ -52,6 +46,8 @@ class Main extends Component {
 
     //Add project title, icon does not work
     componentDidMount(){
+        console.log("mount app");
+
         setInterval(()=>{
             let task = Database.findTaskByNow(moment());
             let project = Database.findProjectByNow(moment());
@@ -65,9 +61,15 @@ class Main extends Component {
                 Database.updateProject({ _id: project._id }, {$set: {notified: true}})
             }
         },3000);
+
+
         ipcRenderer.on('insert-task' ,(event , data)=>{
              Database.insertTask(data.msg);
-         });
+        });
+        
+        ipcRenderer.on('init-export' ,(event , data)=>{
+            ipcRenderer.send('save-to-file' , {content:Database.export(), fileName:data.fileName});
+        });
     }
 
     refreshDatabase(){

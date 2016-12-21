@@ -64,7 +64,7 @@ export default class CreateTaskDialog extends Component {
                         <select ref="projectSelect">
                             <option></option>
                             {this.props.db.allProjects.map((project)=>{
-                                return <option key={project._id}>{project.title}</option>
+                                return <option key={project._id} value={project._id}>{project.title}</option>
                             })}
                         </select>
                     </span>
@@ -118,7 +118,7 @@ export default class CreateTaskDialog extends Component {
         var doc = {
             title: this.refs.taskTitleInput.value,
             notes: this.refs.taskNotesTextarea.value,
-            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronousWithName(this.refs.projectSelect.value)._id: null :null,
+            project: this.refs.projectSelect ? this.refs.projectSelect.value ? this.props.db.findProjectSynchronous(this.refs.projectSelect.value)._id: null :null,
             tags: this.generateTags(),
             dueDate: this.state.dueDate,
             repeat: this.refs.taskRepeatCheckbox.checked,

@@ -99,6 +99,7 @@ hr {
 }
 .tag {
   cursor: pointer;
+  margin-right: 1px;
 }
 .tag:hover {
   background: #00bca0 !important;

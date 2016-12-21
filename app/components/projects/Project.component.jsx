@@ -11,7 +11,7 @@ export default class Project extends Component{
     constructor(props){
         super(props);
         this.state ={
-            dueDate: this.props.project.dueDate ? this.props.project.dueDate : moment(), //needed for react-datepicker
+            dueDate: this.props.project.dueDate ? this.props.project.dueDate : null, //needed for react-datepicker
         }
     }
 

@@ -1,8 +1,9 @@
-import Datastore from 'nedb';
-import {observable,action,computed} from 'mobx';
-import moment from 'moment';
+const Datastore = require('nedb');
+const {observable,action,computed} = require('mobx');
+const moment = require('moment');
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+import * as fs from 'fs';
 
 
 class Database{
@@ -18,13 +19,13 @@ class Database{
 
     constructor(){
         this.taskCollection = new Datastore({
-            filename: __dirname + './tasks.json',
+            filename:'tasks.json',
             autoload: true,
             timestampData: true,
         });
 
         this.projectCollection = new Datastore({
-            filename: __dirname + './projects.json',
+            filename:'projects.json',
             autoload: true,
             timestampData: true,
         });
@@ -34,7 +35,6 @@ class Database{
         this.updateTags();
         this.refreshAllTasks();
         this.refreshAllProjects();
-
     }
 
     /**
@@ -333,6 +333,10 @@ class Database{
             }
             this.tags = tagsArray;
         });
+    }
+
+    export(){
+        return '{"tasks" :'+JSON.stringify(this.allTasks.slice()) +', "projects":'+JSON.stringify(this.allProjects.slice())+'}';
     }
 
 

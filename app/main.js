@@ -9,7 +9,12 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const {dialog} = require('electron')
+const fs = require('fs');
 
+require('electron-reload')(__dirname,{
+  hardResetMethod: 'exit'
+});
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -58,6 +63,17 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null;
   })
+
+  // Hook to open links in default browser
+  var handleRedirect = (e, url) => {
+    if(url != mainWindow.webContents.getURL()) {
+        e.preventDefault()
+        require('electron').shell.openExternal(url)
+    }
+  }
+  mainWindow.webContents.on('will-navigate', handleRedirect)
+  mainWindow.webContents.on('new-window', handleRedirect)
+
   const template = [
     {
       label: 'View',
@@ -103,11 +119,15 @@ function createWindow () {
     {
       label: 'Edit',
       submenu : [
-          {
-              label: 'Add a task',
-              accelerator: 'CommandOrControl+Shift+T',
-              click (){createTaskWindow()}
-          }
+        { label: 'Add a task',accelerator: 'CommandOrControl+Shift+T',click (){createTaskWindow()} },
+        { label: 'Export database',click (){exportDatabase()} },
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
       ]
     },
     {
@@ -162,7 +182,7 @@ function createWindow () {
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
 
-}
+} // .createWindow()
 
 
 //Create the task window
@@ -192,19 +212,60 @@ function createTaskWindow(){
     })
 }
 
+function readFile(filepath){
+    fs.readFile(filepath, 'utf-8', function (err, data) {
+          if(err){
+              console.log("An error ocurred reading the file :" + err.message);
+              return;
+          }
+          // Change how to handle the file content
+          console.log("The file content is : " + data);
+    });
+}
+
+
+function exportDatabase(){
+    // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+    dialog.showSaveDialog({
+        title: 'title',
+        filters: [{
+            name: 'json',
+            extensions: ['json']
+            },
+        ]}, function(fileName) {
+           if (fileName === undefined){
+                console.log("You didn't save the file");
+                return;
+           }
+          mainWindow.webContents.send('init-export' , {fileName:fileName});
+    });
+}
+
+
+
 ipcMain.on('created-task', (event, arg) => {
     mainWindow.webContents.send('insert-task' , {msg:arg});
     taskWindow.close();
+})
+
+ipcMain.on('save-to-file', (event, arg) => {
+    console.log(arg.fileName);
+    console.log(arg.content);
+     fs.writeFile(arg.fileName, arg.content, function (err) {
+        if(err){
+            console.log("An error ocurred updating the file"+ err.message);
+            console.log(err);
+            return;
+        }
+        console.log("The file has been succesfully saved");
+    });
 })
 
 ipcMain.on('set-app-badge',(event,arg)=>{
     if (process.platform === 'darwin') { //badge only available on macOs
         app.dock.setBadge(arg.toString());
     }
-
 })
-
-
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
