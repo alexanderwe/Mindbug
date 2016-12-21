@@ -66,7 +66,7 @@ class Main extends Component {
         ipcRenderer.on('insert-task' ,(event , data)=>{
              Database.insertTask(data.msg);
         });
-        
+
         ipcRenderer.on('init-export' ,(event , data)=>{
             ipcRenderer.send('save-to-file' , {content:Database.export(), fileName:data.fileName});
         });
