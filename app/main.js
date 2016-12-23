@@ -124,6 +124,7 @@ function createWindow () {
       submenu : [
         { label: 'Add a task',accelerator: 'CommandOrControl+Shift+T',click (){createTaskWindow()} },
         { label: 'Export database',click (){exportDatabase()} },
+        { label: 'Import database',click (){importDatabase()} },
         { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
         { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
         { type: "separator" },
@@ -215,12 +216,32 @@ function createTaskWindow(){
     })
 }
 
-function readFile(filepath){
+function readFile(filepath,initImport){
     fs.readFile(filepath, 'utf-8', function (err, data) {
-          if(err){
-              console.log("An error ocurred reading the file :" + err.message);
-              return;
-          }
+        if(err){
+            console.log("An error ocurred reading the file :" + err.message);
+            return;
+        }
+
+        if(initImport){
+            mainWindow.webContents.send('init-import' , {content:data});
+        }
+    });
+}
+
+function importDatabase() {
+    dialog.showOpenDialog({
+        title: 'Import database',
+        filters: [{
+            name: 'json',
+            extensions: ['json']
+            },
+        ]}, function(fileNames) {
+           if (fileNames === undefined){
+                console.log("You didn't save the file");
+                return;
+           }
+        readFile(fileNames[0],true);
     });
 }
 
@@ -228,7 +249,7 @@ function readFile(filepath){
 function exportDatabase(){
     // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
     dialog.showSaveDialog({
-        title: 'title',
+        title: 'Export database',
         filters: [{
             name: 'json',
             extensions: ['json']
@@ -250,8 +271,6 @@ ipcMain.on('created-task', (event, arg) => {
 })
 
 ipcMain.on('save-to-file', (event, arg) => {
-    console.log(arg.fileName);
-    console.log(arg.content);
      fs.writeFile(arg.fileName, arg.content, function (err) {
         if(err){
             console.log("An error ocurred updating the file"+ err.message);

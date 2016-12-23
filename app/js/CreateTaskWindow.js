@@ -39383,18 +39383,12 @@ var CreateTaskWindow = (0, _mobxReact.observer)(_class = function (_Component) {
         return _possibleConstructorReturn(this, (CreateTaskWindow.__proto__ || Object.getPrototypeOf(CreateTaskWindow)).call(this, props));
     }
 
+    /**
+    * Creates the project selection input
+    */
+
+
     _createClass(CreateTaskWindow, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            console.log("Mount create task window");
-
-            console.log(_Database2.default.allProjects);
-        }
-        /**
-        * Creates the project selection input
-        */
-
-    }, {
         key: 'projectInput',
         value: function projectInput() {
             if (_Database2.default.allProjects.length > 0) {

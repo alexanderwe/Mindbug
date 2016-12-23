@@ -32,7 +32,7 @@
     "babel-preset-stage-1": "^6.16.0",
     "babelify": "^7.3.0",
     "browserify": "^13.0.1",
-    "electron": "^1.4.7",
+    "electron": "^1.4.13",
     "electron-builder": "^8.6.0",
     "electron-reload": "^1.1.0",
     "stylus": "^0.54.5"

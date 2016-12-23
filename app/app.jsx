@@ -70,6 +70,11 @@ class Main extends Component {
         ipcRenderer.on('init-export' ,(event , data)=>{
             ipcRenderer.send('save-to-file' , {content:Database.export(), fileName:data.fileName});
         });
+
+        ipcRenderer.on('init-import' ,(event , data)=>{
+            console.log("recevied import");
+            console.log(data.content);
+        });
     }
 
     refreshDatabase(){

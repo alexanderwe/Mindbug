@@ -131,6 +131,11 @@ var Main = function (_Component) {
             ipcRenderer.on('init-export', function (event, data) {
                 ipcRenderer.send('save-to-file', { content: _Database2.default.export(), fileName: data.fileName });
             });
+
+            ipcRenderer.on('init-import', function (event, data) {
+                console.log("recevied import");
+                console.log(data.content);
+            });
         }
     }, {
         key: 'refreshDatabase',

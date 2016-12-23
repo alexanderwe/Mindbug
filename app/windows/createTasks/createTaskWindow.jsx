@@ -19,12 +19,6 @@ class CreateTaskWindow extends Component {
         super(props);
     }
 
-    componentDidMount(){
-        console.log("Mount create task window");
-
-        console.log(Database.allProjects);
-
-    }
     /**
     * Creates the project selection input
     */
