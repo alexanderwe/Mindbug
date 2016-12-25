@@ -322,12 +322,21 @@ app.on('activate', function () {
 
 if (!config.get('next-backup')){
     console.log("set next backup");
-    config.set('next-backup',moment().add(1, 'days'));
+
+    config.set('next-backup',moment().add('1 day'));
 }
 
 setInterval(()=>{
-    if (moment(config.get('next-backup')).format() === moment() || moment().diff(moment(config.get('next-backup')).format()) > 0) {
+    if (config.get('next-backup') === moment() || moment().diff(config.get('next-backup')) > 0) {
         mainWindow.webContents.send('init-export' , {fileName:'./backup.json'});
-        config.set('next-backup',moment().add(1 ,'days'));
+        console.log("set new backup date");
+        var newBackup = moment(config.get('next-backup')).format();
+        newBackup.add('1 day');
+        console.log(newBackup);
+
+
+
+        //config.set('next-backup',moment(config.get('next-backup')).add('1 day'));
+
     }
 },3000);

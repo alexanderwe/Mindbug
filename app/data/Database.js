@@ -1,9 +1,7 @@
 const Datastore = require('nedb');
 const {observable,action,computed} = require('mobx');
 const moment = require('moment');
-
 const ipcRenderer = window.require('electron').ipcRenderer;
-import * as fs from 'fs';
 
 
 class Database{
@@ -16,6 +14,7 @@ class Database{
     @observable taskSort = {dueDate :1}; //representation for the tasksSort in the view
     @observable projectSort = {dueDate :1}; //representation for the projectSort in the view
     dbFilter = null;
+    nextBackup = null;
 
     constructor(){
         this.taskCollection = new Datastore({
@@ -310,7 +309,7 @@ class Database{
     }
 
     /**
-    * Update all tags 
+    * Update all tags
     */
     @action
     updateTags(){
@@ -360,6 +359,7 @@ class Database{
     * Export the whole database as string
     */
     export(){
+        this.setNextBackup(moment().add('1 day'));
         return '{"tasks" :'+JSON.stringify(this.allTasks.slice()) +', "projects":'+JSON.stringify(this.allProjects.slice())+'}';
     }
 
@@ -400,6 +400,11 @@ class Database{
     @action
     setDbFilter(dbFilter){
         this.dbFilter = dbFilter;
+    }
+
+    @action
+    setNextBackup(date){
+        this.nextBackup = date;
     }
 
 

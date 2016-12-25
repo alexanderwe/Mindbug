@@ -48,6 +48,7 @@ class Main extends Component {
     componentDidMount(){
         console.log("mount app");
 
+        //Look every 3 seconds if a task hit it's due date
         setInterval(()=>{
             let task = Database.findTaskByNow(moment());
             let project = Database.findProjectByNow(moment());
@@ -61,7 +62,6 @@ class Main extends Component {
                 Database.updateProject({ _id: project._id }, {$set: {notified: true}})
             }
         },3000);
-
 
         ipcRenderer.on('insert-task' ,(event , data)=>{
              Database.insertTask(data.msg);

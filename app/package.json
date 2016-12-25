@@ -6,6 +6,7 @@
   "main": "main.js",
   "dependencies": {
     "bulma": "^0.2.3",
+    "electron-config": "^0.2.1",
     "font-awesome": "^4.7.0",
     "later": "^1.2.0",
     "mobx": "^2.6.3",
