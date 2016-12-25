@@ -282,6 +282,7 @@ class Database{
             this.refreshAllProjects();
         });
     }
+
     /**
     * Update a project
     * @param {Object} set - MongoDB query
@@ -308,7 +309,9 @@ class Database{
         })
     }
 
-    //TODO also include project tags
+    /**
+    * Update all tags 
+    */
     @action
     updateTags(){
         var tagsArray = [];
@@ -335,10 +338,49 @@ class Database{
         });
     }
 
+    /**
+    * Delete all tasks in the collection
+    */
+    deleteAllTasks(){
+        this.taskCollection.remove({}, { multi: true }, function (err, numRemoved) {
+            this.refreshAllTasks();
+        });
+    }
+
+    /**
+    * Delete all projects in the collection
+    */
+    deleteAllProjects(){
+        this.projectCollection.remove({}, { multi: true }, function (err, numRemoved) {
+            this.refreshAllProjects();
+        });
+    }
+
+    /**
+    * Export the whole database as string
+    */
     export(){
         return '{"tasks" :'+JSON.stringify(this.allTasks.slice()) +', "projects":'+JSON.stringify(this.allProjects.slice())+'}';
     }
 
+    /**
+    * Update a project
+    * @param {Object} JSON Object - Database JSON object
+    */
+    import(content){
+        this.taskCollection.remove({}, { multi: true }, (err, numRemoved) => {
+            this.refreshAllTasks();
+            this.projectCollection.remove({}, { multi: true }, (err, numRemoved) => {
+                this.refreshAllProjects();
+                content.tasks.map((task)=>{
+                    this.insertTask(task);
+                });
+                content.projects.map((project)=>{
+                    this.insertProject(project);
+                });
+            });
+        });
+    }
 
     @action
     setActiveItem(activeItem){

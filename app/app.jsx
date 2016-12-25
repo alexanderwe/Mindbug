@@ -73,7 +73,7 @@ class Main extends Component {
 
         ipcRenderer.on('init-import' ,(event , data)=>{
             console.log("recevied import");
-            console.log(data.content);
+            Database.import(JSON.parse(data.content));
         });
     }
 

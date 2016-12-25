@@ -134,7 +134,7 @@ var Main = function (_Component) {
 
             ipcRenderer.on('init-import', function (event, data) {
                 console.log("recevied import");
-                console.log(data.content);
+                _Database2.default.import(JSON.parse(data.content));
             });
         }
     }, {
@@ -3503,6 +3503,7 @@ var Database = (_class = function () {
                 _this8.refreshAllProjects();
             });
         }
+
         /**
         * Update a project
         * @param {Object} set - MongoDB query
@@ -3537,7 +3538,9 @@ var Database = (_class = function () {
             });
         }
 
-        //TODO also include project tags
+        /**
+        * Update all tags 
+        */
 
     }, {
         key: 'updateTags',
@@ -3588,10 +3591,63 @@ var Database = (_class = function () {
                 _this11.tags = tagsArray;
             });
         }
+
+        /**
+        * Delete all tasks in the collection
+        */
+
+    }, {
+        key: 'deleteAllTasks',
+        value: function deleteAllTasks() {
+            this.taskCollection.remove({}, { multi: true }, function (err, numRemoved) {
+                this.refreshAllTasks();
+            });
+        }
+
+        /**
+        * Delete all projects in the collection
+        */
+
+    }, {
+        key: 'deleteAllProjects',
+        value: function deleteAllProjects() {
+            this.projectCollection.remove({}, { multi: true }, function (err, numRemoved) {
+                this.refreshAllProjects();
+            });
+        }
+
+        /**
+        * Export the whole database as string
+        */
+
     }, {
         key: 'export',
         value: function _export() {
             return '{"tasks" :' + JSON.stringify(this.allTasks.slice()) + ', "projects":' + JSON.stringify(this.allProjects.slice()) + '}';
+        }
+
+        /**
+        * Update a project
+        * @param {Object} JSON Object - Database JSON object
+        */
+
+    }, {
+        key: 'import',
+        value: function _import(content) {
+            var _this12 = this;
+
+            this.taskCollection.remove({}, { multi: true }, function (err, numRemoved) {
+                _this12.refreshAllTasks();
+                _this12.projectCollection.remove({}, { multi: true }, function (err, numRemoved) {
+                    _this12.refreshAllProjects();
+                    content.tasks.map(function (task) {
+                        _this12.insertTask(task);
+                    });
+                    content.projects.map(function (project) {
+                        _this12.insertProject(project);
+                    });
+                });
+            });
         }
     }, {
         key: 'setActiveItem',
