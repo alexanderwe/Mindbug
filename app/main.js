@@ -219,76 +219,7 @@ function createTaskWindow(){
     })
 }
 
-function readFile(filepath,initImport){
-    fs.readFile(filepath, 'utf-8', function (err, data) {
-        if(err){
-            console.log("An error ocurred reading the file :" + err.message);
-            return;
-        }
 
-        if(initImport){
-            mainWindow.webContents.send('init-import' , {content:data});
-        }
-    });
-}
-
-function importDatabase() {
-    dialog.showOpenDialog({
-        title: 'Import database',
-        filters: [{
-            name: 'json',
-            extensions: ['json']
-            },
-        ]}, function(fileNames) {
-           if (fileNames === undefined){
-                console.log("You didn't save the file");
-                return;
-           }
-        readFile(fileNames[0],true);
-    });
-}
-
-
-function exportDatabase(){
-    // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    dialog.showSaveDialog({
-        title: 'Export database',
-        filters: [{
-            name: 'json',
-            extensions: ['json']
-            },
-        ]}, function(fileName) {
-           if (fileName === undefined){
-                console.log("You didn't save the file");
-                return;
-           }
-          mainWindow.webContents.send('init-export' , {fileName:fileName});
-    });
-}
-
-
-
-ipcMain.on('created-task', (event, arg) => {
-    mainWindow.webContents.send('insert-task' , {msg:arg});
-    taskWindow.close();
-})
-
-ipcMain.on('save-to-file', (event, arg) => {
-     fs.writeFile(arg.fileName, arg.content, function (err) {
-        if(err){
-            console.log("An error ocurred updating the file"+ err.message);
-            console.log(err);
-            return;
-        }
-        console.log("The file has been succesfully saved");
-    });
-})
-
-ipcMain.on('set-app-badge',(event,arg)=>{
-    if (process.platform === 'darwin') { //badge only available on macOs
-        app.dock.setBadge(arg.toString());
-    }
-})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -320,14 +251,99 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
+//Init next backup if not already set in the config file
 if (!config.get('next-backup')){
-    console.log("set next backup");
     config.set('next-backup',moment().add(1, 'days'));
 }
 
+//Set a 3 sec intervall to check next database backup
 setInterval(()=>{
     if (moment(config.get('next-backup')).format() === moment() || moment().diff(moment(config.get('next-backup')).format()) > 0) {
         mainWindow.webContents.send('init-export' , {fileName:'./backup.json'});
         config.set('next-backup',moment().add(1 ,'days'));
     }
 },3000);
+
+
+/**
+* Update a project
+* @param {String} filepath - path to the fike
+* @param {boolean} initImport - define whether the read file should be imported as a database
+*/
+
+function readFile(filepath,initImport){
+    fs.readFile(filepath, 'utf-8', function (err, data) {
+        if(err){
+            console.log("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        if(initImport){
+            mainWindow.webContents.send('init-import' , {content:data});
+        }
+    });
+}
+
+/*
+* Import a JSON database
+*/
+function importDatabase() {
+    dialog.showOpenDialog({
+        title: 'Import database',
+        filters: [{
+            name: 'json',
+            extensions: ['json']
+            },
+        ]}, function(fileNames) {
+           if (fileNames === undefined){
+                console.log("You didn't save the file");
+                return;
+           }
+        readFile(fileNames[0],true);
+    });
+}
+
+/*
+* Export the task database to JSON
+*/
+function exportDatabase(){
+    // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+    dialog.showSaveDialog({
+        title: 'Export database',
+        filters: [{
+            name: 'json',
+            extensions: ['json']
+            },
+        ]}, function(fileName) {
+           if (fileName === undefined){
+                console.log("You didn't save the file");
+                return;
+           }
+          mainWindow.webContents.send('init-export' , {fileName:fileName});
+    });
+}
+
+
+/**
+* COMMUNICATION OF RENDERER AND MAIN PROCESS
+**/
+ipcMain.on('created-task', (event, arg) => {
+    mainWindow.webContents.send('insert-task' , {msg:arg});
+    taskWindow.close();
+})
+
+ipcMain.on('save-to-file', (event, arg) => {
+     fs.writeFile(arg.fileName, arg.content, function (err) {
+        if(err){
+            console.log("An error ocurred updating the file"+ err.message);
+            console.log(err);
+            return;
+        }
+        console.log("The file has been succesfully saved");
+    });
+})
+
+ipcMain.on('set-app-badge',(event,arg)=>{
+    if (process.platform === 'darwin') { //badge only available on macOs
+        app.dock.setBadge(arg.toString());
+    }
+})

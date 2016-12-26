@@ -4,7 +4,7 @@
     "compile": " browserify -t  [ babelify --presets [ react es2015 stage-1] --plugins [transform-decorators-legacy] ] app/app.jsx -o app/js/app.js && browserify -t [ babelify --presets [ react es2015 stage-1] --plugins [transform-decorators-legacy] ] app/windows/createTasks/CreateTaskWindow.jsx -o app/js/CreateTaskWindow.js && stylus app/css/styles.styl -o app/css/styles.css",
     "start": "electron app/main.js",
     "dev": "NODE_ENV='development' npm run start",
-    "dist": "build -mw --x64 --ia32"
+    "dist": "build -mwl --x64 --ia32"
   },
   "repository": "https://github.com/alexanderwe/Mindbug",
   "keywords": [
@@ -33,7 +33,7 @@
     "babelify": "^7.3.0",
     "browserify": "^13.0.1",
     "electron": "^1.4.13",
-    "electron-builder": "^8.6.0",
+    "electron-builder": "^8.7.0",
     "electron-reload": "^1.1.0",
     "stylus": "^0.54.5"
   }
