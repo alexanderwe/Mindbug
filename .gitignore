@@ -13,4 +13,4 @@ dist/*
 
 #ignore DS_Store
 .DS_Store
-./backup.json
+backup.json

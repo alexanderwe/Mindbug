@@ -10,6 +10,7 @@ import Navbar from './components/navigation/Navbar.component.jsx';
 
 import Today from './components/general/Today.component.jsx';
 import Inbox from './components/general/Inbox.component.jsx';
+import Search from './components/general/Search.component.jsx';
 
 import TaskList from './components/tasks/TaskList.component.jsx';
 import CreateTaskDialog from './components/tasks/CreateTaskDialog.component.jsx';
@@ -34,9 +35,6 @@ class Main extends Component {
             activeItem: "tasks",
             dbFilter: {done:false},
         }
-    }
-
-    componentWillMount(){
         this.refreshDatabase();
     }
 
@@ -78,6 +76,10 @@ class Main extends Component {
     }
 
     refreshDatabase(){
+        console.log(this.state.activeItem);
+        console.log(this.state.dbFilter);
+
+
         if (this.state.activeItem === "tasks") {
             Database.setDbFilter(this.state.dbFilter);
             Database.findTasks(this.state.dbFilter, {dueDate: 1});
@@ -91,6 +93,10 @@ class Main extends Component {
         } else if (this.state.activeItem === "inbox") {
             Database.setDbFilter(this.state.dbFilter);
             Database.findTasks(this.state.dbFilter, {dueDate: 1});
+        } else if (this.state.activeItem === "search") {
+            Database.setDbFilter(this.state.dbFilter);
+            Database.findTasks(this.state.dbFilter, {dueDate: 1});
+            Database.findProjects(this.state.dbFilter, {dueDate: 1});
         }
     }
     /**
@@ -133,7 +139,9 @@ class Main extends Component {
                                  <Today ref="projectsList" parent={this} db={Database}/>
                              ) : this.state.activeItem === 'inbox' ? (
                                  <Inbox ref="inbox" parent={this} db={Database}/>
-                             ) :null}
+                             ) : this.state.activeItem === 'search' ? (
+                                 <Search ref="search" parent={this} db={Database}/>
+                             ) : null}
                         </div>
                         {/*
                         <div className="pane-sm">

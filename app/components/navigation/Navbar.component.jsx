@@ -28,8 +28,8 @@ export default class Navbar extends Component {
             activeChildItem: dbFilter
         });
 
-        var filterToSet;
-        var activeItem = pageName; //used to
+        let filterToSet;
+        let activeItem = pageName; //used to
         switch (pageName){
             case 'general':
                 if(dbFilter === 'today'){
@@ -39,6 +39,9 @@ export default class Navbar extends Component {
                 } else if (dbFilter === 'inbox'){
                     activeItem = 'inbox'; //Overwrite activeItem when inbox is seletected
                     filterToSet = {inbox:true};
+                } else if (dbFilter === 'search') {
+                    activeItem = 'search'; //Overwrite activeItem when inbox is seletected
+                    filterToSet = {done:false};
                 }
                 break;
             case 'tasks':
@@ -108,6 +111,7 @@ export default class Navbar extends Component {
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('general', 'inbox')} className={this.isActiveState('general', 'inbox') ? 'is-active': null }><i className="fa fa-inbox" aria-hidden="true"></i>Inbox <span className="tag inbox-tag">{this.props.db.totalInbox}</span></a></li>
                         <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'search')} className={this.isActiveState('general', 'search') ? 'is-active': null }><i className="fa fa-search" aria-hidden="true"></i>Search</a></li>
                     </ul>
                     <p className="menu-label">
                         Tasks <a className="pull-right add-btn" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
@@ -145,6 +149,7 @@ export default class Navbar extends Component {
                     <ul className="menu-list">
                         <li><a href="#" onClick={()=>this.goTo('general', 'inbox')} className={this.isActiveState('general', 'inbox') ? 'is-active': null }><i className="fa fa-inbox" aria-hidden="true"></i>Inbox <span className="tag inbox-tag"></span></a></li>
                         <li><a href="#" onClick={()=>this.goTo('general', 'today')} className={this.isActiveState('general', 'today') ? 'is-active': null }><i className="fa fa-clock-o" aria-hidden="true"></i>Today</a></li>
+                        <li><a href="#" onClick={()=>this.goTo('general', 'search')} className={this.isActiveState('general', 'search') ? 'is-active': null }><i className="fa fa-search" aria-hidden="true"></i>Search</a></li>
                     </ul>
                     <p className="menu-label">
                         Tasks <a className="pull-right add-btn" onClick={()=>this.openTaskDialog()}><i className="fa fa-plus" aria-hidden="true"></i></a>
