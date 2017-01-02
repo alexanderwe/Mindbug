@@ -1,5 +1,5 @@
 # Mindbug
-![alt text](https://img.shields.io/badge/Version-0.1.3a-yellow.svg "Program version")
+![alt text](https://img.shields.io/badge/Version-0.1.5a-yellow.svg "Program version")
 ![alt text](https://img.shields.io/badge/Electron-1.4.13-green.svg "Electron version")
 ![alt text](https://img.shields.io/badge/React-15.4.1-green.svg "React version")
 ![alt text](https://img.shields.io/badge/License-MIT-lightgrey.svg "License")
