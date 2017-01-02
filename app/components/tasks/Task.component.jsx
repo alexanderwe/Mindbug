@@ -25,7 +25,8 @@ import AutoLinkText from 'react-autolink-text';
     componentDidMount(){
         console.log("Mounted task");
         console.log(this.props.task);
-        this.refs.repeatT
+        console.log(this.state.dueDate);
+
     }
 
     /**
@@ -108,6 +109,7 @@ import AutoLinkText from 'react-autolink-text';
     edit(){
         this.setState({
             edit:true,
+            showRepeat: this.props.task.repeat,
         });
     }
 

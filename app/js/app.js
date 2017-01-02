@@ -563,6 +563,10 @@ var _ProjectListComponent = require('../projects/ProjectList.component.jsx');
 
 var _ProjectListComponent2 = _interopRequireDefault(_ProjectListComponent);
 
+var _Database = require('../../data/Database.js');
+
+var _Database2 = _interopRequireDefault(_Database);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -588,7 +592,10 @@ var Search = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function search() {
             var filterToSet = void 0;
             if (this.refs.searchTextInput && this.refs.searchTextInput.value != "") {
-                filterToSet = { "title": new RegExp(this.refs.searchTextInput.value.toString(), 'i') };
+                var projectId = _Database2.default.findProjectSynchronousWithName(this.refs.searchTextInput.value.toString()) ? _Database2.default.findProjectSynchronousWithName(this.refs.searchTextInput.value.toString())._id : "";
+                filterToSet = {
+                    $or: [{ "title": new RegExp(this.refs.searchTextInput.value.toString(), 'i') }, { "project": projectId }]
+                };
             } else {
                 filterToSet = { "title": "" };
             }
@@ -649,7 +656,7 @@ var Search = (0, _mobxReact.observer)(_class = function (_Component) {
 
 exports.default = Search;
 
-},{"../projects/ProjectList.component.jsx":12,"../tasks/TaskList.component.jsx":15,"mobx-react":49,"react":220}],6:[function(require,module,exports){
+},{"../../data/Database.js":16,"../projects/ProjectList.component.jsx":12,"../tasks/TaskList.component.jsx":15,"mobx-react":49,"react":220}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2683,7 +2690,7 @@ var Task = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function componentDidMount() {
             console.log("Mounted task");
             console.log(this.props.task);
-            this.refs.repeatT;
+            console.log(this.state.dueDate);
         }
 
         /**
@@ -2787,7 +2794,8 @@ var Task = (0, _mobxReact.observer)(_class = function (_Component) {
         key: 'edit',
         value: function edit() {
             this.setState({
-                edit: true
+                edit: true,
+                showRepeat: this.props.task.repeat
             });
         }
 

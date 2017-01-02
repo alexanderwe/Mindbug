@@ -4,6 +4,8 @@ import {observer} from 'mobx-react';
 import TaskList from '../tasks/TaskList.component.jsx';
 import ProjectList from '../projects/ProjectList.component.jsx';
 
+import Database from '../../data/Database.js';
+
 @observer export default class Search extends Component{
 
     constructor(props){
@@ -14,7 +16,10 @@ import ProjectList from '../projects/ProjectList.component.jsx';
     search(){
         let filterToSet;
         if(this.refs.searchTextInput && this.refs.searchTextInput.value != "" ){
-            filterToSet = {"title": new RegExp(this.refs.searchTextInput.value.toString(),'i')};
+            var projectId =  Database.findProjectSynchronousWithName(this.refs.searchTextInput.value.toString()) ? Database.findProjectSynchronousWithName(this.refs.searchTextInput.value.toString())._id : ""
+            filterToSet = {
+                    $or: [{"title": new RegExp(this.refs.searchTextInput.value.toString(),'i')},{"project": projectId}]
+            };
         } else {
             filterToSet = {"title":""};
         }
