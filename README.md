@@ -19,10 +19,11 @@ Mindbug is a minimal 'Get Things Done' Electron application made with [React.js]
 * Notifications
 * Create task with Shortcuts (Cmd/Control + Shift +T)
 * Inbox for tasks created with the shortcut
+* Search tasks and projects
 
 ## License
 
-Copyright (c) 2016 Alexander Weiß.
+Copyright (c) 2016 - 2017 Alexander Weiß.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
