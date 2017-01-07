@@ -68,7 +68,7 @@ class Database{
         console.log(sort);
 
         this.taskCollection.find(query).sort(sort).exec((err,docs)=>{
-            if (docs.length==0) {
+            if (docs == null || docs.length == 0) {
                 console.log("no tasks found");
                 this.tasks = null;
             } else {

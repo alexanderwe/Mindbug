@@ -15,7 +15,7 @@
   display: -ms-inline-flexbox;
   display: inline-flex;
   font-size: 14px;
-  height: 32px;
+  height: 2.5em;
   -webkit-box-pack: start;
   -ms-flex-pack: start;
   justify-content: flex-start;
@@ -27,7 +27,6 @@
   box-shadow: inset 0 1px 2px rgba(10,10,10,0.1);
   max-width: 100%;
   width: 100%;
-  margin-bottom: 5px;
 }
 /*------------------------------------*    Colors
 \*------------------------------------*/
@@ -144,6 +143,11 @@ hr {
 }
 .checkbox input {
   margin-right: 5px;
+}
+/*------------------------------------*    ToolbarHeader
+\*------------------------------------*/
+.heading-counter {
+  margin-left: 5px;
 }
 /*------------------------------------*    Navbar
 \*------------------------------------*/

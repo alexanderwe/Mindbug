@@ -1396,7 +1396,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
                     ),
                     _react2.default.createElement(
                         'p',
-                        { className: 'title' },
+                        { className: 'title heading-counter' },
                         this.props.db.totalUndoneTasks
                     )
                 ),
@@ -1410,7 +1410,7 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
                     ),
                     _react2.default.createElement(
                         'p',
-                        { className: 'title' },
+                        { className: 'title heading-counter' },
                         this.props.db.totalOpenProjects
                     )
                 ),
@@ -3435,7 +3435,7 @@ var Database = (_class = function () {
             console.log(sort);
 
             this.taskCollection.find(query).sort(sort).exec(function (err, docs) {
-                if (docs.length == 0) {
+                if (docs == null || docs.length == 0) {
                     console.log("no tasks found");
                     _this2.tasks = null;
                 } else {
@@ -12569,11 +12569,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.reactiveComponent = exports.PropTypes = exports.propTypes = exports.inject = exports.Provider = exports.useStaticRendering = exports.trackComponents = exports.componentByNodeRegistery = exports.renderReporter = exports.Observer = exports.observer = undefined;
+	exports.PropTypes = exports.propTypes = exports.inject = exports.Provider = exports.useStaticRendering = exports.trackComponents = exports.componentByNodeRegistery = exports.renderReporter = exports.Observer = exports.observer = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _arguments = arguments;
 
 	var _observer = __webpack_require__(1);
 
@@ -12634,7 +12632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _mobx = __webpack_require__(2);
 
-	var _mobx2 = _interopRequireDefault(_mobx);
+	var mobx = _interopRequireWildcard(_mobx);
 
 	var _react = __webpack_require__(3);
 
@@ -12657,26 +12655,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	if (false) TARGET_LIB_NAME = 'mobx-react/native';
 	if (false) TARGET_LIB_NAME = 'mobx-react/custom';
 
-	if (!_mobx2.default) throw new Error(TARGET_LIB_NAME + ' requires the MobX package');
+	if (!mobx) throw new Error(TARGET_LIB_NAME + ' requires the MobX package');
 	if (!_react2.default) throw new Error(TARGET_LIB_NAME + ' requires React to be available');
 
-	if (("browser") === 'browser' && typeof _reactDom.unstable_batchedUpdates === "function") _mobx2.default.extras.setReactionScheduler(_reactDom.unstable_batchedUpdates);
-	if (false) _mobx2.default.extras.setReactionScheduler(_reactNative.unstable_batchedUpdates);
+	if (("browser") === 'browser' && typeof _reactDom.unstable_batchedUpdates === "function") mobx.extras.setReactionScheduler(_reactDom.unstable_batchedUpdates);
+	if (false) mobx.extras.setReactionScheduler(_reactNative.unstable_batchedUpdates);
 
 	exports.propTypes = propTypes;
 	exports.PropTypes = propTypes;
 	exports.default = module.exports;
 
-	/* Deprecated */
-
-	var reactiveComponent = exports.reactiveComponent = function reactiveComponent() {
-	  console.warn('[mobx-react] `reactiveComponent` has been renamed to `observer` ' + 'and will be removed in 1.1.');
-	  return observer.apply(null, _arguments);
-	};
-
 	/* DevTool support */
+
 	if ((typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ? 'undefined' : _typeof(__MOBX_DEVTOOLS_GLOBAL_HOOK__)) === 'object') {
-	  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, _mobx2.default);
+	  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobxReact(module.exports, mobx);
 	}
 
 /***/ },
@@ -12763,12 +12755,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function patch(target, funcName) {
+	  var runMixinFirst = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
 	  var base = target[funcName];
 	  var mixinFunc = reactiveMixin[funcName];
 	  if (!base) {
 	    target[funcName] = mixinFunc;
 	  } else {
-	    target[funcName] = function () {
+	    target[funcName] = runMixinFirst === true ? function () {
+	      mixinFunc.apply(this, arguments);
+	      base.apply(this, arguments);
+	    } : function () {
 	      base.apply(this, arguments);
 	      mixinFunc.apply(this, arguments);
 	    };
@@ -12990,14 +12987,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var target = componentClass.prototype || componentClass;
-	  ["componentWillMount", "componentWillUnmount", "componentDidMount", "componentDidUpdate"].forEach(function (funcName) {
+	  mixinLifecycleEvents(target);
+	  componentClass.isMobXReactObserver = true;
+	  return componentClass;
+	}
+
+	function mixinLifecycleEvents(target) {
+	  patch(target, "componentWillMount", true);
+	  ["componentDidMount", "componentWillUnmount", "componentDidUpdate"].forEach(function (funcName) {
 	    patch(target, funcName);
 	  });
 	  if (!target.shouldComponentUpdate) {
 	    target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
 	  }
-	  componentClass.isMobXReactObserver = true;
-	  return componentClass;
 	}
 
 	// TODO: support injection somehow as well?
@@ -13324,7 +13326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      // add own stores
 	      for (var _key in this.props) {
-	        if (!specialReactKeys[_key]) stores[_key] = this.props[_key];
+	        if (!specialReactKeys[_key] && _key !== "suppressChangedStoreWarning") stores[_key] = this.props[_key];
 	      }return {
 	        mobxStores: stores
 	      };
@@ -13334,7 +13336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function componentWillReceiveProps(nextProps) {
 	      // Maybe this warning is to aggressive?
 	      if (Object.keys(nextProps).length !== Object.keys(this.props).length) console.warn("MobX Provider: The set of provided stores has changed. Please avoid changing stores as the change might not propagate to all children");
-	      for (var key in nextProps) {
+	      if (!nextProps.suppressChangedStoreWarning) for (var key in nextProps) {
 	        if (!specialReactKeys[key] && this.props[key] !== nextProps[key]) console.warn("MobX Provider: Provided store '" + key + "' has changed. Please avoid replacing stores as the change might not propagate to all children");
 	      }
 	    }
@@ -13760,7 +13762,7 @@ var computedDecorator = createClassPropertyDecorator(function (target, name, _, 
     this.$mobx.values[name].set(value);
 }, false, true);
 function computed(targetOrExpr, keyOrScopeOrSetter, baseDescriptor, options) {
-    if (typeof targetOrExpr === "function" && arguments.length < 3) {
+    if ((typeof targetOrExpr === "function" || isModifierWrapper(targetOrExpr)) && arguments.length < 3) {
         if (typeof keyOrScopeOrSetter === "function")
             return computedExpr(targetOrExpr, keyOrScopeOrSetter, undefined);
         else
@@ -13920,7 +13922,7 @@ function isObservable(value, property) {
         }
         return false;
     }
-    return !!value.$mobx || isAtom(value) || isReaction(value) || isComputedValue(value);
+    return isObservableObject(value) || !!value.$mobx || isAtom(value) || isReaction(value) || isComputedValue(value);
 }
 exports.isObservable = isObservable;
 var decoratorImpl = createClassPropertyDecorator(function (target, name, baseValue) {
@@ -14945,15 +14947,19 @@ function registerInterceptor(interceptable, handler) {
 }
 function interceptChange(interceptable, change) {
     var prevU = untrackedStart();
-    var interceptors = interceptable.interceptors;
-    for (var i = 0, l = interceptors.length; i < l; i++) {
-        change = interceptors[i](change);
-        invariant(!change || change.type, "Intercept handlers should return nothing or a change object");
-        if (!change)
-            return null;
+    try {
+        var interceptors = interceptable.interceptors;
+        for (var i = 0, l = interceptors.length; i < l; i++) {
+            change = interceptors[i](change);
+            invariant(!change || change.type, "Intercept handlers should return nothing or a change object");
+            if (!change)
+                break;
+        }
+        return change;
     }
-    untrackedEnd(prevU);
-    return change;
+    finally {
+        untrackedEnd(prevU);
+    }
 }
 function hasListeners(listenable) {
     return listenable.changeListeners && listenable.changeListeners.length > 0;
@@ -14990,6 +14996,7 @@ var ValueMode;
     ValueMode[ValueMode["Structure"] = 2] = "Structure";
     ValueMode[ValueMode["Flat"] = 3] = "Flat";
 })(ValueMode || (ValueMode = {}));
+exports.ValueMode = ValueMode;
 function withModifier(modifier, value) {
     assertUnwrapped(value, "Modifiers are not allowed to be nested");
     return {
@@ -15034,6 +15041,9 @@ function getValueModeFromModifierFunc(func) {
     var mod = getModifier(func);
     invariant(mod !== null, "Cannot determine value mode from function. Please pass in one of these: mobx.asReference, mobx.asStructure or mobx.asFlat, got: " + func);
     return mod;
+}
+function isModifierWrapper(value) {
+    return value.mobxModifier !== undefined;
 }
 function makeChildObservable(value, parentMode, name) {
     var childMode;
@@ -15327,6 +15337,31 @@ var ObservableArray = (function (_super) {
         }
         return false;
     };
+    ObservableArray.prototype.move = function (fromIndex, toIndex) {
+        function checkIndex(index) {
+            if (index < 0) {
+                throw new Error("[mobx.array] Index out of bounds: " + index + " is negative");
+            }
+            var length = this.$mobx.values.length;
+            if (index >= length) {
+                throw new Error("[mobx.array] Index out of bounds: " + index + " is not smaller than " + length);
+            }
+        }
+        checkIndex.call(this, fromIndex);
+        checkIndex.call(this, toIndex);
+        if (fromIndex === toIndex) {
+            return;
+        }
+        var oldItems = this.$mobx.values;
+        var newItems;
+        if (fromIndex < toIndex) {
+            newItems = oldItems.slice(0, fromIndex).concat(oldItems.slice(fromIndex + 1, toIndex + 1), [oldItems[fromIndex]], oldItems.slice(toIndex + 1));
+        }
+        else {
+            newItems = oldItems.slice(0, toIndex).concat([oldItems[fromIndex]], oldItems.slice(toIndex, fromIndex), oldItems.slice(fromIndex + 1));
+        }
+        this.replace(newItems);
+    };
     ObservableArray.prototype.toString = function () {
         return "[mobx.array] " + Array.prototype.toString.apply(this.$mobx.values, arguments);
     };
@@ -15357,6 +15392,7 @@ makeNonEnumerable(ObservableArray.prototype, [
     "reverse",
     "sort",
     "remove",
+    "move",
     "toString",
     "toLocaleString"
 ]);
@@ -15709,6 +15745,7 @@ function map(initialValues, valueModifier) {
 exports.map = map;
 var isObservableMap = createInstanceofPredicate("ObservableMap", ObservableMap);
 exports.isObservableMap = isObservableMap;
+var COMPUTED_FUNC_DEPRECATED = ("\nIn MobX 2.* passing a function without arguments to (extend)observable will automatically be inferred to be a computed value.\nThis behavior is ambiguous and will change in MobX 3 to create just an observable reference to the value passed in.\nTo disambiguate, please pass the function wrapped with a modifier: use 'computed(fn)' (for current behavior; automatic conversion), or 'asReference(fn)' (future behavior, just store reference) or 'action(fn)'.\nNote that the idiomatic way to write computed properties is 'observable({ get propertyName() { ... }})'.\nFor more details, see https://github.com/mobxjs/mobx/issues/532");
 var ObservableObjectAdministration = (function () {
     function ObservableObjectAdministration(target, name, mode) {
         this.target = target;
@@ -15732,12 +15769,15 @@ function asObservableObject(target, name, mode) {
     if (isObservableObject(target))
         return target.$mobx;
     if (!isPlainObject(target))
-        name = target.constructor.name + "@" + getNextId();
+        name = (target.constructor.name || "ObservableObject") + "@" + getNextId();
     if (!name)
         name = "ObservableObject@" + getNextId();
     var adm = new ObservableObjectAdministration(target, name, mode);
     addHiddenFinalProp(target, "$mobx", adm);
     return adm;
+}
+function handleAsComputedValue(value) {
+    return typeof value === "function" && value.length === 0 && !isAction(value);
 }
 function setObservableObjectInstanceProperty(adm, propName, descriptor) {
     if (adm.values[propName]) {
@@ -15745,10 +15785,15 @@ function setObservableObjectInstanceProperty(adm, propName, descriptor) {
         adm.target[propName] = descriptor.value;
     }
     else {
-        if ("value" in descriptor)
+        if ("value" in descriptor) {
+            if (handleAsComputedValue(descriptor.value)) {
+                deprecated(COMPUTED_FUNC_DEPRECATED + ")in: " + adm.name + "." + propName);
+            }
             defineObservableProperty(adm, propName, descriptor.value, true, undefined);
-        else
+        }
+        else {
             defineObservableProperty(adm, propName, descriptor.get, true, descriptor.set);
+        }
     }
 }
 function defineObservableProperty(adm, propName, newValue, asInstanceProperty, setter) {
@@ -15763,7 +15808,7 @@ function defineObservableProperty(adm, propName, newValue, asInstanceProperty, s
         if (!newValue.scope)
             newValue.scope = adm.target;
     }
-    else if (typeof newValue === "function" && newValue.length === 0 && !isAction(newValue)) {
+    else if (handleAsComputedValue(newValue)) {
         observable = new ComputedValue(newValue, adm.target, false, name, setter);
     }
     else if (getModifier(newValue) === ValueMode.Structure && typeof newValue.value === "function" && newValue.value.length === 0) {
@@ -27562,17 +27607,6 @@ var fourArgumentPooler = function (a1, a2, a3, a4) {
   }
 };
 
-var fiveArgumentPooler = function (a1, a2, a3, a4, a5) {
-  var Klass = this;
-  if (Klass.instancePool.length) {
-    var instance = Klass.instancePool.pop();
-    Klass.call(instance, a1, a2, a3, a4, a5);
-    return instance;
-  } else {
-    return new Klass(a1, a2, a3, a4, a5);
-  }
-};
-
 var standardReleaser = function (instance) {
   var Klass = this;
   !(instance instanceof Klass) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Trying to release an instance into a pool of a different type.') : _prodInvariant('25') : void 0;
@@ -27612,8 +27646,7 @@ var PooledClass = {
   oneArgumentPooler: oneArgumentPooler,
   twoArgumentPooler: twoArgumentPooler,
   threeArgumentPooler: threeArgumentPooler,
-  fourArgumentPooler: fourArgumentPooler,
-  fiveArgumentPooler: fiveArgumentPooler
+  fourArgumentPooler: fourArgumentPooler
 };
 
 module.exports = PooledClass;
@@ -28416,7 +28449,7 @@ var ReactCompositeComponent = {
       // Since plain JS classes are defined without any special initialization
       // logic, we can not catch common errors early. Therefore, we have to
       // catch them here, at initialization time, instead.
-      process.env.NODE_ENV !== 'production' ? warning(!inst.getInitialState || inst.getInitialState.isReactClassApproved, 'getInitialState was defined on %s, a plain JavaScript class. ' + 'This is only supported for classes created using React.createClass. ' + 'Did you mean to define a state property instead?', this.getName() || 'a component') : void 0;
+      process.env.NODE_ENV !== 'production' ? warning(!inst.getInitialState || inst.getInitialState.isReactClassApproved || inst.state, 'getInitialState was defined on %s, a plain JavaScript class. ' + 'This is only supported for classes created using React.createClass. ' + 'Did you mean to define a state property instead?', this.getName() || 'a component') : void 0;
       process.env.NODE_ENV !== 'production' ? warning(!inst.getDefaultProps || inst.getDefaultProps.isReactClassApproved, 'getDefaultProps was defined on %s, a plain JavaScript class. ' + 'This is only supported for classes created using React.createClass. ' + 'Use a static property to define defaultProps instead.', this.getName() || 'a component') : void 0;
       process.env.NODE_ENV !== 'production' ? warning(!inst.propTypes, 'propTypes was defined as an instance property on %s. Use a static ' + 'property to define propTypes instead.', this.getName() || 'a component') : void 0;
       process.env.NODE_ENV !== 'production' ? warning(!inst.contextTypes, 'contextTypes was defined as an instance property on %s. Use a ' + 'static property to define contextTypes instead.', this.getName() || 'a component') : void 0;
@@ -29882,12 +29915,18 @@ ReactDOMComponent.Mixin = {
     } else {
       var contentToUse = CONTENT_TYPES[typeof props.children] ? props.children : null;
       var childrenToUse = contentToUse != null ? null : props.children;
+      // TODO: Validate that text is allowed as a child of this node
       if (contentToUse != null) {
-        // TODO: Validate that text is allowed as a child of this node
-        if (process.env.NODE_ENV !== 'production') {
-          setAndValidateContentChildDev.call(this, contentToUse);
+        // Avoid setting textContent when the text is empty. In IE11 setting
+        // textContent on a text area will cause the placeholder to not
+        // show within the textarea until it has been focused and blurred again.
+        // https://github.com/facebook/react/issues/6731#issuecomment-254874553
+        if (contentToUse !== '') {
+          if (process.env.NODE_ENV !== 'production') {
+            setAndValidateContentChildDev.call(this, contentToUse);
+          }
+          DOMLazyTree.queueText(lazyTree, contentToUse);
         }
-        DOMLazyTree.queueText(lazyTree, contentToUse);
       } else if (childrenToUse != null) {
         var mountImages = this.mountChildren(childrenToUse, transaction, context);
         for (var i = 0; i < mountImages.length; i++) {
@@ -30239,6 +30278,13 @@ var Flags = ReactDOMComponentFlags;
 var internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
 /**
+ * Check if a given node should be cached.
+ */
+function shouldPrecacheNode(node, nodeID) {
+  return node.nodeType === 1 && node.getAttribute(ATTR_NAME) === String(nodeID) || node.nodeType === 8 && node.nodeValue === ' react-text: ' + nodeID + ' ' || node.nodeType === 8 && node.nodeValue === ' react-empty: ' + nodeID + ' ';
+}
+
+/**
  * Drill down (through composites and empty components) until we get a host or
  * host text component.
  *
@@ -30303,7 +30349,7 @@ function precacheChildNodes(inst, node) {
     }
     // We assume the child nodes are in the same order as the child instances.
     for (; childNode !== null; childNode = childNode.nextSibling) {
-      if (childNode.nodeType === 1 && childNode.getAttribute(ATTR_NAME) === String(childID) || childNode.nodeType === 8 && childNode.nodeValue === ' react-text: ' + childID + ' ' || childNode.nodeType === 8 && childNode.nodeValue === ' react-empty: ' + childID + ' ') {
+      if (shouldPrecacheNode(childNode, childID)) {
         precacheNode(childInst, childNode);
         continue outer;
       }
@@ -30711,7 +30757,17 @@ var ReactDOMInput = {
       }
     } else {
       if (props.value == null && props.defaultValue != null) {
-        node.defaultValue = '' + props.defaultValue;
+        // In Chrome, assigning defaultValue to certain input types triggers input validation.
+        // For number inputs, the display value loses trailing decimal points. For email inputs,
+        // Chrome raises "The specified value <x> is not a valid email address".
+        //
+        // Here we check to see if the defaultValue has actually changed, avoiding these problems
+        // when the user is inputting text
+        //
+        // https://github.com/facebook/react/issues/7253
+        if (node.defaultValue !== '' + props.defaultValue) {
+          node.defaultValue = '' + props.defaultValue;
+        }
       }
       if (props.checked == null && props.defaultChecked != null) {
         node.defaultChecked = !!props.defaultChecked;
@@ -31806,9 +31862,15 @@ var ReactDOMTextarea = {
     // This is in postMount because we need access to the DOM node, which is not
     // available until after the component has mounted.
     var node = ReactDOMComponentTree.getNodeFromInstance(inst);
+    var textContent = node.textContent;
 
-    // Warning: node.value may be the empty string at this point (IE11) if placeholder is set.
-    node.value = node.textContent; // Detach value from defaultValue
+    // Only set node.value if textContent is equal to the expected
+    // initial value. In IE10/IE11 there is a bug where the placeholder attribute
+    // will populate textContent as well.
+    // https://developer.microsoft.com/microsoft-edge/platform/issues/101525/
+    if (textContent === inst._wrapperState.initialValue) {
+      node.value = textContent;
+    }
   }
 };
 
@@ -32943,14 +33005,11 @@ module.exports = ReactFeatureFlags;
 
 'use strict';
 
-var _prodInvariant = require('./reactProdInvariant'),
-    _assign = require('object-assign');
+var _prodInvariant = require('./reactProdInvariant');
 
 var invariant = require('fbjs/lib/invariant');
 
 var genericComponentClass = null;
-// This registry keeps track of wrapper classes around host tags.
-var tagToComponentClass = {};
 var textComponentClass = null;
 
 var ReactHostComponentInjection = {
@@ -32963,11 +33022,6 @@ var ReactHostComponentInjection = {
   // rendered as props.
   injectTextComponentClass: function (componentClass) {
     textComponentClass = componentClass;
-  },
-  // This accepts a keyed object with classes as values. Each key represents a
-  // tag. That particular tag will use this class instead of the generic one.
-  injectComponentClasses: function (componentClasses) {
-    _assign(tagToComponentClass, componentClasses);
   }
 };
 
@@ -33007,7 +33061,7 @@ var ReactHostComponent = {
 
 module.exports = ReactHostComponent;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":186,"_process":224,"fbjs/lib/invariant":37,"object-assign":61}],124:[function(require,module,exports){
+},{"./reactProdInvariant":186,"_process":224,"fbjs/lib/invariant":37}],124:[function(require,module,exports){
 /**
  * Copyright 2016-present, Facebook, Inc.
  * All rights reserved.
@@ -35702,7 +35756,7 @@ module.exports = ReactUpdates;
 
 'use strict';
 
-module.exports = '15.4.1';
+module.exports = '15.4.2';
 },{}],145:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -38724,7 +38778,17 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
     instance = ReactEmptyComponent.create(instantiateReactComponent);
   } else if (typeof node === 'object') {
     var element = node;
-    !(element && (typeof element.type === 'function' || typeof element.type === 'string')) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s', element.type == null ? element.type : typeof element.type, getDeclarationErrorAddendum(element._owner)) : _prodInvariant('130', element.type == null ? element.type : typeof element.type, getDeclarationErrorAddendum(element._owner)) : void 0;
+    var type = element.type;
+    if (typeof type !== 'function' && typeof type !== 'string') {
+      var info = '';
+      if (process.env.NODE_ENV !== 'production') {
+        if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
+          info += ' You likely forgot to export your component from the file ' + 'it\'s defined in.';
+        }
+      }
+      info += getDeclarationErrorAddendum(element._owner);
+      !false ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s', type == null ? type : typeof type, info) : _prodInvariant('130', type == null ? type : typeof type, info) : void 0;
+    }
 
     // Special case string values
     if (typeof element.type === 'string') {
@@ -42064,7 +42128,14 @@ var ReactElementValidator = {
     // We warn in this case but don't throw. We expect the element creation to
     // succeed and there will likely be errors in render.
     if (!validType) {
-      process.env.NODE_ENV !== 'production' ? warning(false, 'React.createElement: type should not be null, undefined, boolean, or ' + 'number. It should be a string (for DOM elements) or a ReactClass ' + '(for composite components).%s', getDeclarationErrorAddendum()) : void 0;
+      if (typeof type !== 'function' && typeof type !== 'string') {
+        var info = '';
+        if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
+          info += ' You likely forgot to export your component from the file ' + 'it\'s defined in.';
+        }
+        info += getDeclarationErrorAddendum();
+        process.env.NODE_ENV !== 'production' ? warning(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', type == null ? type : typeof type, info) : void 0;
+      }
     }
 
     var element = ReactElement.createElement.apply(this, arguments);
