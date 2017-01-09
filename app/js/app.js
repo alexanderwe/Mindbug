@@ -1385,42 +1385,41 @@ var ToolbarHeader = (0, _mobxReact.observer)(_class = function (_Component) {
         value: function render() {
             return _react2.default.createElement(
                 'nav',
-                { className: 'level is-mobile draggable' },
+                { className: 'level is-mobile' },
                 _react2.default.createElement(
                     'div',
                     { className: 'level-item has-text-centered' },
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'heading' },
-                        'Undone Tasks'
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'title heading-counter' },
-                        this.props.db.totalUndoneTasks
-                    )
-                ),
-                _react2.default.createElement(
-                    'div',
-                    { className: 'level-item has-text-centered' },
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'heading' },
-                        'Open Projects'
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        { className: 'title heading-counter' },
-                        this.props.db.totalOpenProjects
-                    )
-                ),
-                _react2.default.createElement(
-                    'div',
-                    { className: 'level-left' },
                     _react2.default.createElement(
                         'div',
-                        { className: 'level-item' },
-                        _react2.default.createElement('i', { className: 'fa fa-sort', 'aria-hidden': 'true' })
+                        null,
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'heading' },
+                            'Undone tasks'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            this.props.db.totalUndoneTasks
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'level-item has-text-centered' },
+                    _react2.default.createElement(
+                        'div',
+                        null,
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'heading' },
+                            'Open projects'
+                        ),
+                        _react2.default.createElement(
+                            'p',
+                            { className: 'title' },
+                            this.props.db.totalOpenProjects
+                        )
                     )
                 )
             );
